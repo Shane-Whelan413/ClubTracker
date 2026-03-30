@@ -1,0 +1,40 @@
+{
+  "society": {
+    "name": "My Golf Society",
+    "short_name": "MGS",
+    "season_year": 2026,
+    "season_start": "2026-03-01",
+    "season_end": "2026-11-30"
+  },
+  "branding": {
+    "primary": "#1a1a1a",
+    "accent": "#4a9a5a",
+    "bg": "#f5f5f0",
+    "surface": "#ffffff"
+  },
+  "supabase": {
+    "url": "YOUR_SUPABASE_URL",
+    "key": "YOUR_SUPABASE_KEY"
+  },
+  "scoring": {
+    "type": "stableford",
+    "holes": 9,
+    "handicap_gain": 0.2,
+    "handicap_cut": 1,
+    "handicap_cut_threshold": 18,
+    "top_finish_protection": 3,
+    "outing_gain": 0.2,
+    "outing_cut": 1,
+    "outing_cut_threshold": 37,
+    "league_points": [20,19,18,17,16,15,14,13,12,11,10,9,8,7,6],
+    "league_points_default": 6,
+    "best_weeks": 33
+  },
+  "features": {
+    "knockout": false,
+    "outings": true,
+    "womens_index": false,
+    "noticeboard": true,
+    "profile_photos": true
+  }
+}
