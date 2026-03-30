@@ -781,6 +781,8 @@ async function loadConfig() {
   try {
     const res = await fetch('config.json?v=' + Date.now());
     CONFIG = await res.json();
+    SUPABASE_URL = CONFIG.supabase.url;
+    SUPABASE_KEY = CONFIG.supabase.key;
     applyBranding();
   } catch(e) {
     console.error('Failed to load config.json:', e);
@@ -792,6 +794,8 @@ async function loadConfig() {
       features: { knockout:false, outings:true, womens_index:false, noticeboard:true, profile_photos:true },
       admin_password: 'admin2026'
     };
+    SUPABASE_URL = CONFIG.supabase.url;
+    SUPABASE_KEY = CONFIG.supabase.key;
   }
 }
 
@@ -836,8 +840,8 @@ function applyBranding() {
   }
 }
 
-const SUPABASE_URL = CONFIG.supabase.url;
-const SUPABASE_KEY = CONFIG.supabase.key;
+let SUPABASE_URL = '';
+let SUPABASE_KEY = '';
 
 const api = async (path, opts={}) => {
   const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
