@@ -1,4 +1,4 @@
-const CACHE = 'golf-society-v1';
+const CACHE = 'golf-society-v2';
 const ASSETS = [
   './index.html',
   './manifest.json',
