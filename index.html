@@ -863,10 +863,14 @@ const post = (p,b)   => api(p, { method:'POST', body:JSON.stringify(b) });
 const patch= (p,b)   => api(p, { method:'PATCH', body:JSON.stringify(b), prefer:'return=representation' });
 const del  = p       => api(p, { method:'DELETE', prefer:'return=minimal' });
 
-const LEAGUE_PTS = pos => { const pts = CONFIG.scoring.league_points; return pos <= pts.length ? pts[pos-1] : CONFIG.scoring.league_points_default; };
+const LEAGUE_PTS = pos => {
+  const pts = (CONFIG.scoring && CONFIG.scoring.league_points) ? CONFIG.scoring.league_points : [20,19,18,17,16,15,14,13,12,11,10,9,8,7,6];
+  const def = (CONFIG.scoring && CONFIG.scoring.league_points_default) ? CONFIG.scoring.league_points_default : 6;
+  return pos <= pts.length ? pts[pos-1] : def;
+};
 
-const SEASON_START = new Date(CONFIG.society.season_start);
-const SEASON_END   = new Date(CONFIG.society.season_end);
+const getSeasonStart = () => new Date((CONFIG.society && CONFIG.society.season_start) ? CONFIG.society.season_start : '2026-01-01');
+const getSeasonEnd   = () => new Date((CONFIG.society && CONFIG.society.season_end)   ? CONFIG.society.season_end   : '2026-12-31');
 
 const OUTINGS = {
   '2026-04-18': 'Silloge Park',
@@ -952,14 +956,17 @@ function getSeasonDates() {
     })
   );
   const dates = [];
-  let y=2026, m=3, day=22;
-  const end = new Date(2026,10,29);
-  while (true) {
-    const dt = new Date(y, m-1, day);
-    if (dt > end) break;
+  const start = getSeasonStart();
+  const end   = getSeasonEnd();
+  // Find first Sunday on or after season start
+  const firstSun = new Date(start);
+  while (firstSun.getDay() !== 0) firstSun.setDate(firstSun.getDate()+1);
+  let dt = new Date(firstSun);
+  while (dt <= end) {
+    const y = dt.getFullYear(), m = dt.getMonth()+1, day = dt.getDate();
     const iso = `${y}-${String(m).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
     if (skipSundays.has(iso)) {
-      const sat = new Date(y,m-1,day-1);
+      const sat = new Date(dt); sat.setDate(sat.getDate()-1);
       const satIso = `${sat.getFullYear()}-${String(sat.getMonth()+1).padStart(2,'0')}-${String(sat.getDate()).padStart(2,'0')}`;
       dates.push({ date: satIso, isOuting: true, course: satOutings[satIso] });
     } else if (sunOutings[iso]) {
@@ -967,9 +974,7 @@ function getSeasonDates() {
     } else {
       dates.push({ date: iso, isOuting: false, course: null });
     }
-    day += 7;
-    const next = new Date(y, m-1, day);
-    y = next.getFullYear(); m = next.getMonth()+1; day = next.getDate();
+    dt.setDate(dt.getDate()+7);
   }
   return dates;
 }
@@ -980,7 +985,7 @@ function getSundays() {
 
 let db = { players:[], events:[], rounds:[], noticeboard:[], knockout_matches:[] };
 let isAdmin = false;
-const ADMIN_PW = CONFIG.admin_password || 'admin2026';
+const ADMIN_PW = () => (CONFIG.admin_password || 'admin2026');
 
 function initials(n) { return n.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2); }
 
@@ -3759,7 +3764,7 @@ function showAdminLoginFromScreen() {
 
 function checkAdminPw() {
   const pw = document.getElementById('admin-pw-input').value;
-  if (pw === ADMIN_PW) {
+  if (pw === ADMIN_PW()) {
     isAdmin = true;
     currentUser = { role: 'admin' };
     storeSession(currentUser);
