@@ -16,13 +16,13 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
 <style>
   :root {
-    --green: #C9A84C;
-    --green-light: #fef8e6;
-    --green-mid: #a88630;
-    --green-dark: #0a1628;
-    --gold: #C9A84C;
-    --gold-light: #fef8e6;
-    --amber: #C9A84C;
+    --green: #52b788;
+    --green-light: #e8f7f0;
+    --green-mid: #2d6a4f;
+    --green-dark: #0c1c2e;
+    --gold: #52b788;
+    --gold-light: #e8f7f0;
+    --amber: #52b788;
     --silver: #D3D1C7;
     --bronze: #F0997B;
     --bg: #f8f5ee;
@@ -122,7 +122,7 @@
     transition: background 0.15s;
     flex-shrink: 0;
   }
-  .nav-btn.active { color: #C9A84C; }
+  .nav-btn.active { color: var(--green); }
   .nav-btn.active .tab-icon { background: rgba(201,168,76,0.18); }
   .nav-btn:hover { color: rgba(255,255,255,0.8); }
 
@@ -130,7 +130,7 @@
   .nav-btn.fab-btn { flex: 1; }
   .nav-btn.fab-btn .tab-icon {
     width: 44px; height: 44px; border-radius: 50%;
-    background: #C9A84C; margin-top: -18px;
+    background: var(--green); margin-top: -18px;
     border: 3px solid rgba(10,22,40,0.97);
     box-shadow: 0 2px 12px rgba(201,168,76,0.4);
   }
@@ -214,7 +214,7 @@
   }
   .btn:hover { background: var(--bg); }
   .btn:active { transform: scale(0.98); }
-  .btn.primary { background: #0a1628; color: #C9A84C; border-color: #0a1628; }
+  .btn.primary { background: var(--green-dark); color: var(--green); border-color: var(--green-dark); }
   .btn.primary:hover { background: #0f2040; }
   .btn.danger { color: #A32D2D; border-color: #F7C1C1; }
   .btn.danger:hover { background: #FCEBEB; }
@@ -241,7 +241,7 @@
   .badge.green  { background: #fef8e6; color: #8a6a1a; }
   .badge.gray   { background: #f0ece4; color: #6b6050; }
   .badge.blue   { background: #edf2fa; color: #1a3c6e; }
-  .badge.purple { background: #0a1628; color: #C9A84C; }
+  .badge.purple { background: var(--green-dark); color: var(--green); }
 
   .rank {
     width: 28px; height: 28px; border-radius: 50%;
@@ -288,7 +288,7 @@
 
   /* ── New scorecard entry ── */
   .sc-wrap { background: var(--surface); border-radius: 0 0 var(--radius) var(--radius); overflow: hidden; border: 1px solid var(--border); border-top: none; margin-bottom: 10px; }
-  .sc-thead { display: grid; grid-template-columns: 36px 36px 1fr 48px; background: #0a1628; padding: 8px 14px; gap: 4px; border-radius: 0; }
+  .sc-thead { display: grid; grid-template-columns: 36px 36px 1fr 48px; background: var(--green-dark); padding: 8px 14px; gap: 4px; border-radius: 0; }
   .sc-thead span { font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.55); text-transform: uppercase; letter-spacing: 0.06em; text-align: center; }
   .sc-row { display: grid; grid-template-columns: 36px 36px 1fr 48px; align-items: center; gap: 4px; padding: 4px 14px; border-bottom: 0.5px solid var(--border); cursor: pointer; transition: background 0.1s; }
   .sc-row:last-child { border-bottom: none; }
@@ -301,9 +301,9 @@
   .sc-score-val { font-size: 24px; font-weight: 700; color: var(--text); min-width: 32px; text-align: center; }
   .sc-score-val.sc-empty { color: var(--border-strong); font-size: 18px; font-weight: 400; }
   .sc-adj { width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid var(--border-strong); background: var(--surface); color: var(--text); font-size: 22px; font-weight: 300; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; font-family: 'DM Sans', sans-serif; line-height: 1; touch-action: manipulation; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; }
-  .sc-adj:active { background: #C9A84C; border-color: #C9A84C; color: #0a1628; transform: scale(0.93); }
+  .sc-adj:active { background: var(--green); border-color: var(--green); color: var(--green-dark); transform: scale(0.93); }
   .sc-pts-chip { width: 44px; height: 26px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; }
-  .sc-board { background: #0a1628; border-radius: var(--radius) var(--radius) 0 0; padding: 12px 14px; border: 1px solid var(--border); border-bottom: none; }
+  .sc-board { background: var(--green-dark); border-radius: var(--radius) var(--radius) 0 0; padding: 12px 14px; border: 1px solid var(--border); border-bottom: none; }
 
   .lb-card {
     background: var(--surface); border: 1px solid var(--border);
@@ -375,18 +375,18 @@
     max-width: 300px; pointer-events: none;
   }
   .toast.show { opacity: 1; transform: translateY(0); }
-  .toast.success { border-color: #C9A84C; background: var(--green-light); color: var(--green-dark); }
+  .toast.success { border-color: var(--green); background: var(--green-light); color: var(--green-dark); }
   .toast.error { border-color: #F7C1C1; background: #FCEBEB; color: #A32D2D; }
 
   .divider { height: 1px; background: var(--border); margin: 1rem 0; }
 
   .login-screen {
     position: fixed; inset: 0; z-index: 500;
-    background: #0a1628;
+    background: var(--green-dark);
     display: flex; flex-direction: column; align-items: stretch; overflow: hidden;
   }
   .login-hero {
-    background: #0a1628; padding: 36px 24px 20px; text-align: center; flex-shrink: 0;
+    background: var(--green-dark); padding: 36px 24px 20px; text-align: center; flex-shrink: 0;
   }
   .login-hero-logo {
     width: 64px; height: 64px; border-radius: 14px; background: white;
@@ -402,22 +402,22 @@
   .login-search-wrap { position: relative; margin-bottom: 4px; }
   .login-search-wrap svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #9a9080; pointer-events: none; }
   .login-search-wrap input { width: 100%; height: 40px; border-radius: 10px; border: 1px solid #e0d8c8; background: white; padding: 0 12px 0 36px; font-size: 14px; color: #1a1510; font-family: 'DM Sans', sans-serif; }
-  .login-search-wrap input:focus { outline: none; border-color: #C9A84C; }
-  .login-section-lbl { font-size: 10px; font-weight: 700; color: #C9A84C; text-transform: uppercase; letter-spacing: 0.08em; padding: 6px 2px 2px; }
+  .login-search-wrap input:focus { outline: none; border-color: var(--green); }
+  .login-section-lbl { font-size: 10px; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: 0.08em; padding: 6px 2px 2px; }
   .login-player-row { display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: white; border-radius: 10px; border: 1px solid #e0d8c8; cursor: pointer; transition: border-color 0.1s, background 0.1s; margin-bottom: 4px; }
-  .login-player-row:active { border-color: #C9A84C; background: #fef8e6; }
-  .login-player-avatar { width: 36px; height: 36px; border-radius: 50%; background: #0a1628; color: #C9A84C; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .login-player-row:active { border-color: var(--green); background: #fef8e6; }
+  .login-player-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--green-dark); color: var(--green); font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .login-player-name { font-size: 14px; font-weight: 600; color: #1a1510; }
   .login-view-btn { width: 100%; padding: 11px; border-radius: 10px; border: 1px solid #e0d8c8; background: white; font-size: 13px; color: #9a9080; font-family: 'DM Sans', sans-serif; cursor: pointer; text-align: center; }
   .login-admin-btn { width: 100%; padding: 10px; border-radius: 10px; border: 1px solid rgba(201,168,76,0.3); background: rgba(201,168,76,0.08); font-size: 13px; color: #8a6a1a; font-family: 'DM Sans', sans-serif; cursor: pointer; text-align: center; font-weight: 500; }
-  .pin-dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid #C9A84C; background: transparent; transition: background 0.1s; }
-  .pin-dot.filled { background: #C9A84C; }
+  .pin-dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--green); background: transparent; transition: background 0.1s; }
+  .pin-dot.filled { background: var(--green); }
   .num-key { height: 52px; border-radius: 12px; border: 1px solid #e0d8c8; background: white; font-size: 20px; font-weight: 500; color: #1a1510; display: flex; align-items: center; justify-content: center; cursor: pointer; font-family: 'DM Sans', sans-serif; touch-action: manipulation; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; transition: background 0.08s, transform 0.08s; }
-  .num-key:active { background: #fef8e6; border-color: #C9A84C; transform: scale(0.93); }
+  .num-key:active { background: #fef8e6; border-color: var(--green); transform: scale(0.93); }
   .num-del { background: #f8f5ee; color: #9a9080; font-size: 16px; }
-  .num-go { background: #0a1628; color: #C9A84C; border-color: #0a1628; font-size: 13px; font-weight: 700; }
+  .num-go { background: var(--green-dark); color: var(--green); border-color: var(--green-dark); font-size: 13px; font-weight: 700; }
   .num-go:active { background: #162338; }
-  .login-pin-avatar { width: 60px; height: 60px; border-radius: 50%; background: #0a1628; color: #C9A84C; font-size: 18px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin: 8px auto 12px; }
+  .login-pin-avatar { width: 60px; height: 60px; border-radius: 50%; background: var(--green-dark); color: var(--green); font-size: 18px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin: 8px auto 12px; }
   .login-pin-greeting { font-size: 18px; font-weight: 700; color: #1a1510; text-align: center; margin-bottom: 3px; }
   .login-pin-sub { font-size: 12px; color: #9a9080; text-align: center; margin-bottom: 16px; }
   .locked-tab { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4rem 2rem; text-align: center; color: var(--text-2); }
@@ -434,12 +434,12 @@
 <body>
 
 <!-- INSTALL BANNER -->
-<div id="install-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:600;background:#0a1628;padding:14px 16px 28px;border-top:1px solid rgba(201,168,76,0.3)">
+<div id="install-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:600;background:var(--green-dark);padding:14px 16px 28px;border-top:1px solid rgba(201,168,76,0.3)">
   <div style="display:flex;align-items:center;gap:12px">
     <img src="/brayhead-golf/icon-192.png" style="width:44px;height:44px;border-radius:10px;flex-shrink:0" />
     <div style="flex:1;min-width:0">
       <div style="font-size:14px;font-weight:700;color:white;margin-bottom:2px">id="install-banner-text">Add this app to your home screen</div>
-      <div style="font-size:12px;color:rgba(255,255,255,0.55)">Tap <strong style="color:#C9A84C">Share</strong> then <strong style="color:#C9A84C">Add to Home Screen</strong></div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.55)">Tap <strong style="color:var(--green)">Share</strong> then <strong style="color:var(--green)">Add to Home Screen</strong></div>
     </div>
     <button onclick="dismissInstallBanner()" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:20px;cursor:pointer;padding:4px;flex-shrink:0;font-family:'DM Sans',sans-serif">✕</button>
   </div>
@@ -675,14 +675,14 @@
 
   <!-- ADD ROUND -->
   <div id="add-round" class="section" style="margin:-1.5rem -1.5rem 0;overflow-x:hidden">
-    <div id="ar-header" style="background:#0a1628;padding:14px 16px 12px">
+    <div id="ar-header" style="background:var(--green-dark);padding:14px 16px 12px">
       <div id="ar-event-name" style="font-size:16px;font-weight:700;color:white"></div>
       <div id="ar-event-date" style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px;margin-bottom:12px"></div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:4px">
         <div style="text-align:center"><div style="font-size:9px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px">Hcp</div><div style="font-size:18px;font-weight:700;color:white" id="sb-hcp">—</div></div>
         <div style="text-align:center"><div style="font-size:9px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px">Course hcp</div><div style="font-size:18px;font-weight:700;color:white" id="sb-chcp">—</div></div>
         <div style="text-align:center"><div style="font-size:9px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px">Holes</div><div style="font-size:18px;font-weight:700;color:white" id="sb-holes">0/9</div></div>
-        <div style="text-align:center"><div style="font-size:9px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px">Points</div><div style="font-size:18px;font-weight:700;color:#C9A84C" id="sb-pts">0</div></div>
+        <div style="text-align:center"><div style="font-size:9px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px">Points</div><div style="font-size:18px;font-weight:700;color:var(--green)" id="sb-pts">0</div></div>
       </div>
     </div>
     <div id="ar-player-bar" style="display:none;background:white;border-bottom:1px solid #e0d8c8;padding:8px 16px;display:flex;align-items:center;gap:10px">
@@ -809,6 +809,7 @@ function applyBranding() {
   document.documentElement.style.setProperty('--surface', b.surface || '#ffffff');
   document.documentElement.style.setProperty('--green', b.accent);
   document.documentElement.style.setProperty('--green-light', b.accent + '22');
+  document.documentElement.style.setProperty('--green-mid', b.accent);
   document.documentElement.style.setProperty('--green-dark', b.primary);
   document.documentElement.style.setProperty('--gold', b.accent);
   document.documentElement.style.setProperty('--gold-light', b.accent + '22');
@@ -991,12 +992,12 @@ function initials(n) { return n.split(' ').map(w=>w[0]).join('').toUpperCase().s
 
 function avatarHtml(player, size=44, fontSize=14) {
   if (player && player.avatar_url) {
-    return `<div style="width:${size}px;height:${size}px;border-radius:50%;overflow:hidden;flex-shrink:0;background:#0a1628">
+    return `<div style="width:${size}px;height:${size}px;border-radius:50%;overflow:hidden;flex-shrink:0;background:var(--green-dark)">
       <img src="${player.avatar_url}" style="width:100%;height:100%;object-fit:cover" loading="lazy"
-        onerror="this.parentElement.innerHTML='<span style=\\'display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-size:${Math.round(fontSize)}px;font-weight:700;color:#C9A84C\\'>${initials(player.name)}</span>'" />
+        onerror="this.parentElement.innerHTML='<span style=\\'display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-size:${Math.round(fontSize)}px;font-weight:700;color:var(--green)\\'>${initials(player.name)}</span>'" />
     </div>`;
   }
-  return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:#0a1628;color:#C9A84C;font-size:${fontSize}px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">${initials(player.name)}</div>`;
+  return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:var(--green-dark);color:var(--green);font-size:${fontSize}px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">${initials(player.name)}</div>`;
 }
 function fmtDate(d) {
   const [y,m,day] = d.split('-').map(Number);
@@ -1272,10 +1273,10 @@ function renderEvents() {
       <div style="display:flex;gap:6px;flex-wrap:wrap">
         <button class="btn sm" onclick="viewEventResults('${e.id}')">Results</button>
         ${isAdmin ? `<button class="btn sm" onclick="editEvent('${e.id}')">Edit</button>` : ''}
-        ${isAdmin && verified < count ? `<button class="btn sm" style="background:#fef8e6;color:#8a6a1a;border-color:#C9A84C" onclick="verifyAllRounds('${e.id}')">Verify all (${count - verified})</button>` : ''}
-        ${isAdmin && e.published ? `<button class="btn sm" style="background:#fef8e6;color:#8a6a1a;border-color:#C9A84C" onclick="recalcHandicaps('${e.id}')">Recalc handicaps</button>` : ''}
-        ${isAdmin ? `<button class="btn sm" style="background:#fef8e6;color:#8a6a1a;border-color:#C9A84C" onclick="showPostUpdate('${e.id}')">Post update</button>` : ''}
-        ${isAdmin ? `<button class="btn sm" style="background:${e.published?'#FCEBEB':'#fef8e6'};color:${e.published?'#A32D2D':'#8a6a1a'};border-color:${e.published?'#F7C1C1':'#C9A84C'}" onclick="togglePublishEvent('${e.id}',${!!e.published})">${e.published?'Unpublish':'Publish results'}</button>` : ''}
+        ${isAdmin && verified < count ? `<button class="btn sm" style="background:#fef8e6;color:#8a6a1a;border-color:var(--green)" onclick="verifyAllRounds('${e.id}')">Verify all (${count - verified})</button>` : ''}
+        ${isAdmin && e.published ? `<button class="btn sm" style="background:#fef8e6;color:#8a6a1a;border-color:var(--green)" onclick="recalcHandicaps('${e.id}')">Recalc handicaps</button>` : ''}
+        ${isAdmin ? `<button class="btn sm" style="background:#fef8e6;color:#8a6a1a;border-color:var(--green)" onclick="showPostUpdate('${e.id}')">Post update</button>` : ''}
+        ${isAdmin ? `<button class="btn sm" style="background:${e.published?'#FCEBEB':'#fef8e6'};color:${e.published?'#A32D2D':'#8a6a1a'};border-color:${e.published?'#F7C1C1':'var(--green)'}" onclick="togglePublishEvent('${e.id}',${!!e.published})">${e.published?'Unpublish':'Publish results'}</button>` : ''}
         ${isAdmin ? `<button class="btn sm danger" onclick="deleteEvent('${e.id}')">Delete</button>` : ''}
       </div>
     </div>`;
@@ -1681,7 +1682,7 @@ function updateRoundSummary() {
       const holePts = calcStableford(v, parVals[i-1], getStrokeAllowance(courseHcp, siVals[i-1], n));
       pts += holePts; holes++;
       if (ptsEl) {
-        const bg  = holePts >= 3 ? '#C9A84C' : holePts === 2 ? '#2a6b1a' : holePts === 1 ? '#9a9080' : '#A32D2D';
+        const bg  = holePts >= 3 ? 'var(--green)' : holePts === 2 ? '#2a6b1a' : holePts === 1 ? '#9a9080' : '#A32D2D';
         const col = '#ffffff';
         ptsEl.textContent = holePts;
         ptsEl.style.background = bg;
@@ -1700,7 +1701,7 @@ function updateRoundSummary() {
   if (hcpEl)   hcpEl.textContent  = hcp.toFixed(1);
   if (chcpEl)  chcpEl.textContent = courseHcp + (indexLabel==='W'?' W':'');
   if (holesEl) holesEl.textContent= `${holes}/${n}`;
-  if (ptsEl2)  { ptsEl2.textContent = pts; ptsEl2.style.color = pts > 0 ? '#C9A84C' : 'rgba(255,255,255,0.5)'; }
+  if (ptsEl2)  { ptsEl2.textContent = pts; ptsEl2.style.color = pts > 0 ? 'var(--green)' : 'rgba(255,255,255,0.5)'; }
 
   // Summary bar
   if (holes > 0) {
@@ -2081,11 +2082,11 @@ function renderSchedule() {
     const diff = Math.round((target - new Date(t.getFullYear(), t.getMonth(), t.getDate())) / 86400000);
     const daysLabel = diff === 0 ? 'Today!' : diff === 1 ? '1 day to go' : `${diff} days to go`;
     countdownHtml = `
-      <div style="background:#0a1628;border-radius:var(--radius);padding:16px;margin-bottom:1rem;text-align:center">
+      <div style="background:var(--green-dark);border-radius:var(--radius);padding:16px;margin-bottom:1rem;text-align:center">
         <div style="font-size:10px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Next outing</div>
         <div style="font-size:18px;font-weight:700;color:white;margin-bottom:4px">${outName}</div>
         <div style="font-size:13px;color:rgba(255,255,255,0.6);margin-bottom:10px">${fmtDate(outDate)}</div>
-        <div style="display:inline-block;background:#C9A84C;color:#0a1628;font-size:22px;font-weight:800;padding:8px 24px;border-radius:99px">${daysLabel}</div>
+        <div style="display:inline-block;background:var(--green);color:var(--green-dark);font-size:22px;font-weight:800;padding:8px 24px;border-radius:99px">${daysLabel}</div>
       </div>`;
   }
 
@@ -2168,8 +2169,8 @@ function renderHome() {
           <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px">${nextEvent.course_name}</div>
           <div style="font-size:12px;color:var(--text-3);margin-bottom:10px">${fmtDate(nextEvent.event_date)} · ${total} round${total!==1?'s':''} submitted</div>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
-            ${!allVerified && total > 0 ? `<button class="btn sm" style="background:#fef8e6;color:#8a6a1a;border-color:#C9A84C" onclick="verifyAllRounds('${nextEvent.id}')">Verify all (${unverified})</button>` : ''}
-            ${allVerified ? `<button class="btn sm" style="background:#fef8e6;color:#8a6a1a;border-color:#C9A84C" onclick="togglePublishEvent('${nextEvent.id}',false)">Publish results</button>` : ''}
+            ${!allVerified && total > 0 ? `<button class="btn sm" style="background:#fef8e6;color:#8a6a1a;border-color:var(--green)" onclick="verifyAllRounds('${nextEvent.id}')">Verify all (${unverified})</button>` : ''}
+            ${allVerified ? `<button class="btn sm" style="background:#fef8e6;color:#8a6a1a;border-color:var(--green)" onclick="togglePublishEvent('${nextEvent.id}',false)">Publish results</button>` : ''}
             ${total === 0 ? `<span style="font-size:12px;color:var(--text-3)">Waiting for rounds to be submitted</span>` : ''}
           </div>
         </div>`;
@@ -2221,7 +2222,7 @@ function renderHome() {
       ${ranked.length ? `<div style="margin-bottom:4px">${podium}</div>` : ''}
       ${ctp}${birdies}${custom}
       <div style="margin-top:12px;display:flex;align-items:center;justify-content:space-between">
-        ${ev ? `<button class="btn sm" onclick="viewEventResults('${ev.id}')" style="background:#fef8e6;color:#8a6a1a;border-color:#C9A84C;font-weight:600">View full results →</button>` : '<span></span>'}
+        ${ev ? `<button class="btn sm" onclick="viewEventResults('${ev.id}')" style="background:#fef8e6;color:#8a6a1a;border-color:var(--green);font-weight:600">View full results →</button>` : '<span></span>'}
         ${isAdmin ? `<button class="btn sm danger" onclick="deleteNotice('${n.id}')">Remove</button>` : ''}
       </div>
     </div>`;
@@ -2659,7 +2660,7 @@ function viewPlayerRounds(pid, name) {
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap">
           ${canEdit ? `<button class="btn sm" onclick="editRound('${r.id}')">Edit</button>` : ''}
-          ${isAdmin && !r.verified ? `<button class="btn sm" style="background:#fef8e6;color:#8a6a1a;border-color:#C9A84C" onclick="verifyRound('${r.id}')">Verify</button>` : ''}
+          ${isAdmin && !r.verified ? `<button class="btn sm" style="background:#fef8e6;color:#8a6a1a;border-color:var(--green)" onclick="verifyRound('${r.id}')">Verify</button>` : ''}
           ${isAdmin ? `<button class="btn sm danger" onclick="deleteRound('${r.id}')">Delete</button>` : ''}
         </div>
       </div>`;
@@ -2693,7 +2694,7 @@ function editRound(rid) {
   }
 
   document.getElementById('modal-body').innerHTML = `
-    <div style="background:#0a1628;border-radius:8px 8px 0 0;padding:8px 12px;display:grid;grid-template-columns:36px 36px 1fr;gap:4px">
+    <div style="background:var(--green-dark);border-radius:8px 8px 0 0;padding:8px 12px;display:grid;grid-template-columns:36px 36px 1fr;gap:4px">
       <span style="font-size:10px;color:rgba(255,255,255,0.5);text-transform:uppercase;text-align:center;font-weight:600">#</span>
       <span style="font-size:10px;color:rgba(255,255,255,0.5);text-transform:uppercase;text-align:center;font-weight:600">Par</span>
       <span style="font-size:10px;color:rgba(255,255,255,0.5);text-transform:uppercase;text-align:center;font-weight:600">Score</span>
@@ -2850,8 +2851,8 @@ function renderProfile() {
       <div style="display:flex;align-items:center;gap:14px;margin-bottom:1rem">
         <div style="position:relative;flex-shrink:0" onclick="triggerAvatarUpload('${pid}')">
           ${avatarHtml(player, 52, 18)}
-          <div style="position:absolute;bottom:0;right:0;width:18px;height:18px;border-radius:50%;background:#C9A84C;display:flex;align-items:center;justify-content:center;border:2px solid white">
-            <svg width="9" height="9" viewBox="0 0 10 10" fill="none" stroke="#0a1628" stroke-width="1.8"><line x1="5" y1="2" x2="5" y2="8"/><line x1="2" y1="5" x2="8" y2="5"/></svg>
+          <div style="position:absolute;bottom:0;right:0;width:18px;height:18px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;border:2px solid white">
+            <svg width="9" height="9" viewBox="0 0 10 10" fill="none" stroke="var(--green-dark)" stroke-width="1.8"><line x1="5" y1="2" x2="5" y2="8"/><line x1="2" y1="5" x2="8" y2="5"/></svg>
           </div>
         </div>
         <input type="file" id="avatar-upload-input" accept="image/*" style="display:none" onchange="uploadAvatar(this,'${pid}')" />
@@ -2990,7 +2991,7 @@ function renderProfile() {
 
       // Line
       ctx.beginPath();
-      ctx.strokeStyle = '#C9A84C';
+      ctx.strokeStyle = 'var(--green)';
       ctx.lineWidth = 2.5;
       ctx.lineJoin = 'round';
       ctx.lineCap  = 'round';
@@ -3001,7 +3002,7 @@ function renderProfile() {
       allData.forEach((v,i) => {
         ctx.beginPath();
         ctx.arc(xPos(i), yPos(v), 4, 0, Math.PI*2);
-        ctx.fillStyle = '#C9A84C';
+        ctx.fillStyle = 'var(--green)';
         ctx.fill();
         ctx.fillStyle = 'rgba(0,0,0,0.55)';
         ctx.font = '9px sans-serif';
