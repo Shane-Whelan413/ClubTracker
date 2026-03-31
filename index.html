@@ -16,13 +16,13 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
 <style>
   :root {
-    --green: #52b788;
-    --green-light: #e8f7f0;
-    --green-mid: #2d6a4f;
+    --green: #C9A84C;
+    --green-light: #fef8e6;
+    --green-mid: #a88630;
     --green-dark: #0c1c2e;
-    --gold: #52b788;
-    --gold-light: #e8f7f0;
-    --amber: #52b788;
+    --gold: #C9A84C;
+    --gold-light: #fef8e6;
+    --amber: #C9A84C;
     --silver: #D3D1C7;
     --bronze: #F0997B;
     --bg: #f8f5ee;
@@ -1682,7 +1682,7 @@ function updateRoundSummary() {
       const holePts = calcStableford(v, parVals[i-1], getStrokeAllowance(courseHcp, siVals[i-1], n));
       pts += holePts; holes++;
       if (ptsEl) {
-        const bg  = holePts >= 3 ? 'var(--green)' : holePts === 2 ? '#2a6b1a' : holePts === 1 ? '#9a9080' : '#A32D2D';
+        const bg  = holePts >= 3 ? 'var(--green)' : holePts === 2 ? '#7a5a10' : holePts === 1 ? '#9a9080' : '#A32D2D';
         const col = '#ffffff';
         ptsEl.textContent = holePts;
         ptsEl.style.background = bg;
@@ -2128,15 +2128,15 @@ function renderSchedule() {
 
       if (isNextRound) {
         // NEXT ROUND — green highlight
-        return `<div style="display:flex;align-items:center;gap:10px;padding:12px;background:#f0f7ee;border-radius:10px;border:1.5px solid #a8c89a;margin-bottom:4px">
-          <div style="flex-shrink:0;width:36px;height:36px;border-radius:50%;background:#2a6b1a;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white">${i+1}</div>
+        return `<div style="display:flex;align-items:center;gap:10px;padding:12px;background:#fef8e6;border-radius:10px;border:1.5px solid #C9A84C;margin-bottom:4px">
+          <div style="flex-shrink:0;width:36px;height:36px;border-radius:50%;background:#7a5a10;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white">${i+1}</div>
           <div style="flex:1;min-width:0">
             <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
               ${typeLabel}
-              <span style="font-size:10px;font-weight:700;color:#2a6b1a;background:#d4edcc;padding:2px 8px;border-radius:99px">Next round</span>
+              <span style="font-size:10px;font-weight:700;color:#7a5a10;background:#fef8e6;padding:2px 8px;border-radius:99px">Next round</span>
             </div>
-            <div style="font-size:13px;color:#2a6b1a;font-weight:500">${fmtDate(d)}</div>
-            ${courseName?`<div style="font-size:15px;font-weight:700;color:#1a4a0a;margin-top:2px">${courseName}</div>`:''}
+            <div style="font-size:13px;color:#7a5a10;font-weight:500">${fmtDate(d)}</div>
+            ${courseName?`<div style="font-size:15px;font-weight:700;color:#5a3a0a;margin-top:2px">${courseName}</div>`:''}
           </div>
         </div>`;
       }
