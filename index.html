@@ -845,6 +845,8 @@ function applyBranding() {
 let SUPABASE_URL = '';
 let SUPABASE_KEY = '';
 
+const SOCIETY_ID = 'demo'; // ← change this per society when deploying
+
 const api = async (path, opts={}) => {
   const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
     headers: {
@@ -860,10 +862,27 @@ const api = async (path, opts={}) => {
   const txt = await res.text();
   return txt ? JSON.parse(txt) : null;
 };
-const get  = p       => api(p, { method:'GET', prefer:'', cache:'no-store' });
-const post = (p,b)   => api(p, { method:'POST', body:JSON.stringify(b) });
-const patch= (p,b)   => api(p, { method:'PATCH', body:JSON.stringify(b), prefer:'return=representation' });
-const del  = p       => api(p, { method:'DELETE', prefer:'return=minimal' });
+
+// Automatically append society_id filter to all GET queries
+const get = p => {
+  const sep = p.includes('?') ? '&' : '?';
+  return api(`${p}${sep}society_id=eq.${SOCIETY_ID}`, { method:'GET', prefer:'', cache:'no-store' });
+};
+
+// Automatically inject society_id into all POST bodies
+const post = (p, b) => api(p, { method:'POST', body:JSON.stringify({ ...b, society_id: SOCIETY_ID }) });
+
+// Automatically append society_id filter to all PATCH queries
+const patch = (p, b) => {
+  const sep = p.includes('?') ? '&' : '?';
+  return api(`${p}${sep}society_id=eq.${SOCIETY_ID}`, { method:'PATCH', body:JSON.stringify(b), prefer:'return=representation' });
+};
+
+// Automatically append society_id filter to all DELETE queries
+const del = p => {
+  const sep = p.includes('?') ? '&' : '?';
+  return api(`${p}${sep}society_id=eq.${SOCIETY_ID}`, { method:'DELETE', prefer:'return=minimal' });
+};
 
 const LEAGUE_PTS = pos => {
   const pts = (CONFIG.scoring && CONFIG.scoring.league_points) ? CONFIG.scoring.league_points : [20,19,18,17,16,15,14,13,12,11,10,9,8,7,6];
