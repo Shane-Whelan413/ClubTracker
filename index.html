@@ -782,9 +782,9 @@ async function loadConfig() {
   } catch(e) {
     console.error('Failed to load config.json:', e);
     CONFIG = {
-      society:  { name:'Golf Society', short_name:'GS', season_year:2026, season_start:'2026-01-01', season_end:'2026-12-31' },
+      society:  { name:'GolfSoc Demo', short_name:'GolfSoc', season_year:2026, season_start:'2026-01-01', season_end:'2026-12-31' },
       branding: { primary:'#1a1a1a', accent:'#4a9a5a', bg:'#f5f5f0', surface:'#ffffff' },
-      supabase: { url:'', key:'' },
+      supabase: { url:'https://nljcncrvqjtuwycemutz.supabase.co', key:'sb_publishable_BgbeDiu7r0Ck5YhLpKdJvw_0mmPJWBI' },
       scoring:  { type:'stableford', holes:9, handicap_gain:0.2, handicap_cut:1, handicap_cut_threshold:18, top_finish_protection:3, outing_gain:0.2, outing_cut:1, outing_cut_threshold:37, league_points:[20,19,18,17,16,15,14,13,12,11,10,9,8,7,6], league_points_default:6, best_weeks:33 },
       features: { knockout:false, outings:true, womens_index:false, noticeboard:true, profile_photos:true },
       admin_password: 'admin2026'
