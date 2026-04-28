@@ -2075,97 +2075,89 @@ function viewEventResults(eid) {
 }
 
 function renderSchedule() {
-  const seasonDates = getSeasonDates();
-  const byDate  = {};
-  db.events.forEach(e=>{ byDate[e.event_date]=e; });
   const t = new Date();
   const today = `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;
-  const outingsLogged = db.events.filter(e=>e.event_type==='outing_18').length;
-  const sundaysLogged = db.events.filter(e=>e.event_type==='sunday_9').length;
 
-  // Find next upcoming outing
-  const nextOuting = Object.entries(OUTINGS)
-    .filter(([d]) => d >= today)
-    .sort(([a],[b]) => a.localeCompare(b))[0];
+  // Only show actual events from the database — sorted by date
+  const events = [...db.events].sort((a,b)=>a.event_date.localeCompare(b.event_date));
 
+  if (!events.length) {
+    document.getElementById('schedule-table').innerHTML = '<div class="empty">No events scheduled yet</div>';
+    return;
+  }
+
+  const completed = events.filter(e=>e.published).length;
+  const upcoming  = events.filter(e=>!e.published).length;
+  const nextEvent = events.find(e=>!e.published);
+
+  // Countdown to next event
   let countdownHtml = '';
-  if (nextOuting) {
-    const [outDate, outName] = nextOuting;
-    const [oy,om,od] = outDate.split('-').map(Number);
-    const target = new Date(oy, om-1, od);
+  if (nextEvent) {
+    const [ey,em,ed] = nextEvent.event_date.split('-').map(Number);
+    const target = new Date(ey, em-1, ed);
     const diff = Math.round((target - new Date(t.getFullYear(), t.getMonth(), t.getDate())) / 86400000);
     const daysLabel = diff === 0 ? 'Today!' : diff === 1 ? '1 day to go' : `${diff} days to go`;
     countdownHtml = `
       <div style="background:var(--green-dark);border-radius:var(--radius);padding:16px;margin-bottom:1rem;text-align:center">
-        <div style="font-size:10px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Next outing</div>
-        <div style="font-size:18px;font-weight:700;color:white;margin-bottom:4px">${outName}</div>
-        <div style="font-size:13px;color:rgba(255,255,255,0.6);margin-bottom:10px">${fmtDate(outDate)}</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Next event</div>
+        <div style="font-size:18px;font-weight:700;color:white;margin-bottom:4px">${nextEvent.course_name}</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.6);margin-bottom:10px">${fmtDate(nextEvent.event_date)}</div>
         <div style="display:inline-block;background:var(--green);color:var(--green-dark);font-size:22px;font-weight:800;padding:8px 24px;border-radius:99px">${daysLabel}</div>
       </div>`;
   }
 
+  const rows = events.map((ev, i) => {
+    const isPublished = ev.published;
+    const isNext = nextEvent && ev.id === nextEvent.id;
+    const isOuting = ev.event_type === 'outing_18';
+    const typeLabel = isOuting
+      ? `<span style="font-size:10px;font-weight:600;color:#3C3489;background:#EEEDFE;padding:2px 8px;border-radius:99px">18-hole outing</span>`
+      : `<span style="font-size:10px;font-weight:600;color:#1a3c6e;background:#edf2fa;padding:2px 8px;border-radius:99px">Sunday 9</span>`;
+
+    if (isPublished) {
+      return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border);opacity:0.6">
+        <div style="width:26px;height:26px;border-radius:50%;background:#fef8e6;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;color:#8a6a1a;font-weight:700">✓</div>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">${typeLabel}</div>
+          <div style="font-size:14px;font-weight:600;color:var(--text)">${ev.course_name}</div>
+          <div style="font-size:12px;color:var(--text-3);margin-top:1px">${fmtDate(ev.event_date)}</div>
+        </div>
+        <button class="btn sm" onclick="viewEventResults('${ev.id}')" style="flex-shrink:0;font-size:11px">Results</button>
+      </div>`;
+    }
+
+    if (isNext) {
+      return `<div style="display:flex;align-items:center;gap:10px;padding:12px;background:#fef8e6;border-radius:10px;border:1.5px solid #C9A84C;margin-bottom:4px">
+        <div style="flex-shrink:0;width:36px;height:36px;border-radius:50%;background:#7a5a10;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white">▶</div>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+            ${typeLabel}
+            <span style="font-size:10px;font-weight:700;color:#7a5a10;background:rgba(201,168,76,0.15);padding:2px 8px;border-radius:99px">Next up</span>
+          </div>
+          <div style="font-size:15px;font-weight:700;color:#5a3a0a">${ev.course_name}</div>
+          <div style="font-size:12px;color:#7a5a10;margin-top:2px">${fmtDate(ev.event_date)}</div>
+        </div>
+      </div>`;
+    }
+
+    return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border)">
+      <div style="width:26px;font-size:12px;font-weight:600;color:var(--text-3);text-align:center;flex-shrink:0">${i+1}</div>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">${typeLabel}</div>
+        <div style="font-size:14px;font-weight:600;color:var(--text)">${ev.course_name}</div>
+        <div style="font-size:12px;color:var(--text-3);margin-top:1px">${fmtDate(ev.event_date)}</div>
+      </div>
+    </div>`;
+  }).join('');
+
   document.getElementById('schedule-table').innerHTML = `
     ${countdownHtml}
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.25rem">
-      <span class="badge gray">${seasonDates.length} events in season</span>
-      <span class="badge green">${sundaysLogged} Sundays logged</span>
-      <span class="badge purple">${outingsLogged} / 7 outings logged</span>
+      <span class="badge gray">${events.length} total events</span>
+      <span class="badge green">${completed} completed</span>
+      <span class="badge purple">${upcoming} upcoming</span>
     </div>
-    ${seasonDates.map((entry,i)=>{
-      const { date: d, isOuting, course: outingCourse } = entry;
-      const ev        = byDate[d];
-      const isPast    = d < today;
-      const isTdy     = d === today;
-      const isPublished = ev && ev.published;
-
-      // Find next unpublished event with rounds or just next event in calendar
-      const isNextRound = ev && !ev.published && [...db.events]
-        .filter(e=>!e.published)
-        .sort((a,b)=>a.event_date.localeCompare(b.event_date))[0]?.id === ev.id;
-
-      const courseName = ev ? ev.course_name : isOuting ? outingCourse : null;
-      const typeLabel  = (ev ? ev.event_type : isOuting ? 'outing_18' : 'sunday_9') === 'outing_18'
-        ? `<span style="font-size:10px;font-weight:600;color:#3C3489;background:#EEEDFE;padding:2px 8px;border-radius:99px">18-hole outing</span>`
-        : `<span style="font-size:10px;font-weight:600;color:#1a3c6e;background:#edf2fa;padding:2px 8px;border-radius:99px">Sunday 9</span>`;
-
-      if (isPublished) {
-        // DONE — faded with tick
-        return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--border);opacity:0.5">
-          <div style="width:24px;height:24px;border-radius:50%;background:#fef8e6;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;color:#8a6a1a;font-weight:700">✓</div>
-          <div style="flex:1;min-width:0">
-            <div style="font-size:13px;color:var(--text-2)">${fmtDate(d)}</div>
-            ${courseName?`<div style="font-size:14px;font-weight:600;color:var(--text);margin-top:2px">${courseName}</div>`:''}
-          </div>
-          <button class="btn sm" onclick="viewEventResults('${ev.id}')" style="flex-shrink:0;font-size:11px">Results</button>
-        </div>`;
-      }
-
-      if (isNextRound) {
-        // NEXT ROUND — green highlight
-        return `<div style="display:flex;align-items:center;gap:10px;padding:12px;background:#fef8e6;border-radius:10px;border:1.5px solid #C9A84C;margin-bottom:4px">
-          <div style="flex-shrink:0;width:36px;height:36px;border-radius:50%;background:#7a5a10;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white">${i+1}</div>
-          <div style="flex:1;min-width:0">
-            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
-              ${typeLabel}
-              <span style="font-size:10px;font-weight:700;color:#7a5a10;background:#fef8e6;padding:2px 8px;border-radius:99px">Next round</span>
-            </div>
-            <div style="font-size:13px;color:#7a5a10;font-weight:500">${fmtDate(d)}</div>
-            ${courseName?`<div style="font-size:15px;font-weight:700;color:#5a3a0a;margin-top:2px">${courseName}</div>`:''}
-          </div>
-        </div>`;
-      }
-
-      // UPCOMING — plain
-      return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border)">
-        <div style="width:24px;font-size:12px;font-weight:600;color:var(--text-3);text-align:center;flex-shrink:0">${i+1}</div>
-        <div style="flex:1;min-width:0">
-          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">${typeLabel}</div>
-          <div style="font-size:13px;color:var(--text-2)">${fmtDate(d)}</div>
-          ${courseName?`<div style="font-size:15px;font-weight:600;color:var(--text);margin-top:2px">${courseName}</div>`:''}
-        </div>
-        ${ev?`<button class="btn sm" onclick="viewEventResults('${ev.id}')" style="flex-shrink:0">Results</button>`:''}
-      </div>`;
-    }).join('')}`;
+    ${rows}`;
 }
 
 function renderHome() {
@@ -2790,22 +2782,19 @@ async function verifyRound(rid) {
 function renderProfile() {
   const el = document.getElementById('profile-content');
   if (!el) return;
-  if (!currentUser || currentUser.role === 'viewer') {
-    el.innerHTML = '<div class="empty" style="padding:3rem">Log in as a member to view your profile</div>';
-    return;
-  }
-  // Admins logged in via password won't have a playerId — find them by is_admin flag
-  let pid = currentUser.playerId;
-  if (!pid && currentUser.role === 'admin') {
+
+  // Demo mode — show first player profile even if not logged in
+  let pid = currentUser?.playerId;
+  if (!pid && currentUser?.role === 'admin') {
     const adminPlayer = db.players.find(p => p.is_admin);
     if (adminPlayer) pid = adminPlayer.id;
   }
-  if (!pid) {
-    el.innerHTML = '<div class="empty" style="padding:3rem">Profile not available — log in as a member</div>';
-    return;
-  }
+  // If still no pid, default to first player so demo shows real data
+  if (!pid && db.players.length) pid = db.players[0].id;
+  if (!pid) { el.innerHTML = '<div class="empty" style="padding:3rem">No player data yet</div>'; return; }
+
   const player = db.players.find(p=>p.id===pid);
-  if (!player) { el.innerHTML = '<div class="empty">Player not found — try logging out and back in</div>'; return; }
+  if (!player) { el.innerHTML = '<div class="empty">Player not found</div>'; return; }
 
   const publishedEids = new Set(db.events.filter(e=>e.published).map(e=>e.id));
   const myRounds = db.rounds.filter(r=>r.player_id===pid && r.verified && publishedEids.has(r.event_id));
@@ -2861,6 +2850,9 @@ function renderProfile() {
   const posText  = lbPos===1?'#633806':lbPos===2?'#444441':lbPos===3?'#4A1B0C':'var(--green-dark)';
 
   el.innerHTML = `
+    ${!currentUser?.playerId ? `<div style="background:var(--gold-light);border:1px solid var(--amber);border-radius:var(--radius);padding:10px 14px;margin-bottom:1rem;font-size:12px;color:#8a6a1a">
+      ⛳ Viewing <strong>${player.name.split(' ')[0]}'s</strong> profile — tap your name on the login screen to see your own.
+    </div>` : ''}
     <div class="card" style="margin-bottom:1rem">
       <div style="display:flex;align-items:center;gap:14px;margin-bottom:1rem">
         <div style="position:relative;flex-shrink:0">
