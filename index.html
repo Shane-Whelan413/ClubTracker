@@ -436,7 +436,7 @@
 <!-- INSTALL BANNER -->
 <div id="install-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:600;background:var(--green-dark);padding:14px 16px 28px;border-top:1px solid rgba(201,168,76,0.3)">
   <div style="display:flex;align-items:center;gap:12px">
-    <img src="/brayhead-golf/icon-192.png" style="width:44px;height:44px;border-radius:10px;flex-shrink:0" />
+    <img src="icon-192.png" style="width:44px;height:44px;border-radius:10px;flex-shrink:0" onerror="this.style.display='none'" />
     <div style="flex:1;min-width:0">
       <div style="font-size:14px;font-weight:700;color:white;margin-bottom:2px">id="install-banner-text">Add this app to your home screen</div>
       <div style="font-size:12px;color:rgba(255,255,255,0.55)">Tap <strong style="color:var(--green)">Share</strong> then <strong style="color:var(--green)">Add to Home Screen</strong></div>
@@ -482,7 +482,7 @@
   <a href="https://golfsoc.ie" target="_blank" style="font-size:11px;font-weight:600;color:#C9A84C;text-decoration:none;background:rgba(201,168,76,0.12);padding:4px 10px;border-radius:99px;border:1px solid rgba(201,168,76,0.25);white-space:nowrap">Get started →</a>
 </div>
 <div class="topbar">
-  <img id="topbar-logo" src="icon-192.png" alt="logo" style="width:46px;height:46px;border-radius:10px;object-fit:cover;flex-shrink:0;">
+  <div id="topbar-logo" style="width:36px;height:36px;border-radius:8px;background:rgba(201,168,76,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'DM Serif Display',serif;font-size:13px;font-weight:700;color:#C9A84C">GS</div>
   <span class="site-title"id="topbar-title">MGS</span>
   <span class="site-sub" id="topbar-season-label">2026 Season</span>
   <span class="conn-pill" id="conn-pill">Connecting…</span>
