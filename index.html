@@ -138,7 +138,7 @@
   .nav-btn.fab-btn.disabled { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
 
   /* Content padding for bottom nav and topbar */
-  .content { max-width: 960px; margin: 0 auto; padding: 1.5rem 1.5rem 140px; overflow-x: hidden; height: calc(100vh - 60px); overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
+  .content { max-width: 960px; margin: 0 auto; padding: 1.5rem 1.5rem 140px; overflow-x: hidden; height: calc(100vh - 90px); overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
 
   /* Toasts above bottom nav */
   .toasts { bottom: 100px; }
@@ -456,49 +456,30 @@
     <p><span id="topbar-season">2026 Season</span></p>
   </div>
   <div class="login-body">
-    <!-- Name grid phase -->
+    <!-- Demo banner -->
+    <div style="background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.3);border-radius:10px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px">
+      <span style="font-size:18px">⛳</span>
+      <div>
+        <div style="font-size:13px;font-weight:600;color:#8a6a1a">This is a live demo</div>
+        <div style="font-size:11px;color:#8a6a1a;margin-top:1px">Tap any name to explore — no sign up needed</div>
+      </div>
+    </div>
+    <!-- Name grid -->
     <div id="login-name-section">
       <input type="text" id="login-search" placeholder="Search your name…" oninput="filterLoginNames(this.value)" autocomplete="off"
         style="width:100%;height:40px;border-radius:10px;border:1px solid #e0d8c8;background:white;padding:0 12px;font-size:14px;color:#1a1510;font-family:'DM Sans',sans-serif;margin-bottom:10px;outline:none" />
       <div id="login-name-grid" style="overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch;overscroll-behavior:contain"></div>
       <div style="height:8px"></div>
-      <button class="login-view-btn" onclick="loginAsViewer()">View only (no login)</button>
+      <button class="login-view-btn" onclick="loginAsViewer()">Browse without logging in</button>
       <div style="height:6px"></div>
-      <button class="login-admin-btn" onclick="showAdminLoginFromScreen()">Admin login</button>
-    </div>
-    <!-- PIN phase -->
-    <div id="login-pin-section" style="display:none">
-      <div class="login-pin-avatar" id="login-pin-avatar">??</div>
-      <div class="login-pin-greeting" id="login-pin-greeting">Welcome!</div>
-      <div style="font-size:11px;color:#9a9080;text-align:center;margin-bottom:14px">Enter your PIN</div>
-      <!-- PIN dots -->
-      <div style="display:flex;gap:14px;justify-content:center;margin-bottom:18px">
-        <div class="pin-dot" id="pd1"></div>
-        <div class="pin-dot" id="pd2"></div>
-        <div class="pin-dot" id="pd3"></div>
-        <div class="pin-dot" id="pd4"></div>
-      </div>
-      <div id="login-pin-error" style="color:#A32D2D;font-size:12px;text-align:center;margin-bottom:8px;display:none">Incorrect PIN — try 1234 if first time</div>
-      <!-- Numpad -->
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
-        <button class="num-key" ontouchstart="event.preventDefault();numKey(1)" onclick="numKey(1)">1</button>
-        <button class="num-key" ontouchstart="event.preventDefault();numKey(2)" onclick="numKey(2)">2</button>
-        <button class="num-key" ontouchstart="event.preventDefault();numKey(3)" onclick="numKey(3)">3</button>
-        <button class="num-key" ontouchstart="event.preventDefault();numKey(4)" onclick="numKey(4)">4</button>
-        <button class="num-key" ontouchstart="event.preventDefault();numKey(5)" onclick="numKey(5)">5</button>
-        <button class="num-key" ontouchstart="event.preventDefault();numKey(6)" onclick="numKey(6)">6</button>
-        <button class="num-key" ontouchstart="event.preventDefault();numKey(7)" onclick="numKey(7)">7</button>
-        <button class="num-key" ontouchstart="event.preventDefault();numKey(8)" onclick="numKey(8)">8</button>
-        <button class="num-key" ontouchstart="event.preventDefault();numKey(9)" onclick="numKey(9)">9</button>
-        <button class="num-key num-del" ontouchstart="event.preventDefault();numKey('del')" onclick="numKey('del')">⌫</button>
-        <button class="num-key" ontouchstart="event.preventDefault();numKey(0)" onclick="numKey(0)">0</button>
-        <button class="num-key num-go" ontouchstart="event.preventDefault();submitPin()" onclick="submitPin()">Login</button>
-      </div>
-      <div style="text-align:center;margin-top:12px">
-        <button onclick="backToNames()" style="font-size:12px;color:#9a9080;background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif">← Back</button>
-      </div>
+      <button class="login-admin-btn" onclick="showAdminLoginFromScreen()">👤 Try the admin view</button>
     </div>
   </div>
+</div>
+<!-- DEMO STRIP -->
+<div id="demo-strip" style="background:#0a1628;border-bottom:1px solid rgba(201,168,76,0.25);padding:6px 1rem;display:flex;align-items:center;justify-content:space-between;gap:10px;position:sticky;top:0;z-index:51">
+  <span style="font-size:11px;color:rgba(255,255,255,0.5)">⛳ <strong style="color:#C9A84C">GolfSoc Demo</strong> — explore freely</span>
+  <a href="https://golfsoc.ie" target="_blank" style="font-size:11px;font-weight:600;color:#C9A84C;text-decoration:none;background:rgba(201,168,76,0.12);padding:4px 10px;border-radius:99px;border:1px solid rgba(201,168,76,0.25);white-space:nowrap">Get started →</a>
 </div>
 <div class="topbar">
   <img id="topbar-logo" src="icon-192.png" alt="logo" style="width:46px;height:46px;border-radius:10px;object-fit:cover;flex-shrink:0;">
@@ -506,7 +487,7 @@
   <span class="site-sub" id="topbar-season-label">2026 Season</span>
   <span class="conn-pill" id="conn-pill">Connecting…</span>
   <span id="topbar-user" style="font-size:12px;color:rgba(255,255,255,0.7);margin-left:4px"></span>
-  <button class="btn sm" id="btn-change-pin" onclick="showChangePin()" style="border-color:rgba(255,255,255,0.2);color:rgba(255,255,255,0.7);font-size:11px;padding:3px 8px;display:none">Change PIN</button>
+  <!-- PIN button hidden in demo -->
   <button class="btn sm" onclick="logout()" style="border-color:rgba(255,255,255,0.2);color:rgba(255,255,255,0.7);font-size:11px;padding:3px 8px">Log out</button>
 </div>
 
@@ -559,6 +540,15 @@
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2l1.5 3 3.5.5-2.5 2.5.5 3.5L8 10l-3 1.5.5-3.5L3 5.5l3.5-.5z"/></svg>
       2026 Knockout Competition
     </button>
+    <!-- GolfSoc CTA card -->
+    <div style="background:linear-gradient(135deg,#0a1628,#162338);border-radius:var(--radius-lg);padding:1.25rem;margin-bottom:1rem;display:flex;align-items:center;gap:14px;border:1px solid rgba(201,168,76,0.2)">
+      <div style="width:44px;height:44px;border-radius:10px;background:rgba(201,168,76,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:22px">⛳</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:15px;font-weight:700;color:white;margin-bottom:2px">Like what you see?</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.5)">Get your society set up in 48 hours</div>
+      </div>
+      <a href="https://golfsoc.ie" target="_blank" style="background:#C9A84C;color:#0a1628;font-size:13px;font-weight:700;padding:9px 14px;border-radius:8px;text-decoration:none;white-space:nowrap;flex-shrink:0">Get started →</a>
+    </div>
     <div id="noticeboard-feed"><div class="empty" style="padding:3rem">Loading updates…</div></div>
   </div>
 
@@ -725,14 +715,18 @@
 <div class="modal-overlay" id="admin-modal" onclick="maybeCloseAdminModal(event)">
   <div class="modal" style="max-width:340px">
     <div class="modal-hdr">
-      <span class="modal-title">Admin login</span>
+      <span class="modal-title">Admin view</span>
       <button class="btn sm" onclick="closeAdminModal()">Close</button>
+    </div>
+    <div style="background:var(--gold-light);border:1px solid var(--amber);border-radius:var(--radius);padding:12px 14px;margin-bottom:14px;font-size:13px;color:#8a6a1a">
+      <strong>Demo password:</strong> admin2026<br>
+      <span style="font-size:11px;font-weight:400;opacity:0.8">In your own society, you set your own password.</span>
     </div>
     <div class="form-group" style="margin-bottom:12px">
       <label>Password</label>
-      <input type="password" id="admin-pw-input" placeholder="Enter password" onkeydown="if(event.key==='Enter')checkAdminPw()" />
+      <input type="password" id="admin-pw-input" placeholder="admin2026" onkeydown="if(event.key==='Enter')checkAdminPw()" />
     </div>
-    <button class="btn primary" onclick="checkAdminPw()" style="width:100%">Login</button>
+    <button class="btn primary" onclick="checkAdminPw()" style="width:100%">Login as admin</button>
     <div id="admin-pw-error" style="color:#A32D2D;font-size:12px;margin-top:8px;display:none">Incorrect password</div>
   </div>
 </div>
@@ -3711,21 +3705,16 @@ let selectedPlayerId = null;
 let pinBuffer = '';
 
 function selectPlayer(pid) {
-  selectedPlayerId = pid;
+  // Demo mode — instant login, no PIN required
   const p = db.players.find(x=>x.id===pid);
   if (!p) return;
-  pinBuffer = '';
-  updatePinDots();
-  document.getElementById('login-name-section').style.display = 'none';
-  document.getElementById('login-pin-section').style.display = 'block';
-  const avEl = document.getElementById('login-pin-avatar');
-  if (p.avatar_url) {
-    avEl.innerHTML = `<img src="${p.avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.parentElement.textContent='${initials(p.name)}'" />`;
-  } else {
-    avEl.textContent = initials(p.name);
-  }
-  document.getElementById('login-pin-greeting').textContent = `Welcome, ${p.name.split(' ')[0]}`;
-  document.getElementById('login-pin-error').style.display = 'none';
+  const role = p.is_admin ? 'admin' : 'member';
+  currentUser = { role, playerId: p.id, name: p.name };
+  isAdmin = role === 'admin';
+  storeSession(currentUser);
+  hideLoginScreen();
+  updateUIForRole();
+  toast(`Welcome ${p.name.split(' ')[0]}!`, 'success');
 }
 
 function numKey(val) {
