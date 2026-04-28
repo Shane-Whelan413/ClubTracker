@@ -2079,7 +2079,7 @@ function renderSchedule() {
   const today = `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;
 
   // Only show actual events from the database — sorted by date
-  const events = [...db.events].filter(e=>e.event_type==='outing_18').sort((a,b)=>a.event_date.localeCompare(b.event_date));
+  const events = [...db.events].sort((a,b)=>a.event_date.localeCompare(b.event_date));
 
   if (!events.length) {
     document.getElementById('schedule-table').innerHTML = '<div class="empty">No events scheduled yet</div>';
