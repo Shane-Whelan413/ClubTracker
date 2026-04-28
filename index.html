@@ -2079,7 +2079,7 @@ function renderSchedule() {
   const today = `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;
 
   // Only show actual events from the database — sorted by date
-  const events = [...db.events].sort((a,b)=>a.event_date.localeCompare(b.event_date));
+  const events = [...db.events].filter(e=>e.event_type==='outing_18').sort((a,b)=>a.event_date.localeCompare(b.event_date));
 
   if (!events.length) {
     document.getElementById('schedule-table').innerHTML = '<div class="empty">No events scheduled yet</div>';
@@ -2153,9 +2153,9 @@ function renderSchedule() {
   document.getElementById('schedule-table').innerHTML = `
     ${countdownHtml}
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.25rem">
-      <span class="badge gray">${events.length} total events</span>
+      <span class="badge gray">${events.length} outings in season</span>
       <span class="badge green">${completed} completed</span>
-      <span class="badge purple">${upcoming} upcoming</span>
+      <span class="badge purple">${upcoming} to come</span>
     </div>
     ${rows}`;
 }
@@ -3970,17 +3970,37 @@ async function init() {
 
 buildEventSIInputs(9);
 
-// Pre-load Stepaside if no courses saved yet
+// Pre-load demo courses
 if (getSavedCourses().length === 0) {
-  setSavedCourses([{
-    name: 'Stepaside',
-    cr: 35, slope: 113, par: 35,
-    wcr: 35, wslope: 113, wpar: 36,
-    pars:  [4,5,4,4,4,4,3,3,4],
-    wpars: [4,5,4,4,5,4,3,3,4],
-    si:    [5,2,9,8,1,3,6,7,4],
-    wsi:   [4,1,8,7,5,2,6,9,3]
-  }]);
+  setSavedCourses([
+    {
+      name: 'Portmarnock Golf Club',
+      cr: 71.2, slope: 130, par: 72,
+      wcr: 72.5, wslope: 133, wpar: 72,
+      pars:  [4,4,3,5,4,4,3,4,5, 4,4,3,5,4,4,3,4,4],
+      wpars: [4,4,3,5,4,4,3,4,5, 4,4,3,5,4,4,3,4,4],
+      si:    [7,3,17,1,13,5,15,9,11, 8,4,18,2,12,6,16,10,14],
+      wsi:   [7,3,17,1,13,5,15,9,11, 8,4,18,2,12,6,16,10,14]
+    },
+    {
+      name: 'Royal Dublin Golf Club',
+      cr: 70.8, slope: 128, par: 72,
+      wcr: 72.0, wslope: 131, wpar: 72,
+      pars:  [4,3,4,5,4,4,3,4,5, 4,4,3,4,5,4,3,5,4],
+      wpars: [4,3,4,5,4,4,3,4,5, 4,4,3,4,5,4,3,5,4],
+      si:    [9,17,5,1,13,3,15,7,11, 10,6,18,2,14,4,16,8,12],
+      wsi:   [9,17,5,1,13,3,15,7,11, 10,6,18,2,14,4,16,8,12]
+    },
+    {
+      name: 'The K Club',
+      cr: 72.1, slope: 135, par: 72,
+      wcr: 73.5, wslope: 138, wpar: 72,
+      pars:  [4,4,3,5,4,4,3,4,5, 4,4,3,5,4,4,3,4,4],
+      wpars: [4,4,3,5,4,4,3,4,5, 4,4,3,5,4,4,3,4,4],
+      si:    [5,13,17,1,11,3,15,9,7, 6,14,18,2,12,4,16,10,8],
+      wsi:   [5,13,17,1,11,3,15,9,7, 6,14,18,2,12,4,16,10,8]
+    }
+  ]);
 }
 renderSavedCourseDropdown();
 
