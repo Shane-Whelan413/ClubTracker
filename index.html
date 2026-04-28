@@ -3657,12 +3657,9 @@ function hideLoginScreen() {
 }
 
 function renderLoginNames() {
-  document.getElementById('login-pin-section').style.display = 'none';
   document.getElementById('login-name-section').style.display = 'block';
   const searchEl = document.getElementById('login-search');
   if (searchEl) searchEl.value = '';
-  pinBuffer = '';
-  updatePinDots();
   buildLoginNameList(db.players);
 }
 
@@ -3735,10 +3732,7 @@ function updatePinDots() {
 }
 
 function backToNames() {
-  document.getElementById('login-pin-section').style.display = 'none';
   document.getElementById('login-name-section').style.display = 'block';
-  pinBuffer = '';
-  updatePinDots();
 }
 
 function submitPin() {
@@ -3798,7 +3792,7 @@ function updateUIForRole() {
   if (addPlayerCard) addPlayerCard.style.display = isAdmin ? '' : 'none';
   const createEventCard = document.getElementById('create-event-card');
   if (createEventCard) createEventCard.style.display = isAdmin ? '' : 'none';
-  if (pinBtn) pinBtn.style.display = (role === 'member' || role === 'admin') && currentUser.playerId ? '' : 'none';
+  // PIN button removed in demo mode
 
   // FAB — grey out for viewers only
   const fab = document.getElementById('fab-add-btn');
