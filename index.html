@@ -8,123 +8,50 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" id="theme-color-meta" content="#0a1628">
 <title id="app-title">GolfSoc</title>
-<link id="app-icon" rel="apple-touch-icon" href="icon-192.png">
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Serif+Display&display=swap" rel="stylesheet">
 <style>
-/* ── CSS Variables — overridden at runtime from society settings ── */
+/* ── Variables ── */
 :root {
-  --primary:        #0a1628;
-  --primary-light:  #162338;
-  --accent:         #C9A84C;
-  --accent-light:   #fef8e6;
-  --accent-dark:    #9a7000;
-  --green:          #16a34a;
-  --red:            #dc2626;
-  --bg:             #f8f5ee;
-  --surface:        #ffffff;
-  --border:         #e8e4de;
-  --border-strong:  #c8c4be;
-  --text:           #1a1510;
-  --text-2:         #444441;
-  --text-3:         #888780;
-  --radius:         10px;
-  --radius-lg:      14px;
-  --safe-top:       env(safe-area-inset-top, 0px);
+  --primary:      #0a1628;
+  --accent:       #C9A84C;
+  --accent-dark:  #9a7000;
+  --accent-light: #fef8e6;
+  --bg:           #f8f5ee;
+  --surface:      #fffef9;
+  --border:       rgba(0,0,0,0.09);
+  --border-strong:rgba(0,0,0,0.16);
+  --text:         #1a1510;
+  --text-2:       #5a5040;
+  --text-3:       #9a9080;
+  --green:        #16a34a;
+  --red:          #dc2626;
+  --radius:       10px;
+  --radius-lg:    14px;
 }
 
+/* ── Reset — exact BHGS ── */
 * { box-sizing: border-box; margin: 0; padding: 0; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 html { height: 100%; overflow: hidden; overscroll-behavior: none; }
 body { height: 100%; overflow: hidden; overscroll-behavior: none; position: relative; font-family: 'DM Sans', sans-serif; color: var(--text); background: var(--bg); }
 
-/* ── Splash / Loading ── */
-#splash {
-  position: fixed; inset: 0; background: var(--primary);
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  z-index: 1000; transition: opacity 0.4s;
-  padding-top: env(safe-area-inset-top, 0px);
-}
-#splash.out { opacity: 0; pointer-events: none; }
-.splash-logo { width: 80px; height: 80px; border-radius: 20px; background: var(--accent); display: flex; align-items: center; justify-content: center; margin-bottom: 20px; overflow: hidden; }
-.splash-logo img { width: 100%; height: 100%; object-fit: cover; }
-.splash-logo-text { font-size: 28px; font-weight: 800; color: var(--primary); font-family: 'DM Serif Display', serif; }
-.splash-name { font-family: 'DM Serif Display', serif; font-size: 24px; color: white; margin-bottom: 6px; }
-.splash-sub { font-size: 13px; color: rgba(255,255,255,0.45); }
-.splash-spinner { width: 28px; height: 28px; border: 2px solid rgba(255,255,255,0.15); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin-top: 40px; }
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* ── Auth Screen ── */
-#auth-screen {
-  position: fixed; inset: 0; background: var(--primary);
-  display: none; flex-direction: column; overflow-y: auto;
-  padding: calc(env(safe-area-inset-top, 0px) + 40px) 24px calc(env(safe-area-inset-bottom, 0px) + 24px);
-}
-#auth-screen.active { display: flex; }
-.auth-logo { width: 72px; height: 72px; border-radius: 18px; background: var(--accent); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; overflow: hidden; }
-.auth-logo img { width: 100%; height: 100%; object-fit: cover; }
-.auth-title { font-family: 'DM Serif Display', serif; font-size: 26px; color: white; text-align: center; margin-bottom: 4px; }
-.auth-sub { font-size: 13px; color: rgba(255,255,255,0.45); text-align: center; margin-bottom: 36px; }
-.auth-tabs { display: flex; background: rgba(255,255,255,0.08); border-radius: 99px; padding: 3px; margin-bottom: 24px; }
-.auth-tab { flex: 1; padding: 9px; border-radius: 99px; border: none; font-size: 13px; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.15s; }
-.auth-tab.on { background: var(--accent); color: var(--primary); }
-.auth-tab.off { background: transparent; color: rgba(255,255,255,0.5); }
-.auth-field { margin-bottom: 14px; }
-.auth-label { font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; display: block; }
-.auth-input { width: 100%; padding: 13px 14px; border-radius: var(--radius); border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.07); color: white; font-size: 15px; font-family: 'DM Sans', sans-serif; outline: none; transition: border-color 0.15s; }
-.auth-input:focus { border-color: var(--accent); }
-.auth-input::placeholder { color: rgba(255,255,255,0.25); }
-.auth-btn { width: 100%; padding: 14px; border-radius: var(--radius); border: none; background: var(--accent); color: var(--primary); font-size: 15px; font-weight: 700; font-family: 'DM Sans', sans-serif; cursor: pointer; margin-top: 8px; transition: opacity 0.15s; }
-.auth-btn:active { opacity: 0.85; }
-.auth-btn.loading { opacity: 0.6; pointer-events: none; }
-.auth-err { font-size: 12px; color: #fca5a5; text-align: center; margin-top: 10px; display: none; }
-.auth-err.show { display: block; }
-.auth-forgot { font-size: 12px; color: rgba(255,255,255,0.4); text-align: center; margin-top: 14px; cursor: pointer; }
-.auth-forgot:hover { color: var(--accent); }
-.auth-divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; }
-.auth-divider-line { flex: 1; height: 1px; background: rgba(255,255,255,0.1); }
-.auth-divider-text { font-size: 11px; color: rgba(255,255,255,0.3); }
-
-/* ── App Shell ── */
-#app { display: none; height: 100%; flex-direction: column; }
-#app.active { display: flex; }
-
-/* Topbar */
+/* ── Topbar — exact BHGS padding ── */
 .topbar {
   background: var(--primary);
-  border-bottom: 1px solid rgba(255,255,255,0.08);
+  border-bottom: 1px solid rgba(201,168,76,0.15);
   padding: env(safe-area-inset-top, 0px) 1.25rem 0;
   padding-left: max(1.25rem, env(safe-area-inset-left));
   padding-right: max(1.25rem, env(safe-area-inset-right));
-  display: flex; align-items: center; gap: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   min-height: 56px;
   height: calc(56px + env(safe-area-inset-top, 0px));
-  position: sticky; top: 0; z-index: 50;
-  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 50;
 }
-.topbar-logo { width: 32px; height: 32px; border-radius: 8px; background: var(--accent); display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
-.topbar-logo img { width: 100%; height: 100%; object-fit: cover; }
-.topbar-logo-text { font-size: 11px; font-weight: 800; color: var(--primary); }
-.topbar-name { font-family: 'DM Serif Display', serif; font-size: 17px; color: white; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.topbar-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-.topbar-btn { background: rgba(255,255,255,0.08); border: none; border-radius: 8px; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: white; }
-.conn-pill { font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 99px; background: rgba(201,168,76,0.2); color: var(--accent); }
-.conn-pill.ok { background: rgba(22,163,74,0.2); color: #4ade80; }
-.conn-pill.err { background: rgba(220,38,38,0.2); color: #fca5a5; }
 
-/* Content area */
-.content {
-  padding: 1.5rem 1.5rem 140px;
-  overflow-x: hidden;
-  height: calc(100vh - calc(56px + env(safe-area-inset-top, 0px)));
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
-}
-.section { display: none; }
-.section.active { display: block; animation: fadeUp 0.2s ease; }
-@keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-
-/* Bottom nav — matches BHGS exactly */
+/* ── Nav — exact BHGS ── */
 .nav {
   position: fixed;
   bottom: 0; left: 0; right: 0;
@@ -143,76 +70,213 @@ body { height: 100%; overflow: hidden; overscroll-behavior: none; position: rela
   gap: 3px; padding: 10px 2px 8px;
   border: none; background: transparent; cursor: pointer;
   font-family: 'DM Sans', sans-serif;
+  font-size: 10px; font-weight: 500;
   color: rgba(255,255,255,0.4);
   transition: color 0.15s; min-width: 0; position: relative;
 }
 .nav-icon {
   width: 24px; height: 24px; border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
-  transition: background 0.15s; flex-shrink: 0;
+  transition: background 0.15s;
 }
 .nav-icon svg { width: 20px; height: 20px; stroke: currentColor; stroke-width: 1.6; fill: none; stroke-linecap: round; stroke-linejoin: round; }
 .nav-btn.active { color: var(--accent); }
 .nav-btn.active .nav-icon { background: rgba(201,168,76,0.15); }
-.nav-label { font-size: 10px; font-weight: 500; }
-.nav-indicator { position: absolute; top: 6px; right: 2px; width: 16px; height: 16px; border-radius: 50%; background: #E24B4A; color: white; font-size: 9px; font-weight: 700; display: none; align-items: center; justify-content: center; }
-.nav-indicator.show { display: flex; }
+.nav-badge { position: absolute; top: 6px; right: 2px; width: 16px; height: 16px; border-radius: 50%; background: #E24B4A; color: white; font-size: 9px; font-weight: 700; display: none; align-items: center; justify-content: center; }
+.nav-badge.show { display: flex; }
 
-/* ── Shared Components ── */
+/* ── Content — exact BHGS ── */
+.content {
+  padding: 1.5rem 1.5rem 140px;
+  overflow-x: hidden;
+  height: calc(100vh - calc(56px + env(safe-area-inset-top, 0px)));
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+.section { display: none; }
+.section.active { display: block; animation: fadeUp 0.2s ease; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+/* ── Splash ── */
+#splash {
+  position: fixed; inset: 0; z-index: 1000;
+  background: var(--primary);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  transition: opacity 0.4s;
+  padding-top: env(safe-area-inset-top, 0px);
+}
+#splash.out { opacity: 0; pointer-events: none; }
+.splash-logo { width: 80px; height: 80px; border-radius: 20px; background: var(--accent); display: flex; align-items: center; justify-content: center; margin-bottom: 20px; overflow: hidden; }
+.splash-logo img { width: 100%; height: 100%; object-fit: cover; }
+.splash-name { font-family: 'DM Serif Display', serif; font-size: 24px; color: white; margin-bottom: 6px; }
+.splash-sub { font-size: 13px; color: rgba(255,255,255,0.4); }
+.splash-spinner { width: 28px; height: 28px; border: 2px solid rgba(255,255,255,0.15); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin-top: 40px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+#splash-escape { display:none; margin-top:24px; padding:10px 20px; border:1px solid rgba(255,255,255,0.2); border-radius:99px; font-size:13px; font-weight:600; color:rgba(255,255,255,0.5); cursor:pointer; }
+
+/* ── Auth screen ── */
+#auth-screen {
+  position: fixed; inset: 0; z-index: 100;
+  background: var(--primary);
+  display: none; flex-direction: column;
+  overflow-y: auto;
+  padding: calc(env(safe-area-inset-top, 0px) + 48px) 24px calc(env(safe-area-inset-bottom, 0px) + 32px);
+}
+#auth-screen.active { display: flex; }
+.auth-logo { width: 72px; height: 72px; border-radius: 18px; background: var(--accent); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; overflow: hidden; }
+.auth-logo img { width: 100%; height: 100%; object-fit: cover; }
+.auth-logo-text { font-family: 'DM Serif Display', serif; font-size: 22px; font-weight: 700; color: var(--primary); }
+.auth-title { font-family: 'DM Serif Display', serif; font-size: 26px; color: white; text-align: center; margin-bottom: 4px; }
+.auth-sub { font-size: 13px; color: rgba(255,255,255,0.4); text-align: center; margin-bottom: 32px; }
+.auth-tabs { display: flex; background: rgba(255,255,255,0.08); border-radius: 99px; padding: 3px; margin-bottom: 24px; }
+.auth-tab { flex: 1; padding: 9px; border-radius: 99px; border: none; font-size: 13px; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.15s; }
+.auth-tab.on { background: var(--accent); color: var(--primary); }
+.auth-tab.off { background: transparent; color: rgba(255,255,255,0.4); }
+.auth-label { font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; display: block; }
+.auth-input { width: 100%; padding: 13px 14px; border-radius: var(--radius); border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.07); color: white; font-size: 15px; font-family: 'DM Sans', sans-serif; outline: none; transition: border-color 0.15s; margin-bottom: 12px; }
+.auth-input:focus { border-color: var(--accent); }
+.auth-input::placeholder { color: rgba(255,255,255,0.2); }
+.auth-btn { width: 100%; padding: 14px; border-radius: var(--radius); border: none; background: var(--accent); color: var(--primary); font-size: 15px; font-weight: 700; font-family: 'DM Sans', sans-serif; cursor: pointer; margin-top: 4px; }
+.auth-btn.loading { opacity: 0.6; pointer-events: none; }
+.auth-err { font-size: 12px; color: #fca5a5; text-align: center; margin-top: 10px; display: none; }
+.auth-err.show { display: block; }
+.auth-forgot { font-size: 12px; color: rgba(255,255,255,0.35); text-align: center; margin-top: 14px; cursor: pointer; }
+.auth-note { font-size: 11px; color: rgba(255,255,255,0.25); margin-bottom: 8px; display: block; }
+
+/* ── Setup Wizard ── */
+#setup-wizard { display: none; position: fixed; inset: 0; z-index: 100; background: var(--primary); overflow-y: auto; padding: calc(env(safe-area-inset-top, 0px) + 24px) 24px calc(env(safe-area-inset-bottom, 0px) + 24px); }
+.wiz-step { display: none; }
+.wiz-step.active { display: block; }
+.wiz-progress { display: flex; gap: 6px; margin-bottom: 28px; }
+.wiz-dot { flex: 1; height: 3px; border-radius: 99px; background: rgba(255,255,255,0.15); transition: background 0.3s; }
+.wiz-dot.done { background: var(--accent); }
+.wiz-title { font-family: 'DM Serif Display', serif; font-size: 24px; color: white; margin-bottom: 6px; }
+.wiz-sub { font-size: 13px; color: rgba(255,255,255,0.45); margin-bottom: 24px; }
+.wiz-btn { width: 100%; padding: 14px; border-radius: var(--radius); border: none; background: var(--accent); color: var(--primary); font-size: 15px; font-weight: 700; font-family: 'DM Sans', sans-serif; cursor: pointer; margin-top: 8px; }
+.wiz-btn-back { width: 100%; padding: 13px; border-radius: var(--radius); border: 1px solid rgba(255,255,255,0.15); background: transparent; color: rgba(255,255,255,0.5); font-size: 14px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; margin-top: 8px; }
+.wiz-field { margin-bottom: 16px; }
+.wiz-option { padding: 14px; border-radius: var(--radius); border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); cursor: pointer; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
+.wiz-option.selected { border-color: var(--accent); background: rgba(201,168,76,0.08); }
+.wiz-option-title { font-size: 13px; font-weight: 600; color: white; }
+.wiz-option-sub { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 2px; }
+.wiz-check { color: var(--accent); font-size: 18px; display: none; }
+.wiz-option.selected .wiz-check { display: block; }
+.theme-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 8px; }
+.theme-opt { border-radius: var(--radius); overflow: hidden; border: 2px solid transparent; cursor: pointer; }
+.theme-opt.selected { border-color: var(--accent); }
+.theme-preview { height: 44px; display: flex; }
+.theme-label { font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.6); text-align: center; padding: 5px 0 4px; background: rgba(255,255,255,0.05); }
+.logo-drop { border: 2px dashed rgba(255,255,255,0.2); border-radius: var(--radius-lg); padding: 32px; text-align: center; cursor: pointer; margin-bottom: 8px; }
+.logo-drop:hover { border-color: var(--accent); }
+.logo-drop input { display: none; }
+
+/* ── App shell ── */
+#app { display: none; }
+#app.active { display: block; }
+
+/* ── Shared components ── */
+.topbar-logo { width: 32px; height: 32px; border-radius: 8px; background: var(--accent); display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
+.topbar-logo img { width: 100%; height: 100%; object-fit: cover; }
+.topbar-logo-text { font-size: 11px; font-weight: 800; color: var(--primary); }
+.topbar-name { font-family: 'DM Serif Display', serif; font-size: 17px; color: white; flex: 1; }
+.conn-pill { font-size: 11px; font-weight: 500; padding: 4px 10px; border-radius: 99px; background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); white-space: nowrap; flex-shrink: 0; }
+.conn-pill.ok { background: rgba(45,122,79,0.2); color: #6ee7b7; }
+.conn-pill.err { background: rgba(163,45,45,0.2); color: #fca5a5; }
+
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 10px; }
-.card-header { background: var(--primary); padding: 14px 16px; display: flex; align-items: center; gap: 12px; position: relative; }
-.card-header::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--accent-dark), var(--accent), #e8c04a, var(--accent), var(--accent-dark)); }
-.card-body { padding: 14px 16px; }
-.card-title { font-family: 'DM Serif Display', serif; font-size: 17px; color: white; }
-.card-sub { font-size: 11px; color: rgba(255,255,255,0.45); margin-top: 2px; }
+.card-navy { background: var(--primary); }
 
+.btn { padding: 10px 16px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: 13px; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer; }
+.btn.primary { background: var(--primary); border-color: var(--primary); color: white; }
+.btn.accent { background: var(--accent); border-color: var(--accent); color: var(--primary); }
+.btn.danger { background: #FCEBEB; border-color: #F7C1C1; color: var(--red); }
+.btn.sm { padding: 6px 12px; font-size: 12px; }
+.btn.full { width: 100%; }
+
+.empty { text-align: center; padding: 3rem 1rem; }
+.empty-icon { font-size: 40px; margin-bottom: 12px; }
+.empty-title { font-size: 15px; font-weight: 600; color: var(--text-2); margin-bottom: 6px; }
+.empty-sub { font-size: 13px; color: var(--text-3); }
+
+.field { margin-bottom: 14px; }
+.field label { font-size: 12px; font-weight: 600; color: var(--text-2); display: block; margin-bottom: 6px; }
+.field input, .field select, .field textarea { width: 100%; padding: 11px 12px; border-radius: var(--radius); border: 1px solid var(--border-strong); background: var(--bg); color: var(--text); font-size: 14px; font-family: 'DM Sans', sans-serif; outline: none; }
+.field input:focus, .field select:focus { border-color: var(--primary); }
+
+.tag { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 99px; }
+.tag-blue { background: #edf2fa; color: #1a3c6e; }
+.tag-purple { background: #EEEDFE; color: #3C3489; }
+.tag-gold { background: var(--accent-light); color: var(--accent-dark); }
+
+.skeleton { border-radius: 6px; background: #e8e4de; animation: skPulse 1.4s ease infinite; }
+@keyframes skPulse { 0%,100%{opacity:.6} 50%{opacity:1} }
+
+/* Stats bar */
 .stat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 6px; margin-bottom: 12px; }
 .stat-tile { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 6px; text-align: center; }
 .stat-tile.rank-1 { background: var(--primary); border-color: var(--primary); }
 .stat-tile.rank-2 { background: #3a3a3a; border-color: #3a3a3a; }
 .stat-tile.rank-3 { background: #4a1e00; border-color: #4a1e00; }
 .stat-label { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--text-3); margin-bottom: 3px; }
-.stat-tile.rank-1 .stat-label, .stat-tile.rank-2 .stat-label, .stat-tile.rank-3 .stat-label { color: rgba(255,255,255,0.5); }
+.stat-tile.rank-1 .stat-label, .stat-tile.rank-2 .stat-label, .stat-tile.rank-3 .stat-label { color: rgba(255,255,255,0.45); }
 .stat-val { font-size: 20px; font-weight: 800; color: var(--text); line-height: 1; }
 .stat-tile.rank-1 .stat-val { color: var(--accent); }
 .stat-tile.rank-2 .stat-val { color: #c0c0c0; }
 .stat-tile.rank-3 .stat-val { color: #c07840; }
 
-.btn { padding: 10px 16px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: 13px; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: opacity 0.15s; }
-.btn:active { opacity: 0.7; }
-.btn.primary { background: var(--primary); border-color: var(--primary); color: white; }
-.btn.accent { background: var(--accent); border-color: var(--accent); color: var(--primary); }
-.btn.danger { background: #FCEBEB; border-color: #F7C1C1; color: var(--red); }
-.btn.sm { padding: 6px 12px; font-size: 12px; }
-.btn.full { width: 100%; }
-.btn.loading { opacity: 0.6; pointer-events: none; }
+/* Leaderboard */
+.lb-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 12px; display: flex; align-items: center; gap: 10px; margin-bottom: 6px; border-left-width: 3px; cursor: pointer; }
+.lb-card-gold { background: #fef8e6 !important; border-color: #ddc050 !important; border-left-color: #B8860B !important; }
+.lb-card-silver { background: #f5f5f5 !important; border-color: #bebebe !important; border-left-color: #888 !important; }
+.lb-card-bronze { background: #fdf3ee !important; border-color: #c8855a !important; border-left-color: #8B4513 !important; }
+.lb-wrap { overflow: hidden; border-radius: var(--radius); margin-bottom: 6px; }
+.lb-wrap .lb-card { margin-bottom: 0; }
+.lb-name { font-size: 14px; font-weight: 500; color: var(--text); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lb-sub { font-size: 11px; color: var(--text-3); }
+.lb-pts { font-size: 20px; font-weight: 700; flex-shrink: 0; }
+.lb-filters { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+.lb-filter { padding: 5px 12px; border-radius: 99px; border: 1px solid var(--border-strong); background: var(--bg); color: var(--text-2); font-size: 12px; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer; }
+.lb-filter.active { background: var(--primary); border-color: var(--primary); color: var(--accent); }
 
-.empty { text-align: center; padding: 3rem 1rem; color: var(--text-3); }
-.empty-icon { font-size: 40px; margin-bottom: 12px; }
-.empty-title { font-size: 15px; font-weight: 600; color: var(--text-2); margin-bottom: 6px; }
-.empty-text { font-size: 13px; }
+/* Avatar */
+.avatar { border-radius: 50%; background: var(--primary); color: var(--accent); font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 
-.tag { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 99px; }
-.tag-blue { background: #edf2fa; color: #1a3c6e; }
-.tag-purple { background: #EEEDFE; color: #3C3489; }
-.tag-green { background: rgba(22,163,74,0.1); color: var(--green); }
-.tag-gold { background: var(--accent-light); color: var(--accent-dark); }
+/* Event card */
+.event-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 10px; }
+.ev-date { background: var(--primary); border-radius: 8px; padding: 8px 10px; text-align: center; flex-shrink: 0; min-width: 42px; }
+.ev-day { font-size: 18px; font-weight: 800; color: white; line-height: 1; }
+.ev-month { font-size: 9px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: .06em; }
 
-input, textarea, select { font-family: 'DM Sans', sans-serif; }
-input[type=text], input[type=email], input[type=password], input[type=number], textarea, select {
-  width: 100%; padding: 11px 12px; border-radius: var(--radius); border: 1px solid var(--border-strong);
-  background: var(--bg); color: var(--text); font-size: 14px; outline: none; transition: border-color 0.15s;
-}
-input:focus, textarea:focus, select:focus { border-color: var(--primary); }
+/* Profile hero */
+.profile-hero { background: var(--primary); border-radius: var(--radius-lg); padding: 20px 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 16px; position: relative; overflow: hidden; }
+.profile-hero::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--accent-dark), var(--accent), #e8c04a, var(--accent), var(--accent-dark)); }
 
-label { font-size: 12px; font-weight: 600; color: var(--text-2); display: block; margin-bottom: 6px; }
-.field { margin-bottom: 14px; }
-
-/* Toast */
-#toast { position: fixed; bottom: calc(80px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%) translateY(20px); background: var(--primary); color: white; font-size: 13px; font-weight: 500; padding: 10px 18px; border-radius: 99px; opacity: 0; transition: all 0.25s; pointer-events: none; white-space: nowrap; z-index: 500; max-width: 90vw; }
-#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-#toast.success { background: #15803d; }
-#toast.error { background: var(--red); }
+/* Settings */
+.settings-section { margin-bottom: 24px; }
+.settings-section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--text-3); margin-bottom: 8px; padding: 0 2px; }
+.settings-row { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 13px 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 6px; cursor: pointer; }
+.settings-row-label { font-size: 14px; font-weight: 500; color: var(--text); }
+.settings-row-value { font-size: 13px; color: var(--text-3); display: flex; align-items: center; gap: 6px; }
+.colour-dot { width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--border); flex-shrink: 0; }
+.toggle-switch { position: relative; width: 44px; height: 26px; flex-shrink: 0; }
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.toggle-slider { position: absolute; inset: 0; background: var(--border-strong); border-radius: 99px; cursor: pointer; transition: 0.2s; }
+.toggle-slider::before { content: ''; position: absolute; width: 20px; height: 20px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.2s; }
+.toggle-switch input:checked + .toggle-slider { background: var(--green); }
+.toggle-switch input:checked + .toggle-slider::before { transform: translateX(18px); }
+.hcp-rule-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 0.5px solid var(--border); }
+.hcp-rule-row:last-child { border-bottom: none; }
+.hcp-rule-label { flex: 1; font-size: 13px; color: var(--text); }
+.hcp-rule-input { width: 72px; padding: 7px 10px; border-radius: 8px; border: 1px solid var(--border-strong); background: var(--bg); color: var(--text); font-size: 13px; font-weight: 600; text-align: center; font-family: 'DM Sans', sans-serif; }
+.colour-picker-wrap { display: flex; align-items: center; gap: 10px; }
+.colour-preview { width: 40px; height: 40px; border-radius: 8px; border: 1px solid var(--border); flex-shrink: 0; }
+input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; background: none; }
+.sub-pill { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 99px; }
+.sub-trial { background: rgba(201,168,76,0.15); color: var(--accent-dark); }
+.sub-active { background: rgba(22,163,74,0.1); color: var(--green); }
+.sub-expired { background: rgba(220,38,38,0.1); color: var(--red); }
+.admin-banner { background: var(--accent-light); border: 1px solid var(--accent); border-radius: var(--radius); padding: 10px 12px; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
 
 /* Modal */
 #modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; display: none; align-items: flex-end; }
@@ -225,112 +289,11 @@ label { font-size: 12px; font-weight: 600; color: var(--text-2); display: block;
 .modal-close { background: var(--bg); border: none; border-radius: 99px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; color: var(--text-3); }
 .modal-body { padding: 16px 20px; overflow-y: auto; flex: 1; }
 
-/* Skeleton */
-.skeleton { background: linear-gradient(90deg, var(--border) 25%, #f0ece5 50%, var(--border) 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 6px; }
-@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-
-/* Settings specific */
-.settings-section { margin-bottom: 24px; }
-.settings-section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--text-3); margin-bottom: 10px; padding: 0 2px; }
-.settings-row { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 13px 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 6px; cursor: pointer; }
-.settings-row-label { font-size: 14px; font-weight: 500; color: var(--text); }
-.settings-row-value { font-size: 13px; color: var(--text-3); display: flex; align-items: center; gap: 6px; }
-.colour-dot { width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--border); flex-shrink: 0; }
-.theme-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 16px; }
-.theme-option { border-radius: var(--radius); overflow: hidden; border: 2px solid transparent; cursor: pointer; transition: border-color 0.15s; }
-.theme-option.selected { border-color: var(--accent); }
-.theme-preview { height: 48px; display: flex; }
-.theme-preview-primary { flex: 2; }
-.theme-preview-accent { flex: 1; }
-.theme-label { font-size: 11px; font-weight: 600; color: var(--text-2); text-align: center; padding: 5px 0 4px; background: var(--surface); }
-.toggle-switch { position: relative; width: 44px; height: 26px; }
-.toggle-switch input { opacity: 0; width: 0; height: 0; }
-.toggle-slider { position: absolute; inset: 0; background: var(--border-strong); border-radius: 99px; cursor: pointer; transition: 0.2s; }
-.toggle-slider::before { content: ''; position: absolute; width: 20px; height: 20px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.2s; }
-.toggle-switch input:checked + .toggle-slider { background: var(--green); }
-.toggle-switch input:checked + .toggle-slider::before { transform: translateX(18px); }
-
-/* Leaderboard */
-.lb-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 12px; display: flex; align-items: center; gap: 10px; margin-bottom: 6px; cursor: pointer; border-left-width: 3px; }
-.lb-card-gold { background: #fef8e6 !important; border-color: #ddc050 !important; border-left-color: #B8860B !important; }
-.lb-card-silver { background: #f5f5f5 !important; border-color: #bebebe !important; border-left-color: #888 !important; }
-.lb-card-bronze { background: #fdf3ee !important; border-color: #c8855a !important; border-left-color: #8B4513 !important; }
-.lb-slide-wrap { overflow: hidden; border-radius: var(--radius); margin-bottom: 6px; }
-.lb-slide-wrap .lb-card { margin-bottom: 0; }
-.lb-name { font-size: 14px; font-weight: 500; color: var(--text); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.lb-sub { font-size: 11px; color: var(--text-3); }
-.lb-pts { font-size: 20px; font-weight: 700; flex-shrink: 0; }
-.lb-filter-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
-.lb-filter { padding: 5px 12px; border-radius: 99px; border: 1px solid var(--border-strong); background: var(--bg); color: var(--text-2); font-size: 12px; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer; }
-.lb-filter.active { background: var(--primary); border-color: var(--primary); color: var(--accent); }
-
-/* Avatar */
-.avatar { border-radius: 50%; background: var(--primary); color: var(--accent); font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 11px; }
-
-/* Schedule */
-.event-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 10px; }
-.event-card-header { display: flex; align-items: center; gap: 12px; padding: 12px 14px; cursor: pointer; }
-.event-date-block { background: var(--primary); border-radius: 8px; padding: 8px 10px; text-align: center; flex-shrink: 0; min-width: 44px; }
-.event-date-day { font-size: 18px; font-weight: 800; color: white; line-height: 1; }
-.event-date-month { font-size: 9px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: .06em; margin-top: 1px; }
-.event-info { flex: 1; min-width: 0; }
-.event-name { font-size: 14px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.event-meta { font-size: 11px; color: var(--text-3); margin-top: 2px; }
-
-/* Profile */
-.profile-hero { background: var(--primary); border-radius: var(--radius-lg); padding: 20px 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 16px; position: relative; overflow: hidden; }
-.profile-hero::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--accent-dark), var(--accent), #e8c04a, var(--accent), var(--accent-dark)); }
-.profile-avatar { width: 60px; height: 60px; font-size: 20px; }
-.profile-name { font-family: 'DM Serif Display', serif; font-size: 20px; color: white; }
-.profile-role { font-size: 11px; color: rgba(255,255,255,0.45); margin-top: 2px; }
-.profile-hcp { font-size: 28px; font-weight: 800; color: var(--accent); }
-.profile-hcp-label { font-size: 10px; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: .05em; }
-
-/* Admin banner */
-.admin-banner { background: var(--accent-light); border: 1px solid var(--accent); border-radius: var(--radius); padding: 10px 12px; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
-.admin-banner-text { font-size: 12px; font-weight: 600; color: var(--accent-dark); flex: 1; }
-
-/* Subscription pill */
-.sub-pill { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 99px; }
-.sub-trial { background: rgba(201,168,76,0.15); color: var(--accent-dark); }
-.sub-active { background: rgba(22,163,74,0.1); color: var(--green); }
-.sub-expired { background: rgba(220,38,38,0.1); color: var(--red); }
-
-/* Handicap rules editor */
-.hcp-rule-row { display: flex; align-items: center; gap:10px; padding: 10px 0; border-bottom: 0.5px solid var(--border); }
-.hcp-rule-row:last-child { border-bottom: none; }
-.hcp-rule-label { flex: 1; font-size: 13px; color: var(--text); }
-.hcp-rule-input { width: 72px; padding: 7px 10px; border-radius: 8px; border: 1px solid var(--border-strong); background: var(--bg); color: var(--text); font-size: 13px; font-weight: 600; text-align: center; }
-
-/* Colour picker */
-.colour-picker-wrap { display: flex; align-items: center; gap: 10px; }
-.colour-preview { width: 40px; height: 40px; border-radius: 8px; border: 1px solid var(--border); flex-shrink: 0; }
-input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; background: none; }
-
-/* Setup wizard */
-.wizard-step { display: none; }
-.wizard-step.active { display: block; }
-.wizard-progress { display: flex; gap: 6px; margin-bottom: 24px; }
-.wizard-dot { flex: 1; height: 3px; border-radius: 99px; background: var(--border); transition: background 0.3s; }
-.wizard-dot.done { background: var(--accent); }
-.wizard-title { font-family: 'DM Serif Display', serif; font-size: 22px; color: white; margin-bottom: 6px; }
-.wizard-sub { font-size: 13px; color: rgba(255,255,255,0.5); margin-bottom: 24px; }
-.logo-upload-zone { border: 2px dashed rgba(255,255,255,0.2); border-radius: var(--radius-lg); padding: 32px; text-align: center; cursor: pointer; transition: border-color 0.2s; }
-.logo-upload-zone:hover { border-color: var(--accent); }
-.logo-upload-zone input { display: none; }
-.logo-upload-icon { font-size: 36px; margin-bottom: 10px; }
-.logo-upload-text { font-size: 13px; color: rgba(255,255,255,0.45); }
-.logo-preview { width: 80px; height: 80px; border-radius: 16px; margin: 0 auto 10px; overflow: hidden; }
-.logo-preview img { width: 100%; height: 100%; object-fit: cover; }
-
-/* Responsive tweaks */
-@media (min-width: 480px) {
-  #app { max-width: 480px; margin: 0 auto; box-shadow: 0 0 60px rgba(0,0,0,0.15); }
-  #splash, #auth-screen, #modal-overlay, #toast { max-width: 480px; left: 50%; transform: translateX(-50%); right: auto; width: 480px; }
-  #toast { transform: translateX(-50%) translateY(20px); }
-  #toast.show { transform: translateX(-50%) translateY(0); }
-  #modal-overlay { width: 480px; }
-}
+/* Toast */
+#toast { position: fixed; bottom: calc(80px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%) translateY(20px); background: #1a1510; color: white; font-size: 13px; font-weight: 500; padding: 10px 18px; border-radius: 99px; opacity: 0; transition: all 0.25s; pointer-events: none; white-space: nowrap; z-index: 500; max-width: 88vw; text-align: center; }
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+#toast.success { background: #15803d; }
+#toast.error { background: var(--red); }
 </style>
 </head>
 <body>
@@ -338,551 +301,381 @@ input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px;
 <!-- Splash -->
 <div id="splash">
   <div class="splash-logo" id="splash-logo">
-    <span class="splash-logo-text" id="splash-logo-text">GS</span>
+    <span style="font-family:'DM Serif Display',serif;font-size:28px;font-weight:700;color:var(--primary)" id="splash-initials">GS</span>
   </div>
-  <div class="splash-name" id="splash-society-name">GolfSoc</div>
+  <div class="splash-name" id="splash-name">GolfSoc</div>
   <div class="splash-sub">Golf Society Management</div>
   <div class="splash-spinner"></div>
-  <div id="splash-escape" style="display:none;margin-top:24px;padding:10px 20px;border:1px solid rgba(255,255,255,0.2);border-radius:99px;font-size:13px;font-weight:600;color:rgba(255,255,255,0.6);cursor:pointer;background:rgba(255,255,255,0.05)" onclick="emergencyReset()">Tap to reset &amp; sign in</div>
+  <div id="splash-escape" onclick="emergencyReset()">Tap to reset &amp; sign in</div>
 </div>
 
-<!-- Auth Screen -->
+<!-- Auth -->
 <div id="auth-screen">
   <div class="auth-logo" id="auth-logo">
-    <span id="auth-logo-text" style="font-size:20px;font-weight:800;color:var(--primary);font-family:'DM Serif Display',serif">GS</span>
+    <span class="auth-logo-text" id="auth-initials">GS</span>
   </div>
-  <div class="auth-title" id="auth-society-title">Welcome back</div>
-  <div class="auth-sub" id="auth-society-sub">Sign in to your golf society</div>
-
+  <div class="auth-title" id="auth-title">Welcome back</div>
+  <div class="auth-sub" id="auth-sub">Sign in to your golf society</div>
   <div class="auth-tabs">
     <button class="auth-tab on" onclick="switchAuthTab('login')">Sign in</button>
     <button class="auth-tab off" onclick="switchAuthTab('signup')">Create account</button>
   </div>
-
-  <!-- Login -->
   <div id="auth-login">
-    <div class="auth-field">
-      <label class="auth-label">Email</label>
-      <input class="auth-input" type="email" id="login-email" placeholder="your@email.com" autocomplete="email">
-    </div>
-    <div class="auth-field">
-      <label class="auth-label">Password</label>
-      <input class="auth-input" type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
-    </div>
-    <button class="auth-btn" onclick="doLogin()" id="login-btn">Sign in</button>
+    <input class="auth-input" type="email" id="login-email" placeholder="Email address" autocomplete="email">
+    <input class="auth-input" type="password" id="login-password" placeholder="Password" autocomplete="current-password">
+    <button class="auth-btn" id="login-btn" onclick="doLogin()">Sign in</button>
     <div class="auth-err" id="login-err"></div>
-    <div class="auth-forgot" onclick="doForgotPassword()">Forgot password?</div>
+    <div class="auth-forgot" onclick="doForgot()">Forgot password?</div>
   </div>
-
-  <!-- Signup -->
   <div id="auth-signup" style="display:none">
-    <div class="auth-field">
-      <label class="auth-label">Your name</label>
-      <input class="auth-input" type="text" id="signup-name" placeholder="First Last">
-    </div>
-    <div class="auth-field">
-      <label class="auth-label">Email</label>
-      <input class="auth-input" type="email" id="signup-email" placeholder="your@email.com" autocomplete="email">
-    </div>
-    <div class="auth-field">
-      <label class="auth-label">Password</label>
-      <input class="auth-input" type="password" id="signup-password" placeholder="Min 8 characters" autocomplete="new-password">
-    </div>
-    <div class="auth-field">
-      <label class="auth-label">Invite code <span style="opacity:0.5;font-weight:400;text-transform:none;letter-spacing:0">(optional — leave blank to create a new society)</span></label>
-      <input class="auth-input" type="text" id="signup-code" placeholder="Leave blank to create your own society" style="text-transform:uppercase">
-    </div>
-    <button class="auth-btn" onclick="doSignup()" id="signup-btn">Create account</button>
+    <input class="auth-input" type="text" id="signup-name" placeholder="Your full name">
+    <input class="auth-input" type="email" id="signup-email" placeholder="Email address" autocomplete="email">
+    <input class="auth-input" type="password" id="signup-password" placeholder="Password (min 8 characters)" autocomplete="new-password">
+    <span class="auth-note">Have an invite code? Enter it below to join an existing society. Leave blank to create a new society.</span>
+    <input class="auth-input" type="text" id="signup-code" placeholder="Invite code (optional)" style="text-transform:uppercase">
+    <button class="auth-btn" id="signup-btn" onclick="doSignup()">Create account</button>
     <div class="auth-err" id="signup-err"></div>
   </div>
 </div>
 
-<!-- Setup Wizard (shown after first signup as admin) -->
-<div id="setup-wizard" style="display:none">
-  <div style="background:var(--primary);min-height:100vh;padding:calc(var(--safe-top)+20px) 24px calc(var(--safe-bottom)+24px)">
-    <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.07em;margin-bottom:20px">Setup your society</div>
-    <div class="wizard-progress" id="wizard-progress">
-      <div class="wizard-dot done"></div>
-      <div class="wizard-dot"></div>
-      <div class="wizard-dot"></div>
-      <div class="wizard-dot"></div>
+<!-- Setup Wizard -->
+<div id="setup-wizard">
+  <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.08em;margin-bottom:20px">Setup your society</div>
+  <div class="wiz-progress" id="wiz-progress">
+    <div class="wiz-dot done"></div><div class="wiz-dot"></div><div class="wiz-dot"></div><div class="wiz-dot"></div>
+  </div>
+  <!-- Step 1 -->
+  <div class="wiz-step active" id="wiz-1">
+    <div class="wiz-title">What's your society called?</div>
+    <div class="wiz-sub">This appears in the app and on members' homescreens.</div>
+    <div class="wiz-field"><span class="auth-label">Society name</span><input class="auth-input" type="text" id="wiz-society-name" placeholder="e.g. Bray Head Golf Society"></div>
+    <div class="wiz-field"><span class="auth-label">Home course</span><input class="auth-input" type="text" id="wiz-home-course" placeholder="e.g. Bray Head Golf Club"></div>
+    <button class="wiz-btn" onclick="wizNext(1)">Continue →</button>
+  </div>
+  <!-- Step 2 -->
+  <div class="wiz-step" id="wiz-2">
+    <div class="wiz-title">Pick a theme</div>
+    <div class="wiz-sub">You can change this anytime in Settings.</div>
+    <div class="theme-grid" id="wiz-theme-grid"></div>
+    <button class="wiz-btn" onclick="wizNext(2)">Continue →</button>
+    <button class="wiz-btn-back" onclick="wizStep(1)">← Back</button>
+  </div>
+  <!-- Step 3 -->
+  <div class="wiz-step" id="wiz-3">
+    <div class="wiz-title">Handicap rules</div>
+    <div class="wiz-sub">How do you calculate handicap changes after each round?</div>
+    <div class="wiz-option" onclick="selectHcpMode('bhgs')" id="hm-bhgs">
+      <div><div class="wiz-option-title">Points-based</div><div class="wiz-option-sub">1st −1.0, 2nd −0.5, 3rd −0.2, others +0.2</div></div>
+      <div class="wiz-check">✓</div>
     </div>
-
-    <!-- Step 1: Society name -->
-    <div class="wizard-step active" id="wizard-1">
-      <div class="wizard-title">What's your society called?</div>
-      <div class="wizard-sub">This is what members see when they open the app.</div>
-      <div class="auth-field">
-        <label class="auth-label">Society name</label>
-        <input class="auth-input" type="text" id="wizard-society-name" placeholder="e.g. Bray Head Golf Society">
-      </div>
-      <div class="auth-field">
-        <label class="auth-label">Home course</label>
-        <input class="auth-input" type="text" id="wizard-home-course" placeholder="e.g. Bray Head Golf Club">
-      </div>
-      <button class="auth-btn" onclick="wizardNext(1)">Continue →</button>
+    <div class="wiz-option" onclick="selectHcpMode('gui')" id="hm-gui">
+      <div><div class="wiz-option-title">GUI standard</div><div class="wiz-option-sub">Golfing Union of Ireland rules</div></div>
+      <div class="wiz-check">✓</div>
     </div>
-
-    <!-- Step 2: Logo -->
-    <div class="wizard-step" id="wizard-2">
-      <div class="wizard-title">Upload your logo</div>
-      <div class="wizard-sub">Shown in the app and on the homescreen icon.</div>
-      <div class="logo-upload-zone" onclick="document.getElementById('wizard-logo-input').click()" id="wizard-logo-zone">
-        <input type="file" id="wizard-logo-input" accept="image/*" onchange="previewWizardLogo(event)">
-        <div id="wizard-logo-preview-wrap" style="display:none" class="logo-preview"></div>
-        <div class="logo-upload-icon" id="wizard-upload-icon">🏌️</div>
-        <div class="logo-upload-text">Tap to upload your club crest or logo</div>
-      </div>
-      <div style="display:flex;gap:10px;margin-top:16px">
-        <button class="auth-btn" style="background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.6)" onclick="wizardStep(1)">← Back</button>
-        <button class="auth-btn" onclick="wizardNext(2)">Continue →</button>
-      </div>
+    <div class="wiz-option" onclick="selectHcpMode('custom')" id="hm-custom">
+      <div><div class="wiz-option-title">Custom</div><div class="wiz-option-sub">Set your own cuts per position</div></div>
+      <div class="wiz-check">✓</div>
     </div>
-
-    <!-- Step 3: Theme -->
-    <div class="wizard-step" id="wizard-3">
-      <div class="wizard-title">Pick a theme</div>
-      <div class="wizard-sub">You can change this anytime in Settings.</div>
-      <div class="theme-grid" id="wizard-theme-grid"></div>
-      <div style="display:flex;gap:10px;margin-top:8px">
-        <button class="auth-btn" style="background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.6)" onclick="wizardStep(2)">← Back</button>
-        <button class="auth-btn" onclick="wizardNext(3)">Continue →</button>
-      </div>
+    <button class="wiz-btn" onclick="wizNext(3)" style="margin-top:16px">Continue →</button>
+    <button class="wiz-btn-back" onclick="wizStep(2)">← Back</button>
+  </div>
+  <!-- Step 4 -->
+  <div class="wiz-step" id="wiz-4">
+    <div class="wiz-title">Upload your logo</div>
+    <div class="wiz-sub">Optional — you can add this later in Settings.</div>
+    <div class="logo-drop" onclick="document.getElementById('wiz-logo-input').click()" id="wiz-logo-drop">
+      <input type="file" id="wiz-logo-input" accept="image/*" onchange="previewWizLogo(event)">
+      <div id="wiz-logo-preview" style="display:none;width:80px;height:80px;border-radius:16px;overflow:hidden;margin:0 auto 12px"></div>
+      <div style="font-size:32px;margin-bottom:8px" id="wiz-logo-icon">🏌️</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.4)">Tap to upload club crest</div>
     </div>
-
-    <!-- Step 4: Handicap mode -->
-    <div class="wizard-step" id="wizard-4">
-      <div class="wizard-title">Handicap rules</div>
-      <div class="wizard-sub">How do you calculate handicap changes after each round?</div>
-      <div id="hcp-mode-options">
-        <div class="settings-row" onclick="selectHcpMode('bhgs')" id="hcpm-bhgs" style="margin-bottom:8px;border-radius:var(--radius);background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.1)">
-          <div>
-            <div style="font-size:13px;font-weight:600;color:white">Points-based (recommended)</div>
-            <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px">1st −1.0, 2nd −0.5, 3rd −0.2, others +0.2</div>
-          </div>
-          <div id="hcpm-bhgs-check" style="display:none;color:var(--accent);font-size:18px">✓</div>
-        </div>
-        <div class="settings-row" onclick="selectHcpMode('gui')" id="hcpm-gui" style="margin-bottom:8px;border-radius:var(--radius);background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.1)">
-          <div>
-            <div style="font-size:13px;font-weight:600;color:white">GUI standard</div>
-            <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px">Standard Golfing Union of Ireland rules</div>
-          </div>
-          <div id="hcpm-gui-check" style="display:none;color:var(--accent);font-size:18px">✓</div>
-        </div>
-        <div class="settings-row" onclick="selectHcpMode('custom')" id="hcpm-custom" style="border-radius:var(--radius);background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.1)">
-          <div>
-            <div style="font-size:13px;font-weight:600;color:white">Custom rules</div>
-            <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px">Set your own cuts and additions per position</div>
-          </div>
-          <div id="hcpm-custom-check" style="display:none;color:var(--accent);font-size:18px">✓</div>
-        </div>
-      </div>
-      <div style="display:flex;gap:10px;margin-top:16px">
-        <button class="auth-btn" style="background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.6)" onclick="wizardStep(3)">← Back</button>
-        <button class="auth-btn" onclick="finishWizard()">Finish setup ✓</button>
-      </div>
-    </div>
+    <button class="wiz-btn" onclick="finishWizard()">Finish setup ✓</button>
+    <button class="wiz-btn-back" onclick="wizStep(3)">← Back</button>
   </div>
 </div>
 
 <!-- Main App -->
 <div id="app">
-  <!-- Topbar -->
   <div class="topbar">
-    <div class="topbar-logo" id="topbar-logo-wrap">
-      <span class="topbar-logo-text" id="topbar-logo-initials">GS</span>
-  
-  <nav class="nav" id="bottom-nav">
+    <div class="topbar-logo" id="topbar-logo"><span class="topbar-logo-text" id="topbar-initials">GS</span></div>
+    <div class="topbar-name" id="topbar-name">GolfSoc</div>
+    <span class="conn-pill" id="conn-pill">Connecting…</span>
+  </div>
+  <div class="content">
+    <div class="section active" id="sec-home"><div id="home-feed"><div class="skeleton" style="height:80px;border-radius:12px;margin-bottom:10px"></div><div class="skeleton" style="height:200px;border-radius:12px"></div></div></div>
+    <div class="section" id="sec-leaderboard"><div class="lb-filters" id="lb-filters"><button class="lb-filter active" onclick="setLbFilter('all')">All</button><button class="lb-filter" onclick="setLbFilter('sunday')">Sundays</button><button class="lb-filter" onclick="setLbFilter('outing')">Outings</button></div><div id="lb-table"><div class="skeleton" style="height:52px;margin-bottom:6px;border-radius:10px"></div><div class="skeleton" style="height:52px;margin-bottom:6px;border-radius:10px"></div><div class="skeleton" style="height:52px;border-radius:10px"></div></div></div>
+    <div class="section" id="sec-schedule"><div id="schedule-feed"><div class="skeleton" style="height:72px;margin-bottom:10px;border-radius:14px"></div><div class="skeleton" style="height:72px;border-radius:14px"></div></div></div>
+    <div class="section" id="sec-profile"><div id="profile-content"></div></div>
+    <div class="section" id="sec-settings"><div id="settings-content"></div></div>
+  </div>
+  <nav class="nav">
     <button class="nav-btn active" onclick="showTab('home')" id="nav-home">
       <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M3 12L12 3l9 9"/><path d="M9 21V12h6v9"/><path d="M3 12v9h18V12"/></svg></div>
-      <span class="nav-label">Home</span>
+      Home
     </button>
     <button class="nav-btn" onclick="showTab('leaderboard')" id="nav-leaderboard">
       <div class="nav-icon"><svg viewBox="0 0 24 24"><rect x="2" y="14" width="4" height="7" rx="1"/><rect x="9" y="9" width="4" height="12" rx="1"/><rect x="16" y="4" width="4" height="17" rx="1"/></svg></div>
-      <span class="nav-label">Standings</span>
+      Standings
     </button>
     <button class="nav-btn" onclick="showTab('schedule')" id="nav-schedule">
       <div class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg></div>
-      <span class="nav-label">Schedule</span>
+      Schedule
     </button>
     <button class="nav-btn" onclick="showTab('profile')" id="nav-profile">
       <div class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
-      <span class="nav-label">Profile</span>
+      Profile
     </button>
     <button class="nav-btn" onclick="showTab('settings')" id="nav-settings" style="display:none">
       <div class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></div>
-      <span class="nav-label">Settings</span>
+      Settings
     </button>
   </nav>
-
-    </div>
-    <div class="topbar-name" id="topbar-society-name">GolfSoc</div>
-    <div class="topbar-actions">
-      <span class="conn-pill" id="conn-pill">Connecting…</span>
-    </div>
-  </div>
-
-  <!-- Content -->
-  <div class="content">
-    <!-- HOME -->
-    <div class="section active" id="sec-home">
-      <div id="home-feed"><div class="skeleton" style="height:80px;margin-bottom:10px;border-radius:var(--radius-lg)"></div><div class="skeleton" style="height:120px;margin-bottom:10px;border-radius:var(--radius-lg)"></div></div>
-    </div>
-
-    <!-- LEADERBOARD -->
-    <div class="section" id="sec-leaderboard">
-      <div class="lb-filter-row" id="lb-filters">
-        <button class="lb-filter active" onclick="setLbFilter('all')">All</button>
-        <button class="lb-filter" onclick="setLbFilter('sunday')">Sundays</button>
-        <button class="lb-filter" onclick="setLbFilter('outing')">Outings</button>
-      </div>
-      <div id="lb-table"><div class="skeleton" style="height:52px;margin-bottom:6px;border-radius:var(--radius)"></div><div class="skeleton" style="height:52px;margin-bottom:6px;border-radius:var(--radius)"></div><div class="skeleton" style="height:52px;margin-bottom:6px;border-radius:var(--radius)"></div></div>
-    </div>
-
-    <!-- SCHEDULE -->
-    <div class="section" id="sec-schedule">
-      <div id="schedule-feed"><div class="skeleton" style="height:72px;margin-bottom:10px;border-radius:var(--radius-lg)"></div><div class="skeleton" style="height:72px;margin-bottom:10px;border-radius:var(--radius-lg)"></div></div>
-    </div>
-
-    <!-- PROFILE -->
-    <div class="section" id="sec-profile">
-      <div id="profile-content"><div class="skeleton" style="height:100px;margin-bottom:12px;border-radius:var(--radius-lg)"></div></div>
-    </div>
-
-    <!-- SETTINGS (admin only) -->
-    <div class="section" id="sec-settings">
-      <div id="settings-content"></div>
-    </div>
-  </div>
-
 </div>
 
-
 <!-- Modal -->
-<div id="modal-overlay" onclick="closeModalOutside(event)">
+<div id="modal-overlay" onclick="if(event.target===this)closeModal()">
   <div class="modal">
     <div class="modal-handle"></div>
     <div class="modal-header">
-      <div class="modal-title" id="modal-title">Modal</div>
+      <div class="modal-title" id="modal-title"></div>
       <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
     <div class="modal-body" id="modal-body"></div>
   </div>
 </div>
-
 <div id="toast"></div>
 
 <script>
-// ── Config — replace with your Supabase project details ──
 const SUPABASE_URL = 'https://nljcncrvqjtuwycemutz.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5samNuY3J2cWp0dXd5Y2VtdXR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4OTQyNTksImV4cCI6MjA5MDQ3MDI1OX0.uum4x_Ajhc4Y9P1hzMQph9JvxlMpvWlXfFqOxNFKaiQ';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5samNuY3J2cWp0dXd5Y2VtdXR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4OTQyNTksImV4cCI6MjA5MDQ3MDI1OX0.uum4x_Ajhc4Y9P1hzMQph9JvxlMpvWlXfFqOxNFKaiQ';
 
-// ── Themes ──
 const THEMES = [
-  { id:'navy-gold',   name:'Navy & Gold',    primary:'#0a1628', accent:'#C9A84C' },
-  { id:'green-gold',  name:'Green & Gold',   primary:'#14532d', accent:'#C9A84C' },
-  { id:'black-gold',  name:'Black & Gold',   primary:'#111111', accent:'#C9A84C' },
-  { id:'maroon-gold', name:'Maroon & Gold',  primary:'#6B1C1C', accent:'#C9A84C' },
-  { id:'blue-white',  name:'Blue & White',   primary:'#1e3a8a', accent:'#ffffff' },
-  { id:'forest-gold', name:'Forest & Gold',  primary:'#1a3320', accent:'#d4a847' },
+  { id:'navy-gold',   name:'Navy & Gold',   primary:'#0a1628', accent:'#C9A84C' },
+  { id:'forest-gold', name:'Forest & Gold', primary:'#1a3320', accent:'#d4a847' },
+  { id:'black-gold',  name:'Black & Gold',  primary:'#111111', accent:'#C9A84C' },
+  { id:'maroon-gold', name:'Maroon & Gold', primary:'#6B1C1C', accent:'#C9A84C' },
+  { id:'blue-gold',   name:'Blue & Gold',   primary:'#1e3a8a', accent:'#C9A84C' },
+  { id:'green-gold',  name:'Green & Gold',  primary:'#14532d', accent:'#C9A84C' },
 ];
 
-// ── App state ──
 let currentUser = null;
 let societySettings = null;
 let db = { players:[], events:[], rounds:[], noticeboard:[] };
 let currentTab = 'home';
 let lbFilter = 'all';
-let wizardData = { societyName:'', homeCourse:'', logoFile:null, themeId:'navy-gold', hcpMode:'bhgs' };
+let wizData = { societyName:'', homeCourse:'', themeId:'navy-gold', hcpMode:'', logoFile:null };
 
-// ── API helpers ──
-const api = async (path, opts={}) => {
-  const headers = {
-    'apikey': SUPABASE_ANON_KEY,
-    'Authorization': `Bearer ${(currentUser?.access_token || SUPABASE_ANON_KEY)}`,
-    'Content-Type': 'application/json',
-    'Prefer': opts.prefer || 'return=representation',
-    ...opts.headers
-  };
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, { ...opts, headers });
+// ── Helpers ──
+const H = (path, extra={}) => ({
+  'apikey': SUPABASE_KEY,
+  'Authorization': `Bearer ${currentUser?.access_token || SUPABASE_KEY}`,
+  'Content-Type': 'application/json',
+  'Prefer': 'return=representation',
+  ...extra
+});
+
+const dbFetch = async (path, opts={}) => {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, { ...opts, headers: H(path, opts.headers||{}) });
   if (!res.ok) { const e = await res.text(); throw new Error(e); }
-  const txt = await res.text();
-  return txt ? JSON.parse(txt) : null;
+  const t = await res.text(); return t ? JSON.parse(t) : null;
 };
-const authApi = async (path, body) => {
+const dbGet  = p => dbFetch(p, { method:'GET', headers:{ 'Prefer':'' }, cache:'no-store' });
+const dbPost = (p,b) => dbFetch(p, { method:'POST', body:JSON.stringify(b) });
+const dbPatch = (p,b) => dbFetch(p, { method:'PATCH', body:JSON.stringify(b) });
+const dbDel  = p => dbFetch(p, { method:'DELETE', headers:{'Prefer':'return=minimal'} });
+
+const authFetch = async (path, body) => {
   const res = await fetch(`${SUPABASE_URL}/auth/v1/${path}`, {
-    method: 'POST',
-    headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+    method:'POST', headers:{ 'apikey':SUPABASE_KEY, 'Content-Type':'application/json' },
     body: JSON.stringify(body)
   });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error_description || data.msg || 'Auth error');
-  return data;
+  const d = await res.json();
+  if (!res.ok) throw new Error(d.error_description || d.msg || 'Auth error');
+  if (d.access_token)  localStorage.setItem('gs_token', d.access_token);
+  if (d.refresh_token) localStorage.setItem('gs_refresh', d.refresh_token);
+  return d;
 };
-const get = p => api(p, { method:'GET', prefer:'', cache:'no-store' });
-const post = (p,b) => api(p, { method:'POST', body:JSON.stringify(b) });
-const patch = (p,b) => api(p, { method:'PATCH', body:JSON.stringify(b), prefer:'return=representation' });
-const del = p => api(p, { method:'DELETE', prefer:'return=minimal' });
 
-// ── CSS theme injection ──
-function applyTheme(settings) {
+const initials = name => (name||'?').trim().split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+const fmtDate = d => { if(!d)return''; const [y,m,day]=d.split('-'); const mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; return `${parseInt(day)} ${mo[parseInt(m)-1]} ${y}`; };
+const avatarHtml = (p, size=32, fs=11) => `<div class="avatar" style="width:${size}px;height:${size}px;font-size:${fs}px">${initials(p?.name||'?')}</div>`;
+
+// ── Theme ──
+function applyTheme(s) {
   const r = document.documentElement.style;
-  r.setProperty('--primary', settings.primary_colour || '#0a1628');
-  r.setProperty('--primary-light', lightenColor(settings.primary_colour || '#0a1628', 20));
-  r.setProperty('--accent', settings.secondary_colour || '#C9A84C');
-  r.setProperty('--accent-dark', darkenColor(settings.secondary_colour || '#C9A84C', 25));
-  r.setProperty('--accent-light', hexToRgba(settings.secondary_colour || '#C9A84C', 0.08));
-  document.getElementById('theme-color-meta').content = settings.primary_colour || '#0a1628';
-  // Update manifest dynamically
-  updateManifest(settings);
+  const p = s.primary_colour || '#0a1628';
+  const a = s.secondary_colour || '#C9A84C';
+  r.setProperty('--primary', p);
+  r.setProperty('--accent', a);
+  r.setProperty('--accent-dark', darken(a, 25));
+  r.setProperty('--accent-light', rgba(a, 0.08));
+  document.getElementById('theme-color-meta').content = p;
 }
-
-function lightenColor(hex, pct) {
-  const num = parseInt(hex.slice(1), 16);
-  const r = Math.min(255, (num >> 16) + pct * 2.55 | 0);
-  const g = Math.min(255, ((num >> 8) & 0xff) + pct * 2.55 | 0);
-  const b = Math.min(255, (num & 0xff) + pct * 2.55 | 0);
-  return '#' + [r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('');
+function darken(hex, pct) {
+  const n = parseInt(hex.slice(1),16);
+  return '#'+[n>>16, (n>>8)&255, n&255].map(v=>Math.max(0,v-pct*2.55|0).toString(16).padStart(2,'0')).join('');
 }
-function darkenColor(hex, pct) {
-  const num = parseInt(hex.slice(1), 16);
-  const r = Math.max(0, (num >> 16) - pct * 2.55 | 0);
-  const g = Math.max(0, ((num >> 8) & 0xff) - pct * 2.55 | 0);
-  const b = Math.max(0, (num & 0xff) - pct * 2.55 | 0);
-  return '#' + [r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('');
+function rgba(hex, a) {
+  const n = parseInt(hex.slice(1),16);
+  return `rgba(${n>>16},${(n>>8)&255},${n&255},${a})`;
 }
-function hexToRgba(hex, alpha) {
-  const num = parseInt(hex.slice(1), 16);
-  return `rgba(${(num>>16)},${((num>>8)&0xff)},${(num&0xff)},${alpha})`;
-}
-
-function updateManifest(settings) {
-  // Dynamic PWA manifest — society logo on homescreen
-  const manifest = {
-    name: settings.society_name || 'GolfSoc',
-    short_name: settings.society_name?.split(' ')[0] || 'GolfSoc',
-    start_url: '/',
-    display: 'standalone',
-    background_color: settings.primary_colour || '#0a1628',
-    theme_color: settings.primary_colour || '#0a1628',
-    icons: settings.logo_url
-      ? [{ src: settings.logo_url, sizes: '192x192', type: 'image/png' },
-         { src: settings.logo_url, sizes: '512x512', type: 'image/png' }]
-      : [{ src: 'icon-192.png', sizes: '192x192', type: 'image/png' }]
-  };
-  const blob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  let link = document.querySelector('link[rel=manifest]');
-  if (!link) { link = document.createElement('link'); link.rel = 'manifest'; document.head.appendChild(link); }
-  link.href = url;
-}
-
-function updateBranding(settings) {
-  const name = settings.society_name || 'GolfSoc';
-  const initials = name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+function updateBranding(s) {
+  const name = s.society_name || s.name || 'GolfSoc';
+  const ini  = initials(name.replace(' Golf Society','').replace(' Golf Club','') || name);
+  const logo = s.logo_url;
   document.getElementById('app-title').textContent = name;
-  document.getElementById('topbar-society-name').textContent = name;
-  document.getElementById('splash-society-name').textContent = name;
-  document.getElementById('auth-society-title').textContent = 'Welcome back';
-  document.getElementById('auth-society-sub').textContent = `Sign in to ${name}`;
-
-  const logoUrl = settings.logo_url;
-  ['topbar-logo-wrap','splash-logo','auth-logo'].forEach(id => {
+  document.getElementById('topbar-name').textContent = name;
+  document.getElementById('splash-name').textContent = name;
+  document.getElementById('auth-title').textContent = 'Welcome back';
+  document.getElementById('auth-sub').textContent = `Sign in to ${name}`;
+  ['topbar-logo','splash-logo','auth-logo'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
-    if (logoUrl) {
-      el.innerHTML = `<img src="${logoUrl}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML='${initials}'">`;
-    } else {
-      el.innerHTML = id === 'topbar-logo-wrap'
-        ? `<span class="topbar-logo-text">${initials}</span>`
-        : `<span style="font-size:${id==='splash-logo'?'28':'20'}px;font-weight:800;color:var(--primary);font-family:'DM Serif Display',serif">${initials}</span>`;
-    }
+    const sz = id==='splash-logo'?'28':'20';
+    el.innerHTML = logo
+      ? `<img src="${logo}" style="width:100%;height:100%;object-fit:cover" onerror="this.outerHTML='<span style=\\'font-family:DM Serif Display,serif;font-size:${sz}px;font-weight:700;color:var(--primary)\\'>${ini}</span>'">`
+      : `<span style="font-family:'DM Serif Display',serif;font-size:${sz}px;font-weight:700;color:var(--primary)">${ini}</span>`;
   });
 }
 
 // ── Auth ──
 function switchAuthTab(tab) {
-  document.getElementById('auth-login').style.display = tab==='login' ? 'block' : 'none';
-  document.getElementById('auth-signup').style.display = tab==='signup' ? 'block' : 'none';
+  document.getElementById('auth-login').style.display = tab==='login'?'block':'none';
+  document.getElementById('auth-signup').style.display = tab==='signup'?'block':'none';
   document.querySelectorAll('.auth-tab').forEach((el,i) => {
-    el.className = 'auth-tab ' + ((i===0&&tab==='login')||(i===1&&tab==='signup') ? 'on' : 'off');
+    el.className = 'auth-tab '+((i===0&&tab==='login')||(i===1&&tab==='signup')?'on':'off');
   });
 }
 
 async function doLogin() {
   const email = document.getElementById('login-email').value.trim();
-  const password = document.getElementById('login-password').value;
-  const btn = document.getElementById('login-btn');
-  const err = document.getElementById('login-err');
-  if (!email || !password) { showAuthErr('login', 'Please fill in all fields'); return; }
-  btn.classList.add('loading'); btn.textContent = 'Signing in…';
+  const pass  = document.getElementById('login-password').value;
+  const btn   = document.getElementById('login-btn');
+  const err   = document.getElementById('login-err');
+  err.classList.remove('show');
+  if (!email||!pass) { err.textContent='Please fill in all fields'; err.classList.add('show'); return; }
+  btn.classList.add('loading'); btn.textContent='Signing in…';
   try {
-    const data = await authApi('token?grant_type=password', { email, password });
-    currentUser = { ...data.user, access_token: data.access_token };
+    const d = await authFetch('token?grant_type=password', { email, password:pass });
+    currentUser = { ...d.user, access_token: d.access_token };
     await afterLogin();
   } catch(e) {
-    showAuthErr('login', e.message);
-    btn.classList.remove('loading'); btn.textContent = 'Sign in';
+    err.textContent = e.message; err.classList.add('show');
+    btn.classList.remove('loading'); btn.textContent='Sign in';
   }
 }
 
 async function doSignup() {
-  const name = document.getElementById('signup-name').value.trim();
+  const name  = document.getElementById('signup-name').value.trim();
   const email = document.getElementById('signup-email').value.trim();
-  const password = document.getElementById('signup-password').value;
-  const code = document.getElementById('signup-code').value.trim().toUpperCase();
-  const btn = document.getElementById('signup-btn');
-  if (!name || !email || !password) { showAuthErr('signup', 'Please fill in all fields'); return; }
-  if (password.length < 8) { showAuthErr('signup', 'Password must be at least 8 characters'); return; }
-  btn.classList.add('loading'); btn.textContent = 'Creating account…';
+  const pass  = document.getElementById('signup-password').value;
+  const code  = document.getElementById('signup-code').value.trim().toUpperCase();
+  const btn   = document.getElementById('signup-btn');
+  const err   = document.getElementById('signup-err');
+  err.classList.remove('show');
+  if (!name||!email||!pass) { err.textContent='Please fill in all fields'; err.classList.add('show'); return; }
+  if (pass.length<8) { err.textContent='Password must be at least 8 characters'; err.classList.add('show'); return; }
+  btn.classList.add('loading'); btn.textContent='Creating account…';
   try {
-    // If code provided, verify it and join that society as a member
-    // If no code, create a new society as admin
     let societyId = null;
     if (code) {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/societies?invite_code=eq.${code}&select=id,name`, {
-        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
-      });
-      const society = await res.json();
-      if (!society || !society.length) {
-        showAuthErr('signup', 'Invalid invite code — check with your society admin');
-        btn.classList.remove('loading'); btn.textContent = 'Create account';
-        return;
-      }
-      societyId = society[0].id;
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/societies?invite_code=eq.${code}&select=id`, { headers:{ 'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}` } });
+      const soc = await res.json();
+      if (!soc||!soc.length) { err.textContent='Invalid invite code'; err.classList.add('show'); btn.classList.remove('loading'); btn.textContent='Create account'; return; }
+      societyId = soc[0].id;
     }
-    const role = societyId ? 'member' : 'admin';
-    const data = await authApi('signup', {
-      email, password,
-      data: { full_name: name, society_id: societyId, role }
-    });
-    currentUser = { ...data.user, access_token: data.access_token };
-    if (!societyId) {
-      // New admin — show setup wizard
-      showWizard();
-    } else {
-      await afterLogin();
-    }
+    const d = await authFetch('signup', { email, password:pass, data:{ full_name:name, society_id:societyId, role:societyId?'member':'admin' } });
+    currentUser = { ...d.user, access_token: d.access_token };
+    if (!societyId) { document.getElementById('auth-screen').classList.remove('active'); showWizard(); }
+    else await afterLogin();
   } catch(e) {
-    showAuthErr('signup', e.message);
-    btn.classList.remove('loading'); btn.textContent = 'Create account';
+    err.textContent = e.message; err.classList.add('show');
+    btn.classList.remove('loading'); btn.textContent='Create account';
   }
 }
 
-async function doForgotPassword() {
+async function doForgot() {
   const email = document.getElementById('login-email').value.trim();
-  if (!email) { showAuthErr('login', 'Enter your email first'); return; }
+  if (!email) { document.getElementById('login-err').textContent='Enter your email first'; document.getElementById('login-err').classList.add('show'); return; }
   try {
-    await authApi('recover', { email });
-    showAuthErr('login', 'Check your email for a reset link ✓');
-    document.getElementById('login-err').style.color = '#4ade80';
-    document.getElementById('login-err').classList.add('show');
-  } catch(e) { showAuthErr('login', e.message); }
-}
-
-function showAuthErr(form, msg) {
-  const el = document.getElementById(form+'-err');
-  el.textContent = msg; el.classList.add('show');
-  el.style.color = '#fca5a5';
+    await authFetch('recover', { email });
+    const err = document.getElementById('login-err');
+    err.textContent='Check your email for a reset link ✓'; err.style.color='#6ee7b7'; err.classList.add('show');
+  } catch(e) { document.getElementById('login-err').textContent=e.message; document.getElementById('login-err').classList.add('show'); }
 }
 
 async function afterLogin() {
   document.getElementById('auth-screen').classList.remove('active');
-  document.getElementById('splash').style.display = 'flex';
+  document.getElementById('splash').style.display='flex';
   document.getElementById('splash').classList.remove('out');
-  try {
-    await loadSocietySettings();
-    await loadAll();
-    renderAll();
-  } catch(e) {
-    console.error('afterLogin error:', e);
-  }
+  try { await loadSocietySettings(); await loadAll(); renderAll(); } catch(e) { console.error('afterLogin:',e); }
   document.getElementById('splash').classList.add('out');
-  setTimeout(() => { document.getElementById('splash').style.display = 'none'; }, 400);
+  setTimeout(() => { document.getElementById('splash').style.display='none'; }, 400);
   document.getElementById('app').classList.add('active');
-  
-  if (currentUser?.user_metadata?.role === 'admin') {
-    document.getElementById('nav-settings').style.display = 'flex';
-  }
+  if (currentUser?.user_metadata?.role==='admin') document.getElementById('nav-settings').style.display='flex';
 }
 
+async function doLogout() {
+  try { await authFetch('logout', {}); } catch(e) {}
+  localStorage.removeItem('gs_token'); localStorage.removeItem('gs_refresh');
+  currentUser=null; societySettings=null; db={players:[],events:[],rounds:[],noticeboard:[]};
+  document.getElementById('app').classList.remove('active');
+  document.getElementById('auth-screen').classList.add('active');
+  document.getElementById('login-email').value='';
+  document.getElementById('login-password').value='';
+}
+
+// ── Settings/Society loading ──
 async function loadSocietySettings() {
-  try {
-    const sid = currentUser?.user_metadata?.society_id;
-    if (!sid) { console.warn('loadSocietySettings: no society_id'); return; }
-    const headers = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${currentUser.access_token}` };
-    const [sRes, soRes] = await Promise.all([
-      fetch(`${SUPABASE_URL}/rest/v1/society_settings?society_id=eq.${sid}&select=*`, { headers }),
-      fetch(`${SUPABASE_URL}/rest/v1/societies?id=eq.${sid}&select=*`, { headers })
-    ]);
-    const settings = sRes.ok ? await sRes.json() : [];
-    const society  = soRes.ok ? await soRes.json() : [];
-    societySettings = { ...(settings?.[0]||{}), ...(society?.[0]||{}) };
-    console.log('Society settings loaded:', societySettings);
-    applyTheme(societySettings);
-    updateBranding(societySettings);
-  } catch(e) { console.error('loadSocietySettings:', e.message); }
+  const sid = currentUser?.user_metadata?.society_id;
+  if (!sid) return;
+  const headers = { 'apikey':SUPABASE_KEY, 'Authorization':`Bearer ${currentUser.access_token}`, 'Prefer':'' };
+  const [sRes, soRes] = await Promise.all([
+    fetch(`${SUPABASE_URL}/rest/v1/society_settings?society_id=eq.${sid}&select=*`, { headers }),
+    fetch(`${SUPABASE_URL}/rest/v1/societies?id=eq.${sid}&select=*`, { headers })
+  ]);
+  const settings = sRes.ok ? await sRes.json() : [];
+  const society  = soRes.ok ? await soRes.json() : [];
+  societySettings = { ...(settings?.[0]||{}), ...(society?.[0]||{}) };
+  applyTheme(societySettings);
+  updateBranding(societySettings);
 }
 
-// ── Data loading ──
 async function loadAll() {
   const pill = document.getElementById('conn-pill');
+  let sid = currentUser?.user_metadata?.society_id;
+  if (!sid) {
+    // Try fresh user fetch
+    try {
+      const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, { headers:{ 'apikey':SUPABASE_KEY, 'Authorization':`Bearer ${currentUser.access_token}` } });
+      if (res.ok) { const u = await res.json(); sid = u.user_metadata?.society_id; if (sid) currentUser.user_metadata = u.user_metadata; }
+    } catch(e) {}
+  }
+  if (!sid) { pill.textContent='No society'; pill.className='conn-pill err'; return; }
   try {
-    // Get society_id from multiple sources
-    let sid = currentUser?.user_metadata?.society_id;
-
-    // If not in metadata, try fetching fresh user data
-    if (!sid) {
-      try {
-        const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
-          headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${currentUser.access_token}` }
-        });
-        const freshUser = await res.json();
-        sid = freshUser?.user_metadata?.society_id;
-        if (sid) currentUser.user_metadata = freshUser.user_metadata;
-      } catch(e) { console.error('Fresh user fetch failed:', e); }
-    }
-
-    if (!sid) {
-      console.warn('No society_id found — user may still be in wizard');
-      pill.textContent = 'No society'; pill.className = 'conn-pill err';
-      return;
-    }
-
-    const fetchWithTimeout = (path, ms=8000) => {
-      const ctrl = new AbortController();
-      const timer = setTimeout(() => ctrl.abort(), ms);
-      return api(path, { method:'GET', prefer:'', cache:'no-store', signal: ctrl.signal }).finally(() => clearTimeout(timer));
-    };
-    const safe = async (path) => { try { return await fetchWithTimeout(path); } catch(e) { console.error('fetch failed:', path, e.message); return []; } };
-
-    const [players, events, rounds, noticeboard] = await Promise.all([
+    const ctrl = new AbortController();
+    setTimeout(() => ctrl.abort(), 8000);
+    const safe = async p => { try { return await dbGet(p); } catch(e) { return []; } };
+    const [players,events,rounds,noticeboard] = await Promise.all([
       safe(`players?society_id=eq.${sid}&order=name`),
       safe(`events?society_id=eq.${sid}&order=event_date`),
       safe(`rounds?society_id=eq.${sid}&order=created_at`),
       safe(`noticeboard?society_id=eq.${sid}&order=created_at.desc`),
     ]);
-
-    db.players     = players     || [];
-    db.events      = events      || [];
-    db.rounds      = rounds      || [];
-    db.noticeboard = noticeboard || [];
-
-    pill.textContent = 'Connected'; pill.className = 'conn-pill ok';
-    setTimeout(() => { pill.style.opacity = '0'; }, 2000);
+    db = { players:players||[], events:events||[], rounds:rounds||[], noticeboard:noticeboard||[] };
+    pill.textContent='Connected'; pill.className='conn-pill ok';
+    setTimeout(() => { pill.style.opacity='0'; }, 2000);
   } catch(e) {
-    console.error('loadAll error:', e);
-    pill.textContent = 'Offline'; pill.className = 'conn-pill err';
-    pill.style.cursor = 'pointer';
-    pill.onclick = () => { pill.textContent = 'Connecting…'; pill.className = 'conn-pill'; pill.style.opacity = '1'; loadAll().then(renderAll); };
+    pill.textContent='Offline'; pill.className='conn-pill err';
+    pill.style.cursor='pointer'; pill.onclick = () => { pill.style.opacity='1'; pill.textContent='Connecting…'; pill.className='conn-pill'; loadAll().then(renderAll); };
   }
 }
 
-// ── Tab navigation ──
+// ── Navigation ──
 function showTab(tab) {
   currentTab = tab;
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('sec-'+tab)?.classList.add('active');
   document.getElementById('nav-'+tab)?.classList.add('active');
   if (tab==='home') renderHome();
@@ -891,1192 +684,605 @@ function showTab(tab) {
   if (tab==='profile') renderProfile();
   if (tab==='settings') renderSettings();
 }
-
 function setLbFilter(f) {
-  lbFilter = f;
-  document.querySelectorAll('.lb-filter').forEach(b => {
-    b.classList.toggle('active', b.getAttribute('onclick').includes(`'${f}'`));
-  });
+  lbFilter=f;
+  document.querySelectorAll('.lb-filter').forEach(b=>b.classList.toggle('active',b.getAttribute('onclick').includes(`'${f}'`)));
   renderLeaderboard();
 }
 
 // ── Renderers ──
-function fmtDate(d) {
-  if (!d) return '';
-  const [y,m,day] = d.split('-');
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  return `${parseInt(day)} ${months[parseInt(m)-1]} ${y}`;
-}
-
-function initials(name) {
-  if (!name) return '?';
-  return name.trim().split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
-}
-
-function avatarHtml(player, size=32, fontSize=11) {
-  return `<div class="avatar" style="width:${size}px;height:${size}px;font-size:${fontSize}px">${initials(player?.name||'?')}</div>`;
-}
-
-function renderAll() {
-  renderHome();
-  renderLeaderboard();
-  renderSchedule();
-  renderProfile();
-  if (currentUser?.user_metadata?.role === 'admin') renderSettings();
-}
+function renderAll() { renderHome(); renderLeaderboard(); renderSchedule(); renderProfile(); if(currentUser?.user_metadata?.role==='admin') renderSettings(); }
 
 function renderHome() {
   const feed = document.getElementById('home-feed');
-  const pid = currentUser?.id;
+  const pid  = currentUser?.id;
   const player = db.players.find(p=>p.user_id===pid);
-  const publishedEids = new Set(db.events.filter(e=>e.published).map(e=>e.id));
+  const pubEids = new Set(db.events.filter(e=>e.published).map(e=>e.id));
 
-  // Stats bar
   let statsBar = '';
   if (player) {
-    const myRounds = db.rounds.filter(r=>r.player_id===player.id&&r.verified&&publishedEids.has(r.event_id));
-    const sorted = db.players.map(p => {
-      const pts = db.rounds.filter(r=>r.player_id===p.id&&r.verified&&publishedEids.has(r.event_id)).reduce((s,r)=>s+(r.league_points||0),0);
-      return { id:p.id, pts };
-    }).sort((a,b)=>b.pts-a.pts);
+    const sorted = db.players.map(p => ({ id:p.id, pts: db.rounds.filter(r=>r.player_id===p.id&&r.verified&&pubEids.has(r.event_id)).reduce((s,r)=>s+(r.league_points||0),0) })).sort((a,b)=>b.pts-a.pts);
     const myIdx = sorted.findIndex(p=>p.id===player.id);
     const myPos = myIdx+1;
-    const myPts = sorted[myIdx]?.pts || 0;
+    const myPts = sorted[myIdx]?.pts||0;
+    const myRounds = db.rounds.filter(r=>r.player_id===player.id&&r.verified&&pubEids.has(r.event_id)).length;
     const posLabel = myPos===1?'1st':myPos===2?'2nd':myPos===3?'3rd':myPos>0?myPos+'th':'—';
-    const rankClass = myPos===1?'rank-1':myPos===2?'rank-2':myPos===3?'rank-3':'';
+    const rankCls = myPos===1?'rank-1':myPos===2?'rank-2':myPos===3?'rank-3':'';
     statsBar = `<div class="stat-grid">
-      <div class="stat-tile ${rankClass}"><div class="stat-label">Rank</div><div class="stat-val">${posLabel}</div></div>
+      <div class="stat-tile ${rankCls}"><div class="stat-label">Rank</div><div class="stat-val">${posLabel}</div></div>
       <div class="stat-tile"><div class="stat-label">Pts</div><div class="stat-val">${myPts}</div></div>
       <div class="stat-tile"><div class="stat-label">Hcp</div><div class="stat-val">${parseFloat(player.handicap_index||0).toFixed(1)}</div></div>
-      <div class="stat-tile"><div class="stat-label">Rounds</div><div class="stat-val">${myRounds.length}</div></div>
+      <div class="stat-tile"><div class="stat-label">Rounds</div><div class="stat-val">${myRounds}</div></div>
     </div>`;
   }
 
-  // Next event
   const today = new Date().toISOString().slice(0,10);
   const next = [...db.events].filter(e=>e.event_date>today).sort((a,b)=>a.event_date.localeCompare(b.event_date))[0];
-  let countdownHtml = '';
+  let countdown = '';
   if (next) {
     const [y,mo,d] = next.event_date.split('-').map(Number);
-    const diff = Math.round((new Date(y,mo-1,d) - new Date()) / 86400000);
+    const diff = Math.round((new Date(y,mo-1,d)-new Date(new Date().toDateString()))/86400000);
     const label = diff===0?'Today!':diff===1?'Tomorrow':diff+' days';
-    countdownHtml = `<div class="card" style="margin-bottom:10px">
-      <div style="background:var(--primary);padding:12px 14px;display:flex;align-items:center;justify-content:space-between;position:relative">
-        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent-dark),var(--accent),#e8c04a,var(--accent),var(--accent-dark))"></div>
-        <div>
-          <div style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px">Next event</div>
-          <div style="font-size:15px;font-weight:600;color:white">${next.course_name||fmtDate(next.event_date)}</div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px">${fmtDate(next.event_date)}</div>
-        </div>
-        <div style="background:var(--accent);color:var(--primary);font-size:14px;font-weight:800;padding:7px 16px;border-radius:99px">${label}</div>
-      </div>
+    countdown = `<div style="background:var(--primary);border-radius:var(--radius-lg);padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;position:relative;overflow:hidden">
+      <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent-dark),var(--accent),#e8c04a,var(--accent),var(--accent-dark))"></div>
+      <div><div style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px">Next event</div>
+      <div style="font-size:15px;font-weight:600;color:white">${next.course_name||fmtDate(next.event_date)}</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px">${fmtDate(next.event_date)}</div></div>
+      <div style="background:var(--accent);color:var(--primary);font-size:14px;font-weight:800;padding:7px 16px;border-radius:99px;flex-shrink:0">${label}</div>
     </div>`;
   }
 
-  // Latest result
-  let resultHtml = '';
+  let result = '';
   if (db.noticeboard.length) {
-    const latest = db.noticeboard[0];
-    const ev = db.events.find(e=>e.id===latest.event_id);
-    const evRounds = db.rounds.filter(r=>r.event_id===latest.event_id&&r.verified);
-    const ranked = evRounds.sort((a,b)=>(b.stableford_points||0)-(a.stableford_points||0)).slice(0,3);
-    const medalColors = ['#B8860B','#888','#8B4513'];
-    const top3 = ranked.map((r,i)=>{
+    const n = db.noticeboard[0];
+    const ev = db.events.find(e=>e.id===n.event_id);
+    const evRounds = db.rounds.filter(r=>r.event_id===n.event_id&&r.verified);
+    const ranked = [...evRounds].sort((a,b)=>(b.stableford_points||0)-(a.stableford_points||0)).slice(0,3);
+    const mc = ['#B8860B','#888','#8B4513'];
+    const top3 = ranked.map((r,i) => {
       const p = db.players.find(x=>x.id===r.player_id);
       return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border)">
-        <div style="width:26px;height:26px;border-radius:50%;background:${medalColors[i]};color:white;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">${i+1}</div>
-        ${avatarHtml(p, 30, 10)}
+        <div style="width:26px;height:26px;border-radius:50%;background:${mc[i]};color:white;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">${i+1}</div>
+        ${avatarHtml(p,30,10)}
         <div style="flex:1;font-size:13px;font-weight:${i===0?'700':'400'};color:var(--text)">${p?.name||'?'}</div>
-        <div style="font-size:16px;font-weight:800;color:${medalColors[i]}">${r.stableford_points||0}<span style="font-size:10px;color:var(--text-3);font-weight:400"> pts</span></div>
+        <div style="font-size:15px;font-weight:800;color:${mc[i]}">${r.stableford_points||0}<span style="font-size:10px;color:var(--text-3);font-weight:400"> pts</span></div>
       </div>`;
     }).join('');
-    resultHtml = `<div style="background:white;border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:10px">
+    result = `<div style="background:white;border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden">
       <div style="background:var(--primary);padding:14px 16px;position:relative">
         <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent-dark),var(--accent),#e8c04a,var(--accent),var(--accent-dark))"></div>
         <div style="display:flex;align-items:center;gap:12px">
           <div style="width:40px;height:40px;border-radius:50%;background:rgba(201,168,76,0.15);border:1.5px solid rgba(201,168,76,0.4);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px">⛳</div>
-          <div>
-            <div style="font-family:'DM Serif Display',serif;font-size:17px;color:white">${ev?.course_name||'Latest result'}</div>
-            <div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px">${ev?fmtDate(ev.event_date):''} · ${evRounds.length} rounds</div>
-          </div>
+          <div><div style="font-family:'DM Serif Display',serif;font-size:17px;color:white">${ev?.course_name||'Latest result'}</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px">${ev?fmtDate(ev.event_date):''} · ${evRounds.length} rounds</div></div>
         </div>
       </div>
       <div style="padding:4px 16px 0">${top3}</div>
       <div style="padding:10px 16px;display:flex;justify-content:flex-end;border-top:0.5px solid var(--border)">
-        <button onclick="" class="btn sm">Share</button>
+        <button class="btn sm accent" onclick="">Share</button>
       </div>
     </div>`;
+  } else {
+    result = `<div class="empty"><div class="empty-icon">⛳</div><div class="empty-title">No results yet</div><div class="empty-sub">Results appear here after your first event</div></div>`;
   }
-
-  feed.innerHTML = statsBar + countdownHtml + (resultHtml || '<div class="empty"><div class="empty-icon">⛳</div><div class="empty-title">No results yet</div><div class="empty-text">Results will appear here after your first event</div></div>');
+  feed.innerHTML = statsBar + countdown + result;
 }
 
 function renderLeaderboard() {
   const el = document.getElementById('lb-table');
-  const publishedEids = new Set(db.events.filter(e=>e.published).map(e=>e.id));
-  const allRows = db.players.map(p => {
-    const pts = db.rounds.filter(r=>r.player_id===p.id&&r.verified&&publishedEids.has(r.event_id)).reduce((s,r)=>s+(r.league_points||0),0);
-    return { ...p, pts };
-  }).sort((a,b)=>b.pts-a.pts);
-  if (!allRows.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">🏆</div><div class="empty-title">No standings yet</div><div class="empty-text">Leaderboard appears after results are published</div></div>'; return; }
-  let pos = 1;
-  el.innerHTML = allRows.map((p,i) => {
-    if (i>0 && p.pts < allRows[i-1].pts) pos = i+1;
-    const posLabel = pos===1?'1st':pos===2?'2nd':pos===3?'3rd':pos+'th';
+  const pubEids = new Set(db.events.filter(e=>e.published).map(e=>e.id));
+  const rows = db.players.map(p => ({ ...p, pts: db.rounds.filter(r=>r.player_id===p.id&&r.verified&&pubEids.has(r.event_id)).reduce((s,r)=>s+(r.league_points||0),0) })).sort((a,b)=>b.pts-a.pts);
+  if (!rows.length) { el.innerHTML='<div class="empty"><div class="empty-icon">🏆</div><div class="empty-title">No standings yet</div></div>'; return; }
+  let pos=1;
+  el.innerHTML = rows.map((p,i) => {
+    if (i>0&&p.pts<rows[i-1].pts) pos=i+1;
+    const lbl = pos===1?'1st':pos===2?'2nd':pos===3?'3rd':pos+'th';
     const cls = pos===1?'lb-card-gold':pos===2?'lb-card-silver':pos===3?'lb-card-bronze':'';
-    const rankBg = pos===1?'#B8860B':pos===2?'#888':pos===3?'#8B4513':'var(--primary)';
-    const ptsColor = pos===1?'#B8860B':pos===2?'#666':pos===3?'#8B4513':'var(--green,#16a34a)';
-    return `<div class="lb-slide-wrap">
-      <div class="lb-card ${cls}" style="width:100%;text-align:left;cursor:pointer">
-        <div style="width:34px;height:34px;border-radius:50%;background:${rankBg};color:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:700">${posLabel}</div>
-        ${avatarHtml(p, 34, 12)}
-        <div style="flex:1;min-width:0">
-          <div class="lb-name">${p.name}</div>
-          <div class="lb-sub">Hcp ${parseFloat(p.handicap_index||0).toFixed(1)}</div>
-        </div>
-        <div class="lb-pts" style="color:${ptsColor}">${p.pts}<span style="font-size:11px;font-weight:400;color:var(--text-3)"> pts</span></div>
-      </div>
-    </div>`;
+    const bg  = pos===1?'#B8860B':pos===2?'#888':pos===3?'#8B4513':'var(--primary)';
+    const pc  = pos===1?'#B8860B':pos===2?'#666':pos===3?'#8B4513':'var(--green)';
+    return `<div class="lb-wrap"><div class="lb-card ${cls}">
+      <div style="width:34px;height:34px;border-radius:50%;background:${bg};color:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:700">${lbl}</div>
+      ${avatarHtml(p,34,12)}
+      <div style="flex:1;min-width:0"><div class="lb-name">${p.name}</div><div class="lb-sub">Hcp ${parseFloat(p.handicap_index||0).toFixed(1)}</div></div>
+      <div class="lb-pts" style="color:${pc}">${p.pts}<span style="font-size:11px;font-weight:400;color:var(--text-3)"> pts</span></div>
+    </div></div>`;
   }).join('');
-  // Slide in animation
-  setTimeout(() => {
-    const cards = document.querySelectorAll('#lb-table .lb-slide-wrap');
-    cards.forEach((c,i) => {
-      c.style.opacity='0'; c.style.transform='translateX(-22px)'; c.style.transition='none';
-      setTimeout(() => { requestAnimationFrame(() => requestAnimationFrame(() => { c.style.transition='opacity 0.38s ease,transform 0.38s cubic-bezier(0.22,1,0.36,1)'; c.style.opacity='1'; c.style.transform='translateX(0)'; })); }, 80+i*100);
-    });
-  }, 50);
 }
 
 function renderSchedule() {
   const el = document.getElementById('schedule-feed');
   const today = new Date().toISOString().slice(0,10);
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const upcoming = [...db.events].filter(e=>e.event_date>=today).sort((a,b)=>a.event_date.localeCompare(b.event_date));
   const past = [...db.events].filter(e=>e.event_date<today).sort((a,b)=>b.event_date.localeCompare(a.event_date)).slice(0,5);
-  if (!upcoming.length && !past.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">📅</div><div class="empty-title">No events yet</div><div class="empty-text">Events will appear here once added by your admin</div></div>'; return; }
-  const renderEvent = (ev, isPast) => {
+  if (!upcoming.length&&!past.length) { el.innerHTML='<div class="empty"><div class="empty-icon">📅</div><div class="empty-title">No events yet</div><div class="empty-sub">Events appear here once added by your admin</div></div>'; return; }
+  const renderEv = (ev, past) => {
     const [y,m,d] = ev.event_date.split('-');
-    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     const isOuting = ev.event_type==='outing_18';
-    return `<div class="event-card">
-      <div class="event-card-header">
-        <div class="event-date-block" style="${isPast?'opacity:0.5':''}">
-          <div class="event-date-day">${parseInt(d)}</div>
-          <div class="event-date-month">${months[parseInt(m)-1]}</div>
+    return `<div class="event-card" style="${past?'opacity:0.6':''}">
+      <div style="display:flex;align-items:center;gap:12px;padding:12px 14px">
+        <div class="ev-date"><div class="ev-day">${parseInt(d)}</div><div class="ev-month">${months[parseInt(m)-1]}</div></div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${ev.course_name||'TBD'}</div>
+          <div style="font-size:11px;color:var(--text-3);margin-top:2px">${isOuting?'Outing · 18 holes':'Sunday · 9 holes'}${ev.published?' · Results posted':''}</div>
         </div>
-        <div class="event-info">
-          <div class="event-name">${ev.course_name||'TBD'}</div>
-          <div class="event-meta">${isOuting?'Outing · 18 holes':'Sunday · 9 holes'}${ev.published?' · Results posted':''}</div>
-        </div>
-        ${isOuting?`<span class="tag tag-purple">Outing</span>`:`<span class="tag tag-blue">Sunday</span>`}
+        <span class="tag ${isOuting?'tag-purple':'tag-blue'}">${isOuting?'Outing':'Sunday'}</span>
       </div>
     </div>`;
   };
-  el.innerHTML = (upcoming.map(e=>renderEvent(e,false)).join('')) + (past.length ? `<div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text-3);padding:4px 2px 8px;margin-top:6px">Past events</div>${past.map(e=>renderEvent(e,true)).join('')}` : '');
+  el.innerHTML = upcoming.map(e=>renderEv(e,false)).join('') + (past.length?`<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-3);padding:8px 2px;margin-top:6px">Past events</div>`+past.map(e=>renderEv(e,true)).join(''):'');
 }
 
 function renderProfile() {
   const el = document.getElementById('profile-content');
   const pid = currentUser?.id;
   const player = db.players.find(p=>p.user_id===pid);
-  const isAdmin = currentUser?.user_metadata?.role === 'admin';
+  const isAdmin = currentUser?.user_metadata?.role==='admin';
   if (!player) {
-    el.innerHTML = `<div class="empty"><div class="empty-icon">👤</div><div class="empty-title">Profile not set up</div><div class="empty-text">Ask your admin to add you as a player</div></div>
-    <button class="btn danger full" onclick="doLogout()" style="margin-top:16px">Sign out</button>`;
+    el.innerHTML = `<div class="empty"><div class="empty-icon">👤</div><div class="empty-title">Profile not set up</div><div class="empty-sub">Ask your admin to add you as a player</div></div><button class="btn danger full" onclick="doLogout()" style="margin-top:16px">Sign out</button>`;
     return;
   }
   el.innerHTML = `
     <div class="profile-hero">
       ${avatarHtml(player, 60, 20)}
-      <div style="flex:1">
-        <div class="profile-name">${player.name}</div>
-        <div class="profile-role">${isAdmin?'Admin · ':''}Member</div>
-      </div>
-      <div style="text-align:right">
-        <div class="profile-hcp">${parseFloat(player.handicap_index||0).toFixed(1)}</div>
-        <div class="profile-hcp-label">Handicap</div>
-      </div>
+      <div style="flex:1"><div style="font-family:'DM Serif Display',serif;font-size:20px;color:white">${player.name}</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px">${isAdmin?'Admin · ':''}Member</div></div>
+      <div style="text-align:right"><div style="font-size:28px;font-weight:800;color:var(--accent)">${parseFloat(player.handicap_index||0).toFixed(1)}</div>
+      <div style="font-size:10px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:.05em">Handicap</div></div>
     </div>
-    <button class="btn danger full" onclick="doLogout()" style="margin-top:8px">Sign out</button>
-  `;
+    <button class="btn danger full" onclick="doLogout()">Sign out</button>`;
 }
 
-async function doLogout() {
-  try { await authApi('logout', {}); } catch(e) {}
-  currentUser = null; societySettings = null;
-  db = { players:[], events:[], rounds:[], noticeboard:[] };
-  document.getElementById('app').classList.remove('active');
-  document.getElementById('auth-screen').classList.add('active');
-  document.getElementById('login-email').value = '';
-  document.getElementById('login-password').value = '';
-}
-
-// ── Settings ──
 function renderSettings() {
   const el = document.getElementById('settings-content');
-  const s = societySettings || {};
-  const subStatus = s.subscription_status || 'trial';
-  const subClass = subStatus==='active'?'sub-active':subStatus==='trial'?'sub-trial':'sub-expired';
-  const subLabel = subStatus==='active'?'Active':subStatus==='trial'?'Trial':'Expired';
-
+  const s = societySettings||{};
+  const subClass = s.subscription_status==='active'?'sub-active':s.subscription_status==='trial'?'sub-trial':'sub-expired';
+  const subLabel = s.subscription_status==='active'?'Active':s.subscription_status==='trial'?'Trial':'Expired';
   el.innerHTML = `
-    <div class="admin-banner">
-      <span style="font-size:18px">⚙️</span>
-      <div class="admin-banner-text">Admin settings — only visible to you</div>
+    <div class="admin-banner"><span style="font-size:18px">⚙️</span>
+      <div style="flex:1;font-size:12px;font-weight:600;color:var(--accent-dark)">Admin settings</div>
       <span class="sub-pill ${subClass}">${subLabel}</span>
     </div>
-
     <div class="settings-section">
       <div class="settings-section-title">Branding</div>
-      <div class="settings-row" onclick="openBrandingModal()">
-        <div class="settings-row-label">Society name</div>
-        <div class="settings-row-value">${s.society_name||'—'} ›</div>
-      </div>
+      <div class="settings-row" onclick="openModal('Society name','<div class=\\'field\\'><label>Society name</label><input type=\\'text\\' id=\\'brand-name\\' value=\\'${s.society_name||s.name||\\'\\'}\\'></div><button class=\\'btn primary full\\' onclick=\\'saveBranding()\\' style=\\'margin-top:8px\\'>Save</button>')">
+        <div class="settings-row-label">Society name</div><div class="settings-row-value">${s.society_name||s.name||'—'} ›</div></div>
       <div class="settings-row" onclick="openLogoModal()">
-        <div class="settings-row-label">Logo</div>
-        <div class="settings-row-value">${s.logo_url?'Uploaded ✓':'Not set'} ›</div>
-      </div>
+        <div class="settings-row-label">Logo</div><div class="settings-row-value">${s.logo_url?'Uploaded ✓':'Not set'} ›</div></div>
       <div class="settings-row" onclick="openThemeModal()">
-        <div class="settings-row-label">Theme colours</div>
-        <div class="settings-row-value">
-          <div class="colour-dot" style="background:${s.primary_colour||'#0a1628'}"></div>
-          <div class="colour-dot" style="background:${s.secondary_colour||'#C9A84C'}"></div>
-          ›
-        </div>
-      </div>
+        <div class="settings-row-label">Theme</div>
+        <div class="settings-row-value"><div class="colour-dot" style="background:${s.primary_colour||'#0a1628'}"></div><div class="colour-dot" style="background:${s.secondary_colour||'#C9A84C'}"></div> ›</div></div>
     </div>
-
     <div class="settings-section">
       <div class="settings-section-title">Handicap rules</div>
       <div class="settings-row" onclick="openHcpModal()">
-        <div class="settings-row-label">Handicap mode</div>
-        <div class="settings-row-value">${s.handicap_mode==='custom'?'Custom':s.handicap_mode==='gui'?'GUI standard':'Points-based'} ›</div>
-      </div>
+        <div class="settings-row-label">Mode</div><div class="settings-row-value">${s.handicap_mode==='custom'?'Custom':s.handicap_mode==='gui'?'GUI standard':'Points-based'} ›</div></div>
       <div class="settings-row" onclick="openHcpModal()">
-        <div class="settings-row-label">Podium cuts</div>
-        <div class="settings-row-value">1st ${s.cut_1st||'-1.0'} / 2nd ${s.cut_2nd||'-0.5'} / 3rd ${s.cut_3rd||'-0.2'} ›</div>
-      </div>
+        <div class="settings-row-label">Podium cuts</div><div class="settings-row-value">1st ${s.cut_1st||'-1.0'} / 2nd ${s.cut_2nd||'-0.5'} / 3rd ${s.cut_3rd||'-0.2'} ›</div></div>
       <div class="settings-row" onclick="openHcpModal()">
-        <div class="settings-row-label">Non-podium addition</div>
-        <div class="settings-row-value">+${s.add_non_podium||'0.2'} per round ›</div>
-      </div>
+        <div class="settings-row-label">Non-podium addition</div><div class="settings-row-value">+${s.add_non_podium||'0.2'} ›</div></div>
       <div class="settings-row" onclick="openHcpModal()">
-        <div class="settings-row-label">Max handicap</div>
-        <div class="settings-row-value">${s.max_handicap||'36'} ›</div>
-      </div>
+        <div class="settings-row-label">Max handicap</div><div class="settings-row-value">${s.max_handicap||36} ›</div></div>
     </div>
-
     <div class="settings-section">
       <div class="settings-section-title">League points</div>
       <div class="settings-row" onclick="openLeaguePtsModal()">
-        <div class="settings-row-label">Points mode</div>
-        <div class="settings-row-value">${s.league_pts_mode==='custom'?'Custom':'BHGS style'} ›</div>
-      </div>
+        <div class="settings-row-label">Points table</div><div class="settings-row-value">${s.league_pts_mode==='custom'?'Custom':'BHGS style'} ›</div></div>
     </div>
-
     <div class="settings-section">
       <div class="settings-section-title">Event defaults</div>
       <div class="settings-row" onclick="openEventDefaultsModal()">
-        <div class="settings-row-label">Home course</div>
-        <div class="settings-row-value">${s.home_course||'Not set'} ›</div>
-      </div>
+        <div class="settings-row-label">Home course</div><div class="settings-row-value">${s.home_course||'Not set'} ›</div></div>
       <div class="settings-row" onclick="openEventDefaultsModal()">
-        <div class="settings-row-label">Default holes</div>
-        <div class="settings-row-value">${s.holes_per_round||9} holes ›</div>
-      </div>
+        <div class="settings-row-label">Default holes</div><div class="settings-row-value">${s.holes_per_round||9} holes ›</div></div>
     </div>
-
-    <div class="settings-section">
-      <div class="settings-section-title">Events</div>
-      <div class="settings-row" onclick="openEventsModal()">
-        <div class="settings-row-label">Manage events</div>
-        <div class="settings-row-value">${db.events.length} events ›</div>
-      </div>
-    </div>
-
     <div class="settings-section">
       <div class="settings-section-title">Members</div>
       <div class="settings-row" onclick="openMembersModal()">
-        <div class="settings-row-label">Manage members</div>
-        <div class="settings-row-value">${db.players.length} members ›</div>
-      </div>
+        <div class="settings-row-label">Manage members</div><div class="settings-row-value">${db.players.length} members ›</div></div>
       <div class="settings-row" onclick="openInviteModal()">
-        <div class="settings-row-label">Invite link</div>
-        <div class="settings-row-value">Share ›</div>
-      </div>
+        <div class="settings-row-label">Invite link</div><div class="settings-row-value">Share ›</div></div>
     </div>
-
+    <div class="settings-section">
+      <div class="settings-section-title">Events</div>
+      <div class="settings-row" onclick="openEventsModal()">
+        <div class="settings-row-label">Manage events</div><div class="settings-row-value">${db.events.length} events ›</div></div>
+    </div>
     <div class="settings-section">
       <div class="settings-section-title">Subscription</div>
       <div class="settings-row" onclick="openBillingModal()">
-        <div class="settings-row-label">Plan</div>
-        <div class="settings-row-value"><span class="sub-pill ${subClass}">${subLabel}</span> ›</div>
-      </div>
+        <div class="settings-row-label">Plan</div><div class="settings-row-value"><span class="sub-pill ${subClass}">${subLabel}</span> ›</div></div>
     </div>
-
-    <div style="height:20px"></div>
-  `;
+    <div style="height:20px"></div>`;
 }
+
+// ── Modal helpers ──
+function openModal(title, bodyHtml) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').innerHTML = bodyHtml;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
 
 // ── Settings modals ──
 function openThemeModal() {
-  const s = societySettings || {};
-  const presets = THEMES.map(t => `
-    <div class="theme-option ${s.primary_colour===t.primary&&s.secondary_colour===t.accent?'selected':''}" onclick="applyThemePreset('${t.id}')">
-      <div class="theme-preview">
-        <div class="theme-preview-primary" style="background:${t.primary}"></div>
-        <div class="theme-preview-accent" style="background:${t.accent}"></div>
-      </div>
-      <div class="theme-label">${t.name}</div>
-    </div>`).join('');
-
-  document.getElementById('modal-title').textContent = 'Theme & colours';
-  document.getElementById('modal-body').innerHTML = `
-    <div class="field"><label>Preset themes</label><div class="theme-grid">${presets}</div></div>
-    <div class="field"><label>Custom primary colour</label>
-      <div class="colour-picker-wrap">
-        <div class="colour-preview" id="primary-preview" style="background:${s.primary_colour||'#0a1628'}"></div>
-        <input type="color" value="${s.primary_colour||'#0a1628'}" oninput="previewColour('primary',this.value)">
-        <input type="text" value="${s.primary_colour||'#0a1628'}" id="primary-hex" style="flex:1" oninput="if(/^#[0-9a-f]{6}$/i.test(this.value))previewColour('primary',this.value)">
-      </div>
-    </div>
-    <div class="field"><label>Custom accent colour</label>
-      <div class="colour-picker-wrap">
-        <div class="colour-preview" id="accent-preview" style="background:${s.secondary_colour||'#C9A84C'}"></div>
-        <input type="color" value="${s.secondary_colour||'#C9A84C'}" oninput="previewColour('accent',this.value)">
-        <input type="text" value="${s.secondary_colour||'#C9A84C'}" id="accent-hex" style="flex:1" oninput="if(/^#[0-9a-f]{6}$/i.test(this.value))previewColour('accent',this.value)">
-      </div>
-    </div>
-    <button class="btn primary full" onclick="saveTheme()" style="margin-top:8px">Save theme</button>
-  `;
-  document.getElementById('modal-overlay').classList.add('open');
-}
-
-function previewColour(type, val) {
-  document.getElementById(type+'-preview').style.background = val;
-  document.getElementById(type+'-hex').value = val;
-  if (type==='primary') document.documentElement.style.setProperty('--primary', val);
-  else document.documentElement.style.setProperty('--accent', val);
+  const s = societySettings||{};
+  const presets = THEMES.map(t=>`<div class="theme-opt" id="to-${t.id}" onclick="applyThemePreset('${t.id}')"><div class="theme-preview"><div style="flex:2;background:${t.primary}"></div><div style="flex:1;background:${t.accent}"></div></div><div class="theme-label">${t.name}</div></div>`).join('');
+  openModal('Theme & colours',`
+    <div style="margin-bottom:16px"><div class="field" style="margin-bottom:8px"><label>Preset themes</label><div class="theme-grid">${presets}</div></div></div>
+    <div class="field"><label>Primary colour</label><div class="colour-picker-wrap"><div class="colour-preview" id="pp"></div><input type="color" id="pc" oninput="document.getElementById('pp').style.background=this.value;document.getElementById('ph').value=this.value;document.documentElement.style.setProperty('--primary',this.value)"><input type="text" id="ph" value="${s.primary_colour||'#0a1628'}" style="flex:1" oninput="if(/^#[0-9a-f]{6}$/i.test(this.value)){document.getElementById('pc').value=this.value;document.getElementById('pp').style.background=this.value;document.documentElement.style.setProperty('--primary',this.value)}"></div></div>
+    <div class="field"><label>Accent colour</label><div class="colour-picker-wrap"><div class="colour-preview" id="ap"></div><input type="color" id="ac" oninput="document.getElementById('ap').style.background=this.value;document.getElementById('ah').value=this.value;document.documentElement.style.setProperty('--accent',this.value)"><input type="text" id="ah" value="${s.secondary_colour||'#C9A84C'}" style="flex:1" oninput="if(/^#[0-9a-f]{6}$/i.test(this.value)){document.getElementById('ac').value=this.value;document.getElementById('ap').style.background=this.value;document.documentElement.style.setProperty('--accent',this.value)}"></div></div>
+    <button class="btn primary full" onclick="saveTheme()" style="margin-top:4px">Save theme</button>`);
+  document.getElementById('pp').style.background = s.primary_colour||'#0a1628';
+  document.getElementById('pc').value = s.primary_colour||'#0a1628';
+  document.getElementById('ap').style.background = s.secondary_colour||'#C9A84C';
+  document.getElementById('ac').value = s.secondary_colour||'#C9A84C';
 }
 
 function applyThemePreset(id) {
-  const t = THEMES.find(x=>x.id===id);
-  if (!t) return;
-  previewColour('primary', t.primary);
-  previewColour('accent', t.accent);
-  document.querySelectorAll('.theme-option').forEach(el => {
-    el.classList.toggle('selected', el.getAttribute('onclick').includes(`'${id}'`));
-  });
+  const t = THEMES.find(x=>x.id===id); if(!t)return;
+  document.getElementById('pc').value=t.primary; document.getElementById('ph').value=t.primary; document.getElementById('pp').style.background=t.primary;
+  document.getElementById('ac').value=t.accent;  document.getElementById('ah').value=t.accent;  document.getElementById('ap').style.background=t.accent;
+  document.documentElement.style.setProperty('--primary',t.primary);
+  document.documentElement.style.setProperty('--accent',t.accent);
+  document.querySelectorAll('.theme-opt').forEach(el=>el.classList.toggle('selected',el.id==='to-'+id));
 }
 
 async function saveTheme() {
-  const primary = document.getElementById('primary-hex').value;
-  const accent  = document.getElementById('accent-hex').value;
   const sid = currentUser?.user_metadata?.society_id;
+  const primary = document.getElementById('ph').value;
+  const accent  = document.getElementById('ah').value;
   try {
-    await patch(`society_settings?society_id=eq.${sid}`, { primary_colour: primary, secondary_colour: accent });
-    societySettings = { ...societySettings, primary_colour: primary, secondary_colour: accent };
-    applyTheme(societySettings);
-    toast('Theme saved!', 'success');
-    closeModal();
-    renderSettings();
-  } catch(e) { toast('Error saving theme', 'error'); }
+    await dbPatch(`society_settings?society_id=eq.${sid}`, { primary_colour:primary, secondary_colour:accent });
+    societySettings = { ...societySettings, primary_colour:primary, secondary_colour:accent };
+    applyTheme(societySettings); toast('Theme saved!','success'); closeModal(); renderSettings();
+  } catch(e) { toast('Error: '+e.message,'error'); }
 }
 
 function openLogoModal() {
-  document.getElementById('modal-title').textContent = 'Society logo';
-  document.getElementById('modal-body').innerHTML = `
-    <p style="font-size:13px;color:var(--text-2);margin-bottom:16px">Upload your club crest or logo. This appears in the app and on the homescreen icon when members save to their phone.</p>
-    ${societySettings?.logo_url?`<div style="text-align:center;margin-bottom:16px"><img src="${societySettings.logo_url}" style="width:80px;height:80px;border-radius:16px;object-fit:cover;border:1px solid var(--border)"></div>`:''}
-    <div class="logo-upload-zone" onclick="document.getElementById('logo-upload-input').click()" style="border-color:var(--border-strong);background:var(--bg)">
-      <input type="file" id="logo-upload-input" accept="image/*" onchange="uploadLogo(event)" style="display:none">
+  openModal('Society logo',`
+    <p style="font-size:13px;color:var(--text-2);margin-bottom:14px">Upload your club crest. This appears in the app header and on the homescreen icon when members save to their phone.</p>
+    ${societySettings?.logo_url?`<div style="text-align:center;margin-bottom:14px"><img src="${societySettings.logo_url}" style="width:80px;height:80px;border-radius:16px;object-fit:cover;border:1px solid var(--border)"></div>`:''}
+    <div class="logo-drop" onclick="document.getElementById('logo-input').click()" style="border:2px dashed var(--border-strong);border-radius:var(--radius-lg);padding:32px;text-align:center;cursor:pointer">
+      <input type="file" id="logo-input" accept="image/*" onchange="uploadLogo(event)" style="display:none">
       <div style="font-size:32px;margin-bottom:8px">🏌️</div>
       <div style="font-size:13px;color:var(--text-3)">Tap to upload (PNG or JPG)</div>
-    </div>
-  `;
-  document.getElementById('modal-overlay').classList.add('open');
+    </div>`);
 }
 
 async function uploadLogo(event) {
-  const file = event.target.files[0];
-  if (!file) return;
+  const file = event.target.files[0]; if (!file) return;
   const sid = currentUser?.user_metadata?.society_id;
-  toast('Uploading logo…');
+  toast('Uploading…');
   try {
     const ext = file.name.split('.').pop();
     const path = `${sid}/logo.${ext}`;
-    const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/society-logos/${path}`, {
-      method: 'POST',
-      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${currentUser.access_token}`, 'Content-Type': file.type },
-      body: file
+    const res = await fetch(`${SUPABASE_URL}/storage/v1/object/society-logos/${path}`, {
+      method:'POST', headers:{ 'apikey':SUPABASE_KEY, 'Authorization':`Bearer ${currentUser.access_token}`, 'Content-Type':file.type }, body:file
     });
-    if (!uploadRes.ok) throw new Error('Upload failed');
-    const logoUrl = `${SUPABASE_URL}/storage/v1/object/public/society-logos/${path}`;
-    await patch(`society_settings?society_id=eq.${sid}`, { logo_url: logoUrl });
-    societySettings = { ...societySettings, logo_url: logoUrl };
-    updateBranding(societySettings);
-    toast('Logo updated!', 'success');
-    closeModal();
-    renderSettings();
-  } catch(e) { toast('Upload failed: '+e.message, 'error'); }
+    if (!res.ok) throw new Error('Upload failed');
+    const url = `${SUPABASE_URL}/storage/v1/object/public/society-logos/${path}`;
+    await dbPatch(`society_settings?society_id=eq.${sid}`, { logo_url:url });
+    societySettings = { ...societySettings, logo_url:url };
+    updateBranding(societySettings); toast('Logo updated!','success'); closeModal(); renderSettings();
+  } catch(e) { toast('Error: '+e.message,'error'); }
 }
 
 function openHcpModal() {
-  const s = societySettings || {};
-  document.getElementById('modal-title').textContent = 'Handicap rules';
-  document.getElementById('modal-body').innerHTML = `
-    <div class="field"><label>Mode</label>
-      <select id="hcp-mode" onchange="toggleHcpCustom()" style="margin-bottom:0">
-        <option value="bhgs" ${(s.handicap_mode||'bhgs')==='bhgs'?'selected':''}>Points-based (recommended)</option>
-        <option value="gui" ${s.handicap_mode==='gui'?'selected':''}>GUI standard</option>
-        <option value="custom" ${s.handicap_mode==='custom'?'selected':''}>Custom rules</option>
-      </select>
-    </div>
-    <div id="hcp-custom-rules">
+  const s = societySettings||{};
+  openModal('Handicap rules',`
+    <div class="field"><label>Mode</label><select id="hcp-mode" onchange="document.getElementById('hcp-custom').style.display=this.value==='gui'?'none':'block'">
+      <option value="bhgs" ${(s.handicap_mode||'bhgs')==='bhgs'?'selected':''}>Points-based</option>
+      <option value="gui" ${s.handicap_mode==='gui'?'selected':''}>GUI standard</option>
+      <option value="custom" ${s.handicap_mode==='custom'?'selected':''}>Custom</option>
+    </select></div>
+    <div id="hcp-custom" style="${s.handicap_mode==='gui'?'display:none':''}">
       <div style="background:var(--bg);border-radius:var(--radius);padding:12px 14px;margin-bottom:14px">
-        <div class="hcp-rule-row">
-          <div class="hcp-rule-label">1st place cut</div>
-          <input class="hcp-rule-input" type="number" step="0.1" id="hcp-cut-1" value="${s.cut_1st||-1.0}">
-        </div>
-        <div class="hcp-rule-row">
-          <div class="hcp-rule-label">2nd place cut</div>
-          <input class="hcp-rule-input" type="number" step="0.1" id="hcp-cut-2" value="${s.cut_2nd||-0.5}">
-        </div>
-        <div class="hcp-rule-row">
-          <div class="hcp-rule-label">3rd place cut</div>
-          <input class="hcp-rule-input" type="number" step="0.1" id="hcp-cut-3" value="${s.cut_3rd||-0.2}">
-        </div>
-        <div class="hcp-rule-row">
-          <div class="hcp-rule-label">4th–last addition</div>
-          <input class="hcp-rule-input" type="number" step="0.1" id="hcp-add" value="${s.add_non_podium||0.2}">
-        </div>
-        <div class="hcp-rule-row">
-          <div class="hcp-rule-label">Max handicap</div>
-          <input class="hcp-rule-input" type="number" id="hcp-max" value="${s.max_handicap||36}">
-        </div>
-        <div class="hcp-rule-row" style="border-bottom:none">
-          <div class="hcp-rule-label">Provisional rounds</div>
-          <input class="hcp-rule-input" type="number" id="hcp-prov" value="${s.provisional_rounds||3}">
-        </div>
+        <div class="hcp-rule-row"><div class="hcp-rule-label">1st place cut</div><input class="hcp-rule-input" type="number" step="0.1" id="hcp-1" value="${s.cut_1st||-1.0}"></div>
+        <div class="hcp-rule-row"><div class="hcp-rule-label">2nd place cut</div><input class="hcp-rule-input" type="number" step="0.1" id="hcp-2" value="${s.cut_2nd||-0.5}"></div>
+        <div class="hcp-rule-row"><div class="hcp-rule-label">3rd place cut</div><input class="hcp-rule-input" type="number" step="0.1" id="hcp-3" value="${s.cut_3rd||-0.2}"></div>
+        <div class="hcp-rule-row"><div class="hcp-rule-label">4th–last addition</div><input class="hcp-rule-input" type="number" step="0.1" id="hcp-add" value="${s.add_non_podium||0.2}"></div>
+        <div class="hcp-rule-row"><div class="hcp-rule-label">Max handicap</div><input class="hcp-rule-input" type="number" id="hcp-max" value="${s.max_handicap||36}"></div>
+        <div class="hcp-rule-row" style="border:none"><div class="hcp-rule-label">Provisional rounds</div><input class="hcp-rule-input" type="number" id="hcp-prov" value="${s.provisional_rounds||3}"></div>
       </div>
     </div>
-    <button class="btn primary full" onclick="saveHcpRules()">Save rules</button>
-  `;
-  toggleHcpCustom();
-  document.getElementById('modal-overlay').classList.add('open');
+    <button class="btn primary full" onclick="saveHcp()">Save rules</button>`);
 }
 
-function toggleHcpCustom() {
-  const mode = document.getElementById('hcp-mode')?.value;
-  const custom = document.getElementById('hcp-custom-rules');
-  if (custom) custom.style.display = mode === 'gui' ? 'none' : 'block';
-}
-
-async function saveHcpRules() {
+async function saveHcp() {
   const sid = currentUser?.user_metadata?.society_id;
   const mode = document.getElementById('hcp-mode').value;
-  const payload = {
-    handicap_mode: mode,
-    cut_1st: parseFloat(document.getElementById('hcp-cut-1')?.value || -1.0),
-    cut_2nd: parseFloat(document.getElementById('hcp-cut-2')?.value || -0.5),
-    cut_3rd: parseFloat(document.getElementById('hcp-cut-3')?.value || -0.2),
-    add_non_podium: parseFloat(document.getElementById('hcp-add')?.value || 0.2),
-    max_handicap: parseInt(document.getElementById('hcp-max')?.value || 36),
-    provisional_rounds: parseInt(document.getElementById('hcp-prov')?.value || 3),
-  };
-  try {
-    await patch(`society_settings?society_id=eq.${sid}`, payload);
-    societySettings = { ...societySettings, ...payload };
-    toast('Handicap rules saved!', 'success');
-    closeModal(); renderSettings();
-  } catch(e) { toast('Error saving rules', 'error'); }
+  const payload = { handicap_mode:mode, cut_1st:parseFloat(document.getElementById('hcp-1')?.value||-1), cut_2nd:parseFloat(document.getElementById('hcp-2')?.value||-0.5), cut_3rd:parseFloat(document.getElementById('hcp-3')?.value||-0.2), add_non_podium:parseFloat(document.getElementById('hcp-add')?.value||0.2), max_handicap:parseInt(document.getElementById('hcp-max')?.value||36), provisional_rounds:parseInt(document.getElementById('hcp-prov')?.value||3) };
+  try { await dbPatch(`society_settings?society_id=eq.${sid}`, payload); societySettings={...societySettings,...payload}; toast('Saved!','success'); closeModal(); renderSettings(); } catch(e) { toast('Error: '+e.message,'error'); }
 }
 
 function openLeaguePtsModal() {
-  const s = societySettings || {};
-  const defaultPts = {1:20,2:17,3:15,4:13,5:11,6:10,7:9,8:8,9:7,10:6};
-  const pts = s.league_pts_table || defaultPts;
-  const rows = Object.entries(defaultPts).map(([pos]) => `
-    <div class="hcp-rule-row">
-      <div class="hcp-rule-label">${pos}${pos==='1'?'st':pos==='2'?'nd':pos==='3'?'rd':'th'} place</div>
-      <input class="hcp-rule-input" type="number" id="lp-${pos}" value="${pts[pos]||0}">
-    </div>`).join('');
-  document.getElementById('modal-title').textContent = 'League points';
-  document.getElementById('modal-body').innerHTML = `
-    <div class="field"><label>Mode</label>
-      <select id="lp-mode" style="margin-bottom:14px">
-        <option value="bhgs" ${(s.league_pts_mode||'bhgs')==='bhgs'?'selected':''}>BHGS style</option>
-        <option value="custom" ${s.league_pts_mode==='custom'?'selected':''}>Custom</option>
-      </select>
-    </div>
-    <div style="background:var(--bg);border-radius:var(--radius);padding:12px 14px;margin-bottom:14px">${rows}</div>
-    <button class="btn primary full" onclick="saveLeaguePts()">Save points table</button>
-  `;
-  document.getElementById('modal-overlay').classList.add('open');
+  const s = societySettings||{};
+  const pts = s.league_pts_table||{1:20,2:17,3:15,4:13,5:11,6:10,7:9,8:8,9:7,10:6};
+  const rows = [1,2,3,4,5,6,7,8,9,10].map(p=>`<div class="hcp-rule-row${p===10?' style="border:none"':''}"><div class="hcp-rule-label">${p}${p===1?'st':p===2?'nd':p===3?'rd':'th'} place</div><input class="hcp-rule-input" type="number" id="lp-${p}" value="${pts[p]||0}"></div>`).join('');
+  openModal('League points',`<div class="field"><label>Mode</label><select id="lp-mode"><option value="bhgs" ${(s.league_pts_mode||'bhgs')==='bhgs'?'selected':''}>BHGS style</option><option value="custom" ${s.league_pts_mode==='custom'?'selected':''}>Custom</option></select></div><div style="background:var(--bg);border-radius:var(--radius);padding:12px 14px;margin-bottom:14px">${rows}</div><button class="btn primary full" onclick="saveLeaguePts()">Save</button>`);
 }
 
 async function saveLeaguePts() {
   const sid = currentUser?.user_metadata?.society_id;
   const mode = document.getElementById('lp-mode').value;
   const table = {};
-  [1,2,3,4,5,6,7,8,9,10].forEach(p => { table[p] = parseInt(document.getElementById('lp-'+p)?.value||0); });
-  try {
-    await patch(`society_settings?society_id=eq.${sid}`, { league_pts_mode: mode, league_pts_table: table });
-    societySettings = { ...societySettings, league_pts_mode: mode, league_pts_table: table };
-    toast('Points table saved!', 'success');
-    closeModal(); renderSettings();
-  } catch(e) { toast('Error saving points', 'error'); }
+  [1,2,3,4,5,6,7,8,9,10].forEach(p=>{ table[p]=parseInt(document.getElementById('lp-'+p)?.value||0); });
+  try { await dbPatch(`society_settings?society_id=eq.${sid}`, { league_pts_mode:mode, league_pts_table:table }); societySettings={...societySettings,league_pts_mode:mode,league_pts_table:table}; toast('Saved!','success'); closeModal(); renderSettings(); } catch(e) { toast('Error: '+e.message,'error'); }
 }
 
 function openEventDefaultsModal() {
-  const s = societySettings || {};
-  document.getElementById('modal-title').textContent = 'Event defaults';
-  document.getElementById('modal-body').innerHTML = `
+  const s = societySettings||{};
+  openModal('Event defaults',`
     <div class="field"><label>Home course name</label><input type="text" id="ev-course" value="${s.home_course||''}"></div>
     <div class="field"><label>Slope rating</label><input type="number" id="ev-slope" value="${s.home_course_slope||113}"></div>
     <div class="field"><label>Course rating</label><input type="number" step="0.1" id="ev-cr" value="${s.home_course_cr||69.0}"></div>
     <div class="field"><label>Par</label><input type="number" id="ev-par" value="${s.home_course_par||70}"></div>
-    <div class="field"><label>Default holes per round</label>
-      <select id="ev-holes">
-        <option value="9" ${(s.holes_per_round||9)===9?'selected':''}>9 holes (Sunday)</option>
-        <option value="18" ${s.holes_per_round===18?'selected':''}>18 holes (Outing)</option>
-      </select>
-    </div>
-    <button class="btn primary full" onclick="saveEventDefaults()">Save defaults</button>
-  `;
-  document.getElementById('modal-overlay').classList.add('open');
+    <div class="field"><label>Default holes</label><select id="ev-holes"><option value="9" ${(s.holes_per_round||9)==9?'selected':''}>9 holes (Sunday)</option><option value="18" ${s.holes_per_round==18?'selected':''}>18 holes (Outing)</option></select></div>
+    <button class="btn primary full" onclick="saveEventDefaults()">Save</button>`);
 }
 
 async function saveEventDefaults() {
   const sid = currentUser?.user_metadata?.society_id;
-  const payload = {
-    home_course: document.getElementById('ev-course').value,
-    home_course_slope: parseFloat(document.getElementById('ev-slope').value),
-    home_course_cr: parseFloat(document.getElementById('ev-cr').value),
-    home_course_par: parseInt(document.getElementById('ev-par').value),
-    holes_per_round: parseInt(document.getElementById('ev-holes').value),
-  };
-  try {
-    await patch(`society_settings?society_id=eq.${sid}`, payload);
-    societySettings = { ...societySettings, ...payload };
-    toast('Defaults saved!', 'success');
-    closeModal(); renderSettings();
-  } catch(e) { toast('Error saving defaults', 'error'); }
-}
-
-function openInviteModal() {
-  const code = societySettings?.invite_code || '—';
-  const link = `${location.origin}${location.pathname}?code=${code}`;
-  document.getElementById('modal-title').textContent = 'Invite members';
-  document.getElementById('modal-body').innerHTML = `
-    <p style="font-size:13px;color:var(--text-2);margin-bottom:16px">Share this code or link with new members. They'll use it when creating their account.</p>
-    <div style="background:var(--bg);border-radius:var(--radius);padding:16px;text-align:center;margin-bottom:14px">
-      <div style="font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Invite code</div>
-      <div style="font-size:28px;font-weight:800;color:var(--primary);letter-spacing:.1em">${code}</div>
-    </div>
-    <button class="btn primary full" onclick="navigator.share?navigator.share({title:'Join our golf society',text:'Use code ${code}',url:'${link}'}):navigator.clipboard.writeText('${link}').then(()=>toast('Link copied!','success'))">Share invite link</button>
-  `;
-  document.getElementById('modal-overlay').classList.add('open');
-}
-
-function openBillingModal() {
-  const s = societySettings || {};
-  const status = s.subscription_status || 'trial';
-  document.getElementById('modal-title').textContent = 'Subscription';
-  document.getElementById('modal-body').innerHTML = `
-    <div style="background:var(--bg);border-radius:var(--radius-lg);padding:16px;margin-bottom:16px;text-align:center">
-      <div style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Current plan</div>
-      <div style="font-size:24px;font-weight:800;color:var(--text);margin-bottom:6px">${status==='active'?'Active':'Trial'}</div>
-      ${s.trial_ends_at?`<div style="font-size:12px;color:var(--text-3)">Trial ends ${fmtDate(s.trial_ends_at?.slice(0,10))}</div>`:''}
-    </div>
-    <div style="background:var(--primary);border-radius:var(--radius-lg);padding:20px;margin-bottom:10px;color:white">
-      <div style="font-size:11px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">Founding rate</div>
-      <div style="font-size:32px;font-weight:800;color:var(--accent)">€50<span style="font-size:14px;font-weight:400;color:rgba(255,255,255,0.5)">/year</span></div>
-      <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:4px">Lock in forever · Standard rate is €200/year</div>
-    </div>
-    <button class="btn accent full" onclick="toast('Redirecting to payment…');setTimeout(()=>window.open('https://golfsoc.ie/subscribe','_blank'),500)">Subscribe · €50/year</button>
-    <div style="font-size:11px;color:var(--text-3);text-align:center;margin-top:10px">Secure payment via Stripe · Cancel anytime</div>
-  `;
-  document.getElementById('modal-overlay').classList.add('open');
+  const p = { home_course:document.getElementById('ev-course').value, home_course_slope:parseFloat(document.getElementById('ev-slope').value), home_course_cr:parseFloat(document.getElementById('ev-cr').value), home_course_par:parseInt(document.getElementById('ev-par').value), holes_per_round:parseInt(document.getElementById('ev-holes').value) };
+  try { await dbPatch(`society_settings?society_id=eq.${sid}`, p); societySettings={...societySettings,...p}; toast('Saved!','success'); closeModal(); renderSettings(); } catch(e) { toast('Error: '+e.message,'error'); }
 }
 
 function openMembersModal() {
-  const sid = currentUser?.user_metadata?.society_id;
-  document.getElementById('modal-title').textContent = 'Players';
-  const playerRows = db.players.map(p => `
-    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border)">
-      ${avatarHtml(p, 36, 12)}
-      <div style="flex:1;min-width:0">
-        <div style="font-size:14px;font-weight:500;color:var(--text)">${p.name}</div>
-        <div style="font-size:11px;color:var(--text-3)">Hcp ${parseFloat(p.handicap_index||0).toFixed(1)} · ${p.role==='admin'?'Admin':'Member'}</div>
-      </div>
-      <div style="display:flex;gap:6px">
-        <button onclick="editPlayer('${p.id}')" class="btn sm" style="padding:5px 10px">Edit</button>
-        <button onclick="removePlayer('${p.id}','${p.name}')" class="btn sm danger" style="padding:5px 10px">✕</button>
-      </div>
-    </div>`).join('');
-
-  document.getElementById('modal-body').innerHTML = `
-    <button onclick="openAddPlayerModal()" class="btn primary full" style="margin-bottom:14px">+ Add player</button>
-    ${playerRows || '<div class="empty" style="padding:1rem">No players yet</div>'}
-  `;
-  document.getElementById('modal-overlay').classList.add('open');
+  const rows = db.players.map(p=>`<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border)">${avatarHtml(p,36,12)}<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:500">${p.name}</div><div style="font-size:11px;color:var(--text-3)">Hcp ${parseFloat(p.handicap_index||0).toFixed(1)} · ${p.role==='admin'?'Admin':'Member'}</div></div><div style="display:flex;gap:6px"><button onclick="editPlayer('${p.id}')" class="btn sm">Edit</button><button onclick="removePlayer('${p.id}','${p.name.replace(/'/g,"\\'")}')" class="btn sm danger">✕</button></div></div>`).join('');
+  openModal('Members',`<button class="btn accent full" onclick="openAddPlayerModal()" style="margin-bottom:14px">+ Add player</button>${rows||'<div class="empty" style="padding:1rem">No players yet</div>'}`);
 }
 
 function openAddPlayerModal() {
-  document.getElementById('modal-title').textContent = 'Add player';
-  document.getElementById('modal-body').innerHTML = `
-    <div class="field"><label>Full name</label><input type="text" id="ap-name" placeholder="e.g. Shane Whelan"></div>
-    <div class="field"><label>Email (optional)</label><input type="email" id="ap-email" placeholder="their@email.com"></div>
+  openModal('Add player',`
+    <div class="field"><label>Full name</label><input type="text" id="ap-name"></div>
+    <div class="field"><label>Email (optional)</label><input type="email" id="ap-email"></div>
     <div class="field"><label>Handicap index</label><input type="number" id="ap-hcp" value="18.0" step="0.1" min="0" max="54"></div>
-    <div class="field"><label>Role</label>
-      <select id="ap-role">
-        <option value="member">Member</option>
-        <option value="admin">Admin</option>
-      </select>
-    </div>
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
-      <label class="toggle-switch"><input type="checkbox" id="ap-provisional"><div class="toggle-slider"></div></label>
-      <span style="font-size:13px;color:var(--text-2)">Provisional handicap</span>
-    </div>
-    <div style="display:flex;gap:8px">
-      <button onclick="openMembersModal()" class="btn" style="flex-shrink:0">← Back</button>
-      <button onclick="saveNewPlayer()" class="btn primary" style="flex:1">Add player</button>
-    </div>
-  `;
+    <div class="field"><label>Role</label><select id="ap-role"><option value="member">Member</option><option value="admin">Admin</option></select></div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><label class="toggle-switch"><input type="checkbox" id="ap-prov"><div class="toggle-slider"></div></label><span style="font-size:13px;color:var(--text-2)">Provisional handicap</span></div>
+    <div style="display:flex;gap:8px"><button onclick="openMembersModal()" class="btn">← Back</button><button onclick="saveNewPlayer()" class="btn accent" style="flex:1">Add player</button></div>`);
 }
 
 async function saveNewPlayer() {
   const sid = currentUser?.user_metadata?.society_id;
   const name = document.getElementById('ap-name').value.trim();
   const email = document.getElementById('ap-email').value.trim();
-  const hcp = parseFloat(document.getElementById('ap-hcp').value) || 18.0;
+  const hcp = parseFloat(document.getElementById('ap-hcp').value)||18;
   const role = document.getElementById('ap-role').value;
-  const provisional = document.getElementById('ap-provisional').checked;
-  if (!name) { toast('Enter a name', 'error'); return; }
+  const provisional = document.getElementById('ap-prov').checked;
+  if (!name) { toast('Enter a name','error'); return; }
   try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/players`, {
-      method: 'POST',
-      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${currentUser.access_token}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
-      body: JSON.stringify({ society_id: sid, name, email: email||null, handicap_index: hcp, role, provisional })
-    });
-    if (!res.ok) { const e = await res.text(); throw new Error(e); }
-    const player = await res.json();
-    db.players.push(player[0]);
-    db.players.sort((a,b) => a.name.localeCompare(b.name));
-    toast(name + ' added!', 'success');
-    openMembersModal();
-    renderAll();
-  } catch(e) { toast('Error: ' + e.message, 'error'); }
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/players`, { method:'POST', headers:H('players'), body:JSON.stringify({ society_id:sid, name, email:email||null, handicap_index:hcp, role, provisional }) });
+    if (!res.ok) throw new Error(await res.text());
+    const p = await res.json();
+    db.players.push(p[0]); db.players.sort((a,b)=>a.name.localeCompare(b.name));
+    toast(name+' added!','success'); openMembersModal(); renderAll();
+  } catch(e) { toast('Error: '+e.message,'error'); }
 }
 
 function editPlayer(pid) {
-  const p = db.players.find(x=>x.id===pid);
-  if (!p) return;
-  document.getElementById('modal-title').textContent = 'Edit player';
-  document.getElementById('modal-body').innerHTML = `
+  const p = db.players.find(x=>x.id===pid); if(!p)return;
+  openModal('Edit player',`
     <div class="field"><label>Full name</label><input type="text" id="ep-name" value="${p.name}"></div>
     <div class="field"><label>Email</label><input type="email" id="ep-email" value="${p.email||''}"></div>
     <div class="field"><label>Handicap index</label><input type="number" id="ep-hcp" value="${parseFloat(p.handicap_index||18).toFixed(1)}" step="0.1" min="0" max="54"></div>
-    <div class="field"><label>Role</label>
-      <select id="ep-role">
-        <option value="member" ${p.role==='member'?'selected':''}>Member</option>
-        <option value="admin" ${p.role==='admin'?'selected':''}>Admin</option>
-      </select>
-    </div>
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
-      <label class="toggle-switch"><input type="checkbox" id="ep-provisional" ${p.provisional?'checked':''}><div class="toggle-slider"></div></label>
-      <span style="font-size:13px;color:var(--text-2)">Provisional handicap</span>
-    </div>
-    <div style="display:flex;gap:8px">
-      <button onclick="openMembersModal()" class="btn" style="flex-shrink:0">← Back</button>
-      <button onclick="saveEditPlayer('${pid}')" class="btn primary" style="flex:1">Save changes</button>
-    </div>
-  `;
+    <div class="field"><label>Role</label><select id="ep-role"><option value="member" ${p.role==='member'?'selected':''}>Member</option><option value="admin" ${p.role==='admin'?'selected':''}>Admin</option></select></div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><label class="toggle-switch"><input type="checkbox" id="ep-prov" ${p.provisional?'checked':''}><div class="toggle-slider"></div></label><span style="font-size:13px;color:var(--text-2)">Provisional handicap</span></div>
+    <div style="display:flex;gap:8px"><button onclick="openMembersModal()" class="btn">← Back</button><button onclick="saveEditPlayer('${pid}')" class="btn accent" style="flex:1">Save</button></div>`);
 }
 
 async function saveEditPlayer(pid) {
-  const name  = document.getElementById('ep-name').value.trim();
-  const email = document.getElementById('ep-email').value.trim();
-  const hcp   = parseFloat(document.getElementById('ep-hcp').value) || 18.0;
-  const role  = document.getElementById('ep-role').value;
-  const provisional = document.getElementById('ep-provisional').checked;
-  if (!name) { toast('Enter a name', 'error'); return; }
+  const name=document.getElementById('ep-name').value.trim(), email=document.getElementById('ep-email').value.trim(), hcp=parseFloat(document.getElementById('ep-hcp').value)||18, role=document.getElementById('ep-role').value, provisional=document.getElementById('ep-prov').checked;
+  if(!name){toast('Enter a name','error');return;}
   try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/players?id=eq.${pid}`, {
-      method: 'PATCH',
-      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${currentUser.access_token}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
-      body: JSON.stringify({ name, email: email||null, handicap_index: hcp, role, provisional })
-    });
-    if (!res.ok) { const e = await res.text(); throw new Error(e); }
-    const idx = db.players.findIndex(p=>p.id===pid);
-    if (idx>=0) db.players[idx] = { ...db.players[idx], name, email, handicap_index: hcp, role, provisional };
-    toast('Saved!', 'success');
-    openMembersModal();
-    renderAll();
-  } catch(e) { toast('Error: ' + e.message, 'error'); }
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/players?id=eq.${pid}`, { method:'PATCH', headers:H('players'), body:JSON.stringify({ name, email:email||null, handicap_index:hcp, role, provisional }) });
+    if(!res.ok) throw new Error(await res.text());
+    const idx=db.players.findIndex(p=>p.id===pid); if(idx>=0) db.players[idx]={...db.players[idx],name,email,handicap_index:hcp,role,provisional};
+    toast('Saved!','success'); openMembersModal(); renderAll();
+  } catch(e) { toast('Error: '+e.message,'error'); }
 }
 
 async function removePlayer(pid, name) {
-  if (!confirm(`Remove ${name} from the society?`)) return;
+  if(!confirm(`Remove ${name}?`)) return;
   try {
-    await fetch(`${SUPABASE_URL}/rest/v1/players?id=eq.${pid}`, {
-      method: 'DELETE',
-      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${currentUser.access_token}` }
-    });
-    db.players = db.players.filter(p=>p.id!==pid);
-    toast(name + ' removed', 'success');
-    openMembersModal();
-    renderAll();
-  } catch(e) { toast('Error: ' + e.message, 'error'); }
+    await fetch(`${SUPABASE_URL}/rest/v1/players?id=eq.${pid}`, { method:'DELETE', headers:H('players') });
+    db.players=db.players.filter(p=>p.id!==pid); toast(name+' removed','success'); openMembersModal(); renderAll();
+  } catch(e) { toast('Error: '+e.message,'error'); }
 }
 
-function openBrandingModal() {
-  const s = societySettings || {};
-  document.getElementById('modal-title').textContent = 'Society name';
-  document.getElementById('modal-body').innerHTML = `
-    <div class="field"><label>Society name</label><input type="text" id="brand-name" value="${s.society_name||''}"></div>
-    <button class="btn primary full" onclick="saveBranding()">Save</button>
-  `;
-  document.getElementById('modal-overlay').classList.add('open');
+function openInviteModal() {
+  const code = societySettings?.invite_code||'—';
+  openModal('Invite members',`<p style="font-size:13px;color:var(--text-2);margin-bottom:16px">Share this code with new members. They enter it when creating their account.</p>
+    <div style="background:var(--bg);border-radius:var(--radius);padding:16px;text-align:center;margin-bottom:14px">
+      <div style="font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Invite code</div>
+      <div style="font-size:28px;font-weight:800;color:var(--primary);letter-spacing:.1em">${code}</div>
+    </div>
+    <button class="btn primary full" onclick="navigator.clipboard.writeText('${code}').then(()=>toast('Code copied!','success'))">Copy code</button>`);
+}
+
+function openEventsModal() {
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const rows=[...db.events].sort((a,b)=>b.event_date.localeCompare(a.event_date)).map(ev=>{
+    const [y,m,d]=ev.event_date.split('-');
+    return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border)">
+      <div class="ev-date" style="min-width:42px"><div class="ev-day">${parseInt(d)}</div><div class="ev-month">${months[parseInt(m)-1]}</div></div>
+      <div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600">${ev.course_name||'TBD'}</div><div style="font-size:11px;color:var(--text-3)">${ev.event_type==='outing_18'?'Outing · 18h':'Sunday · 9h'} · ${ev.published?'Published':'Draft'}</div></div>
+      <button onclick="deleteEvent('${ev.id}')" class="btn sm danger">✕</button>
+    </div>`;
+  }).join('');
+  openModal('Events',`<button class="btn accent full" onclick="openCreateEventModal()" style="margin-bottom:14px">+ Create event</button>${rows||'<div class="empty" style="padding:1rem">No events yet</div>'}`);
+}
+
+function openCreateEventModal() {
+  const s=societySettings||{};
+  const today=new Date().toISOString().slice(0,10);
+  openModal('Create event',`
+    <div class="field"><label>Date</label><input type="date" id="ce-date" value="${today}"></div>
+    <div class="field"><label>Course name</label><input type="text" id="ce-course" value="${s.home_course||''}"></div>
+    <div class="field"><label>Event type</label><select id="ce-type"><option value="sunday_9">Sunday (9 holes)</option><option value="outing_18">Outing (18 holes)</option></select></div>
+    <div class="field"><label>Slope rating</label><input type="number" id="ce-slope" value="${s.home_course_slope||113}"></div>
+    <div class="field"><label>Course rating</label><input type="number" step="0.1" id="ce-cr" value="${s.home_course_cr||69.0}"></div>
+    <div class="field"><label>Par</label><input type="number" id="ce-par" value="${s.home_course_par||70}"></div>
+    <div style="display:flex;gap:8px"><button onclick="openEventsModal()" class="btn">← Back</button><button onclick="saveNewEvent()" class="btn accent" style="flex:1">Create</button></div>`);
+}
+
+async function saveNewEvent() {
+  const sid=currentUser?.user_metadata?.society_id;
+  const date=document.getElementById('ce-date').value, course=document.getElementById('ce-course').value.trim(), type=document.getElementById('ce-type').value;
+  const slope=parseFloat(document.getElementById('ce-slope').value||113), cr=parseFloat(document.getElementById('ce-cr').value||69), par=parseInt(document.getElementById('ce-par').value||70);
+  if(!date){toast('Pick a date','error');return;}
+  try {
+    const res=await fetch(`${SUPABASE_URL}/rest/v1/events`,{method:'POST',headers:H('events'),body:JSON.stringify({society_id:sid,event_date:date,course_name:course||'TBD',event_type:type,holes:type==='outing_18'?18:9,slope_rating:slope,course_rating:cr,par,published:false})});
+    if(!res.ok)throw new Error(await res.text());
+    const ev=await res.json(); db.events.push(ev[0]); toast('Event created!','success'); openEventsModal(); renderAll();
+  } catch(e){toast('Error: '+e.message,'error');}
+}
+
+async function deleteEvent(eid) {
+  const ev=db.events.find(e=>e.id===eid);
+  if(!confirm(`Delete ${ev?.course_name||'this event'}?`))return;
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/events?id=eq.${eid}`,{method:'DELETE',headers:H('events')});
+    db.events=db.events.filter(e=>e.id!==eid); toast('Deleted','success'); openEventsModal(); renderAll();
+  } catch(e){toast('Error: '+e.message,'error');}
 }
 
 async function saveBranding() {
-  const sid = currentUser?.user_metadata?.society_id;
-  if (!sid) { toast('No society found — please restart', 'error'); return; }
-  const name = document.getElementById('brand-name').value.trim();
-  if (!name) { toast('Enter a name', 'error'); return; }
+  const sid=currentUser?.user_metadata?.society_id; if(!sid)return;
+  const name=document.getElementById('brand-name').value.trim(); if(!name){toast('Enter a name','error');return;}
   try {
-    await fetch(`${SUPABASE_URL}/rest/v1/societies?id=eq.${sid}`, {
-      method:'PATCH', headers:{'apikey':SUPABASE_ANON_KEY,'Authorization':`Bearer ${currentUser.access_token}`,'Content-Type':'application/json','Prefer':'return=representation'},
-      body: JSON.stringify({ name })
-    });
-    await fetch(`${SUPABASE_URL}/rest/v1/society_settings?society_id=eq.${sid}`, {
-      method:'PATCH', headers:{'apikey':SUPABASE_ANON_KEY,'Authorization':`Bearer ${currentUser.access_token}`,'Content-Type':'application/json','Prefer':'return=representation'},
-      body: JSON.stringify({ society_name: name })
-    });
-    societySettings = { ...societySettings, society_name: name };
-    updateBranding(societySettings);
-    toast('Name saved!', 'success');
-    closeModal(); renderSettings();
-  } catch(e) { toast('Error saving: '+e.message, 'error'); }
+    await fetch(`${SUPABASE_URL}/rest/v1/societies?id=eq.${sid}`,{method:'PATCH',headers:H('societies'),body:JSON.stringify({name})});
+    await fetch(`${SUPABASE_URL}/rest/v1/society_settings?society_id=eq.${sid}`,{method:'PATCH',headers:H('society_settings'),body:JSON.stringify({society_name:name})});
+    societySettings={...societySettings,society_name:name}; updateBranding(societySettings); toast('Saved!','success'); closeModal(); renderSettings();
+  } catch(e){toast('Error: '+e.message,'error');}
+}
+
+function openBillingModal() {
+  const s=societySettings||{};
+  openModal('Subscription',`
+    <div style="background:var(--bg);border-radius:var(--radius-lg);padding:16px;margin-bottom:16px;text-align:center">
+      <div style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Current plan</div>
+      <div style="font-size:24px;font-weight:800;color:var(--text)">${s.subscription_status==='active'?'Active':'Trial'}</div>
+    </div>
+    <div style="background:var(--primary);border-radius:var(--radius-lg);padding:20px;margin-bottom:10px;color:white">
+      <div style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">Founding rate</div>
+      <div style="font-size:32px;font-weight:800;color:var(--accent)">€50<span style="font-size:14px;font-weight:400;color:rgba(255,255,255,0.4)">/year</span></div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:4px">Lock in forever · Standard €200/year</div>
+    </div>
+    <button class="btn accent full" onclick="toast('Redirecting to payment…')">Subscribe · €50/year</button>
+    <div style="font-size:11px;color:var(--text-3);text-align:center;margin-top:10px">Secure payment via Stripe</div>`);
 }
 
 // ── Setup Wizard ──
 function showWizard() {
-  document.getElementById('auth-screen').classList.remove('active');
-  document.getElementById('setup-wizard').style.display = 'block';
-  renderWizardThemes();
-  wizardStep(1);
+  document.getElementById('setup-wizard').style.display='block';
+  renderWizThemes(); wizStep(1);
 }
-
-function renderWizardThemes() {
-  const grid = document.getElementById('wizard-theme-grid');
-  if (!grid) return;
-  grid.innerHTML = THEMES.map(t => `
-    <div class="theme-option ${wizardData.themeId===t.id?'selected':''}" onclick="selectWizardTheme('${t.id}')">
-      <div class="theme-preview">
-        <div class="theme-preview-primary" style="background:${t.primary}"></div>
-        <div class="theme-preview-accent" style="background:${t.accent}"></div>
-      </div>
-      <div class="theme-label">${t.name}</div>
-    </div>`).join('');
+function renderWizThemes() {
+  document.getElementById('wiz-theme-grid').innerHTML = THEMES.map(t=>`<div class="theme-opt ${wizData.themeId===t.id?'selected':''}" onclick="selectWizTheme('${t.id}')"><div class="theme-preview"><div style="flex:2;background:${t.primary}"></div><div style="flex:1;background:${t.accent}"></div></div><div class="theme-label">${t.name}</div></div>`).join('');
 }
-
-function selectWizardTheme(id) {
-  wizardData.themeId = id;
-  const t = THEMES.find(x=>x.id===id);
-  if (t) { document.documentElement.style.setProperty('--primary',t.primary); document.documentElement.style.setProperty('--accent',t.accent); }
-  document.querySelectorAll('#wizard-theme-grid .theme-option').forEach(el => {
-    el.classList.toggle('selected', el.getAttribute('onclick').includes(`'${id}'`));
-  });
+function wizStep(n) {
+  document.querySelectorAll('.wiz-step').forEach(s=>s.classList.remove('active'));
+  document.getElementById('wiz-'+n)?.classList.add('active');
+  document.querySelectorAll('.wiz-dot').forEach((d,i)=>d.classList.toggle('done',i<n));
 }
-
-function selectHcpMode(mode) {
-  wizardData.hcpMode = mode;
-  ['bhgs','gui','custom'].forEach(m => {
-    document.getElementById('hcpm-'+m+'-check').style.display = m===mode?'block':'none';
-    document.getElementById('hcpm-'+m).style.borderColor = m===mode?'rgba(201,168,76,0.6)':'rgba(255,255,255,0.1)';
-  });
-}
-
-function wizardStep(n) {
-  document.querySelectorAll('.wizard-step').forEach(s=>s.classList.remove('active'));
-  document.getElementById('wizard-'+n)?.classList.add('active');
-  const dots = document.querySelectorAll('.wizard-dot');
-  dots.forEach((d,i) => d.classList.toggle('done', i<n));
-}
-
-function wizardNext(current) {
-  if (current===1) {
-    wizardData.societyName = document.getElementById('wizard-society-name').value.trim();
-    wizardData.homeCourse = document.getElementById('wizard-home-course').value.trim();
-    if (!wizardData.societyName) { toast('Enter your society name', 'error'); return; }
+function wizNext(n) {
+  if (n===1) {
+    wizData.societyName = document.getElementById('wiz-society-name').value.trim();
+    wizData.homeCourse  = document.getElementById('wiz-home-course').value.trim();
+    if (!wizData.societyName) { toast('Enter your society name','error'); return; }
   }
-  wizardStep(current+1);
+  if (n===3 && !wizData.hcpMode) { toast('Select a handicap mode','error'); return; }
+  wizStep(n+1);
 }
-
-function previewWizardLogo(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  wizardData.logoFile = file;
-  const reader = new FileReader();
-  reader.onload = e => {
-    const wrap = document.getElementById('wizard-logo-preview-wrap');
-    wrap.style.display = 'block';
-    wrap.innerHTML = `<img src="${e.target.result}" style="width:80px;height:80px;object-fit:cover;border-radius:16px">`;
-    document.getElementById('wizard-upload-icon').style.display = 'none';
-  };
-  reader.readAsDataURL(file);
+function selectWizTheme(id) {
+  wizData.themeId=id;
+  const t=THEMES.find(x=>x.id===id); if(t){ document.documentElement.style.setProperty('--primary',t.primary); document.documentElement.style.setProperty('--accent',t.accent); }
+  document.querySelectorAll('#wiz-theme-grid .theme-opt').forEach(el=>el.classList.toggle('selected',el.getAttribute('onclick').includes(`'${id}'`)));
 }
-
+function selectHcpMode(mode) {
+  wizData.hcpMode=mode;
+  ['bhgs','gui','custom'].forEach(m=>{ document.getElementById('hm-'+m)?.classList.toggle('selected',m===mode); });
+}
+function previewWizLogo(event) {
+  const file=event.target.files[0]; if(!file)return;
+  wizData.logoFile=file;
+  const r=new FileReader(); r.onload=e=>{ const p=document.getElementById('wiz-logo-preview'); p.innerHTML=`<img src="${e.target.result}" style="width:80px;height:80px;object-fit:cover;border-radius:16px">`; p.style.display='block'; document.getElementById('wiz-logo-icon').style.display='none'; }; r.readAsDataURL(file);
+}
 async function finishWizard() {
-  if (!wizardData.hcpMode) { toast('Select a handicap mode', 'error'); return; }
   toast('Setting up your society…');
   try {
-    const theme = THEMES.find(t=>t.id===wizardData.themeId) || THEMES[0];
-    const inviteCode = (wizardData.societyName||'GOLF').replace(/[^A-Z0-9]/gi,'').toUpperCase().slice(0,6)+'-'+Math.random().toString(36).slice(2,6).toUpperCase();
-
+    const theme=THEMES.find(t=>t.id===wizData.themeId)||THEMES[0];
+    const inviteCode=(wizData.societyName||'GOLF').replace(/[^A-Z0-9]/gi,'').toUpperCase().slice(0,6)+'-'+Math.random().toString(36).slice(2,6).toUpperCase();
+    const headers={'apikey':SUPABASE_KEY,'Authorization':`Bearer ${currentUser.access_token}`,'Content-Type':'application/json','Prefer':'return=representation'};
     // 1. Create society
-    const societyRes = await fetch(`${SUPABASE_URL}/rest/v1/societies`, {
-      method: 'POST',
-      headers: {
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${currentUser.access_token}`,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=representation'
-      },
-      body: JSON.stringify({
-        name: wizardData.societyName,
-        invite_code: inviteCode,
-        contact_email: currentUser.email,
-        subscription_status: 'trial',
-        trial_ends_at: new Date(Date.now()+30*86400000).toISOString()
-      })
-    });
-    if (!societyRes.ok) { const e = await societyRes.text(); throw new Error('Society: '+e); }
-    const society = await societyRes.json();
-    const sid = society[0].id;
-
-    // 2. Create society settings
-    const settingsRes = await fetch(`${SUPABASE_URL}/rest/v1/society_settings`, {
-      method: 'POST',
-      headers: {
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${currentUser.access_token}`,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=representation'
-      },
-      body: JSON.stringify({
-        society_id: sid,
-        society_name: wizardData.societyName,
-        home_course: wizardData.homeCourse || '',
-        primary_colour: theme.primary,
-        secondary_colour: theme.accent,
-        theme_preset: wizardData.themeId,
-        handicap_mode: wizardData.hcpMode,
-        cut_1st: -1.0, cut_2nd: -0.5, cut_3rd: -0.2,
-        add_non_podium: 0.2, max_handicap: 36, provisional_rounds: 3,
-        league_pts_mode: 'bhgs', holes_per_round: 9
-      })
-    });
-    if (!settingsRes.ok) { const e = await settingsRes.text(); throw new Error('Settings: '+e); }
-
-    // 3. Create player record for the admin
-    await fetch(`${SUPABASE_URL}/rest/v1/players`, {
-      method: 'POST',
-      headers: {
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${currentUser.access_token}`,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=representation'
-      },
-      body: JSON.stringify({
-        society_id: sid,
-        user_id: currentUser.id,
-        name: currentUser.user_metadata?.full_name || currentUser.email,
-        email: currentUser.email,
-        handicap_index: 18.0,
-        role: 'admin'
-      })
-    });
-
-    // 4. Update user metadata with society_id
-    const metaRes = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
-      method: 'PUT',
-      headers: {
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${currentUser.access_token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        data: {
-          full_name: currentUser.user_metadata?.full_name || '',
-          society_id: sid,
-          role: 'admin'
-        }
-      })
-    });
-    if (!metaRes.ok) { const e = await metaRes.text(); throw new Error('Metadata: '+e); }
-    const updatedUser = await metaRes.json();
-
-    // 5. Update local user object
-    currentUser = {
-      ...currentUser,
-      user_metadata: { ...currentUser.user_metadata, society_id: sid, role: 'admin' }
-    };
-
-    // 6. Load settings and launch app
-    societySettings = {
-      society_id: sid,
-      society_name: wizardData.societyName,
-      home_course: wizardData.homeCourse || '',
-      primary_colour: theme.primary,
-      secondary_colour: theme.accent,
-      invite_code: inviteCode,
-      subscription_status: 'trial'
-    };
-
-    document.getElementById('setup-wizard').style.display = 'none';
+    const sRes=await fetch(`${SUPABASE_URL}/rest/v1/societies`,{method:'POST',headers,body:JSON.stringify({name:wizData.societyName,invite_code:inviteCode,contact_email:currentUser.email,subscription_status:'trial',trial_ends_at:new Date(Date.now()+30*86400000).toISOString()})});
+    if(!sRes.ok) throw new Error('Society: '+(await sRes.text()));
+    const sid=(await sRes.json())[0].id;
+    // 2. Create settings
+    await fetch(`${SUPABASE_URL}/rest/v1/society_settings`,{method:'POST',headers,body:JSON.stringify({society_id:sid,society_name:wizData.societyName,home_course:wizData.homeCourse||'',primary_colour:theme.primary,secondary_colour:theme.accent,theme_preset:wizData.themeId,handicap_mode:wizData.hcpMode||'bhgs',cut_1st:-1,cut_2nd:-0.5,cut_3rd:-0.2,add_non_podium:0.2,max_handicap:36,provisional_rounds:3,league_pts_mode:'bhgs',holes_per_round:9})});
+    // 3. Create admin player record
+    await fetch(`${SUPABASE_URL}/rest/v1/players`,{method:'POST',headers,body:JSON.stringify({society_id:sid,user_id:currentUser.id,name:currentUser.user_metadata?.full_name||currentUser.email,email:currentUser.email,handicap_index:18,role:'admin'})});
+    // 4. Update user metadata
+    await fetch(`${SUPABASE_URL}/auth/v1/user`,{method:'PUT',headers,body:JSON.stringify({data:{full_name:currentUser.user_metadata?.full_name||'',society_id:sid,role:'admin'}})});
+    currentUser.user_metadata={...currentUser.user_metadata,society_id:sid,role:'admin'};
+    societySettings={society_id:sid,society_name:wizData.societyName,home_course:wizData.homeCourse,primary_colour:theme.primary,secondary_colour:theme.accent,invite_code:inviteCode,subscription_status:'trial'};
+    applyTheme(societySettings); updateBranding(societySettings);
+    document.getElementById('setup-wizard').style.display='none';
     document.getElementById('app').classList.add('active');
-    
-    document.getElementById('nav-settings').style.display = 'flex';
-
-    applyTheme(societySettings);
-    updateBranding(societySettings);
-    await loadAll();
-    renderAll();
-
-    toast('Society created! Welcome to GolfSoc 🎉', 'success');
-  } catch(e) {
-    console.error('finishWizard error:', e);
-    toast('Setup failed: ' + e.message, 'error');
-  }
+    document.getElementById('nav-settings').style.display='flex';
+    await loadAll(); renderAll();
+    toast('Society created! Welcome to GolfSoc 🎉','success');
+  } catch(e) { console.error(e); toast('Setup failed: '+e.message,'error'); }
 }
-
-// ── Modal helpers ──
-function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
-function closeModalOutside(e) { if (e.target===document.getElementById('modal-overlay')) closeModal(); }
 
 // ── Toast ──
-let toastTimer;
+let _toastTimer;
 function toast(msg, type='') {
-  const el = document.getElementById('toast');
-  el.textContent = msg; el.className = 'show' + (type?' '+type:'');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.className = '', 2800);
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.className='show'+(type?' '+type:'');
+  clearTimeout(_toastTimer); _toastTimer=setTimeout(()=>el.className='',2800);
 }
+
+// ── Emergency reset ──
+function emergencyReset() { localStorage.clear(); location.reload(); }
 
 // ── Init ──
-function emergencyReset() {
-  localStorage.clear();
-  location.reload();
-}
-
-// Auto-reset if stuck on splash for more than 5 seconds
-setTimeout(() => {
-  const splash = document.getElementById('splash');
-  if (splash && splash.style.display !== 'none' && !splash.classList.contains('out')) {
-    localStorage.removeItem('gs_token');
-    splash.classList.add('out');
-    setTimeout(() => {
-      splash.style.display = 'none';
-      document.getElementById('auth-screen').classList.add('active');
-    }, 400);
-  }
-}, 5000);
-
 async function init() {
-  // Show escape hatch after 3 seconds
-  setTimeout(() => {
-    const esc = document.getElementById('splash-escape');
-    if (esc && document.getElementById('splash').style.display !== 'none') esc.style.display = 'block';
-  }, 3000);
-  const showAuth = () => {
-    document.getElementById('splash').classList.add('out');
-    setTimeout(() => {
-      document.getElementById('splash').style.display = 'none';
-      document.getElementById('auth-screen').classList.add('active');
-    }, 400);
-  };
+  // Show escape hatch after 4s
+  setTimeout(()=>{ const e=document.getElementById('splash-escape'); if(e&&document.getElementById('splash').style.display!=='none') e.style.display='block'; },4000);
+  // Auto-bail after 8s
+  setTimeout(()=>{ const sp=document.getElementById('splash'); if(sp&&!sp.classList.contains('out')){ localStorage.removeItem('gs_token'); localStorage.removeItem('gs_refresh'); sp.classList.add('out'); setTimeout(()=>{ sp.style.display='none'; document.getElementById('auth-screen').classList.add('active'); },400); } },8000);
 
-  const token = localStorage.getItem('gs_token');
-  const refreshToken = localStorage.getItem('gs_refresh');
-  if (!token && !refreshToken) { setTimeout(showAuth, 800); return; }
+  const token=localStorage.getItem('gs_token');
+  const refresh=localStorage.getItem('gs_refresh');
+  if (!token&&!refresh) { setTimeout(()=>{ document.getElementById('splash').classList.add('out'); setTimeout(()=>{ document.getElementById('splash').style.display='none'; document.getElementById('auth-screen').classList.add('active'); },400); },800); return; }
 
   try {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 6000);
-    let res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
-      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${token||''}` },
-      signal: controller.signal
-    });
-    clearTimeout(timer);
-
-    // If access token expired, try refresh token
-    if (!res.ok && refreshToken) {
-      const refreshRes = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
-        method: 'POST',
-        headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refresh_token: refreshToken })
-      });
-      if (refreshRes.ok) {
-        const refreshData = await refreshRes.json();
-        localStorage.setItem('gs_token', refreshData.access_token);
-        if (refreshData.refresh_token) localStorage.setItem('gs_refresh', refreshData.refresh_token);
-        res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
-          headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${refreshData.access_token}` }
-        });
+    let res=await fetch(`${SUPABASE_URL}/auth/v1/user`,{ headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${token||''}`} });
+    // If token expired, try refresh
+    if (!res.ok && refresh) {
+      const rr=await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`,{ method:'POST', headers:{'apikey':SUPABASE_KEY,'Content-Type':'application/json'}, body:JSON.stringify({refresh_token:refresh}) });
+      if (rr.ok) {
+        const rd=await rr.json();
+        localStorage.setItem('gs_token',rd.access_token);
+        if(rd.refresh_token) localStorage.setItem('gs_refresh',rd.refresh_token);
+        res=await fetch(`${SUPABASE_URL}/auth/v1/user`,{ headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${rd.access_token}`} });
+        currentUser={...(await res.clone().json()),access_token:rd.access_token};
       }
     }
-
-    if (!res.ok) {
-      localStorage.removeItem('gs_token');
-      localStorage.removeItem('gs_refresh');
-      setTimeout(showAuth, 800);
-      return;
-    }
-
-    const user = await res.json();
-    if (!user.id) { localStorage.removeItem('gs_token'); setTimeout(showAuth, 800); return; }
-
-    currentUser = { ...user, access_token: token };
+    if (!res.ok) { localStorage.removeItem('gs_token'); localStorage.removeItem('gs_refresh'); setTimeout(()=>{ document.getElementById('splash').classList.add('out'); setTimeout(()=>{ document.getElementById('splash').style.display='none'; document.getElementById('auth-screen').classList.add('active'); },400); },400); return; }
+    if (!currentUser) { const u=await res.json(); currentUser={...u,access_token:token}; }
     await afterLogin();
   } catch(e) {
-    // Network error or timeout — show auth
-    console.error('Init error:', e.message);
-    localStorage.removeItem('gs_token');
-    setTimeout(showAuth, 800);
+    console.error('Init error:',e);
+    localStorage.removeItem('gs_token'); localStorage.removeItem('gs_refresh');
+    document.getElementById('splash').classList.add('out');
+    setTimeout(()=>{ document.getElementById('splash').style.display='none'; document.getElementById('auth-screen').classList.add('active'); },400);
   }
 }
 
-// Intercept login to store token
-const _origAuthApi = authApi;
-async function patchedLogin(path, body) {
-  const data = await _origAuthApi(path, body);
-  if (data?.access_token) {
-    localStorage.setItem('gs_token', data.access_token);
-    if (data?.refresh_token) localStorage.setItem('gs_refresh', data.refresh_token);
-  }
-  return data;
-}
-
-// Override authApi for login/signup
-window.authApi = async (path, body) => {
-  const res = await fetch(`${SUPABASE_URL}/auth/v1/${path}`, {
-    method:'POST',
-    headers:{'apikey':SUPABASE_ANON_KEY,'Content-Type':'application/json'},
-    body:JSON.stringify(body)
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error_description||data.msg||'Auth error');
-  if (data?.access_token) {
-    localStorage.setItem('gs_token', data.access_token);
-    if (data?.refresh_token) localStorage.setItem('gs_refresh', data.refresh_token);
-  }
-  return data;
-};
-
-function openEventsModal() {
-  document.getElementById('modal-title').textContent = 'Events';
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const eventRows = [...db.events].sort((a,b)=>b.event_date.localeCompare(a.event_date)).map(ev => {
-    const [y,m,d] = ev.event_date.split('-');
-    const isOuting = ev.event_type === 'outing_18';
-    return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border)">
-      <div style="background:var(--primary);border-radius:8px;padding:6px 8px;text-align:center;flex-shrink:0;min-width:38px">
-        <div style="font-size:16px;font-weight:800;color:white;line-height:1">${parseInt(d)}</div>
-        <div style="font-size:8px;font-weight:600;color:var(--accent);text-transform:uppercase">${months[parseInt(m)-1]}</div>
-      </div>
-      <div style="flex:1;min-width:0">
-        <div style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${ev.course_name||'TBD'}</div>
-        <div style="font-size:11px;color:var(--text-3)">${isOuting?'Outing · 18h':'Sunday · 9h'} · ${ev.published?'Published':'Draft'}</div>
-      </div>
-      <button onclick="deleteEvent('${ev.id}')" class="btn sm danger" style="padding:5px 8px;flex-shrink:0">✕</button>
-    </div>`;
-  }).join('');
-
-  document.getElementById('modal-body').innerHTML = `
-    <button onclick="openCreateEventModal()" class="btn primary full" style="margin-bottom:14px">+ Create event</button>
-    ${eventRows || '<div class="empty" style="padding:1rem">No events yet</div>'}
-  `;
-  document.getElementById('modal-overlay').classList.add('open');
-}
-
-function openCreateEventModal() {
-  const s = societySettings || {};
-  const today = new Date().toISOString().slice(0,10);
-  document.getElementById('modal-title').textContent = 'Create event';
-  document.getElementById('modal-body').innerHTML = `
-    <div class="field"><label>Date</label><input type="date" id="ce-date" value="${today}"></div>
-    <div class="field"><label>Course name</label><input type="text" id="ce-course" value="${s.home_course||''}" placeholder="e.g. Bray Head Golf Club"></div>
-    <div class="field"><label>Event type</label>
-      <select id="ce-type" onchange="toggleEventType()">
-        <option value="sunday_9">Sunday (9 holes)</option>
-        <option value="outing_18">Outing (18 holes)</option>
-      </select>
-    </div>
-    <div id="ce-course-details" style="background:var(--bg);border-radius:var(--radius);padding:12px;margin-bottom:14px">
-      <div style="font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Course details</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
-        <div class="field" style="margin:0"><label>Slope</label><input type="number" id="ce-slope" value="${s.home_course_slope||113}"></div>
-        <div class="field" style="margin:0"><label>CR</label><input type="number" id="ce-cr" step="0.1" value="${s.home_course_cr||69.0}"></div>
-        <div class="field" style="margin:0"><label>Par</label><input type="number" id="ce-par" value="${s.home_course_par||70}"></div>
-      </div>
-    </div>
-    <div style="display:flex;gap:8px">
-      <button onclick="openEventsModal()" class="btn" style="flex-shrink:0">← Back</button>
-      <button onclick="saveNewEvent()" class="btn primary" style="flex:1">Create event</button>
-    </div>
-  `;
-}
-
-function toggleEventType() {
-  const type = document.getElementById('ce-type')?.value;
-  const details = document.getElementById('ce-course-details');
-  if (details) details.style.display = type === 'outing_18' ? 'block' : 'none';
-}
-
-async function saveNewEvent() {
-  const sid = currentUser?.user_metadata?.society_id;
-  const date   = document.getElementById('ce-date').value;
-  const course = document.getElementById('ce-course').value.trim();
-  const type   = document.getElementById('ce-type').value;
-  const slope  = parseFloat(document.getElementById('ce-slope')?.value || 113);
-  const cr     = parseFloat(document.getElementById('ce-cr')?.value || 69.0);
-  const par    = parseInt(document.getElementById('ce-par')?.value || 70);
-  if (!date) { toast('Pick a date', 'error'); return; }
-  try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/events`, {
-      method: 'POST',
-      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${currentUser.access_token}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
-      body: JSON.stringify({ society_id: sid, event_date: date, course_name: course||'TBD', event_type: type, holes: type==='outing_18'?18:9, slope_rating: slope, course_rating: cr, par, published: false })
-    });
-    if (!res.ok) { const e = await res.text(); throw new Error(e); }
-    const ev = await res.json();
-    db.events.push(ev[0]);
-    toast('Event created!', 'success');
-    openEventsModal();
-    renderAll();
-  } catch(e) { toast('Error: ' + e.message, 'error'); }
-}
-
-async function deleteEvent(eid) {
-  const ev = db.events.find(e=>e.id===eid);
-  if (!confirm(`Delete ${ev?.course_name||'this event'}?`)) return;
-  try {
-    await fetch(`${SUPABASE_URL}/rest/v1/events?id=eq.${eid}`, {
-      method: 'DELETE',
-      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${currentUser.access_token}` }
-    });
-    db.events = db.events.filter(e=>e.id!==eid);
-    toast('Event deleted', 'success');
-    openEventsModal();
-    renderAll();
-  } catch(e) { toast('Error: ' + e.message, 'error'); }
-}
-
-
+init();
 </script>
 </body>
 </html>
