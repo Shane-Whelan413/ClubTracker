@@ -1139,6 +1139,14 @@ function renderSettings() {
     </div>
 
     <div class="settings-section">
+      <div class="settings-section-title">Events</div>
+      <div class="settings-row" onclick="openEventsModal()">
+        <div class="settings-row-label">Manage events</div>
+        <div class="settings-row-value">${db.events.length} events ›</div>
+      </div>
+    </div>
+
+    <div class="settings-section">
       <div class="settings-section-title">Members</div>
       <div class="settings-row" onclick="openMembersModal()">
         <div class="settings-row-label">Manage members</div>
@@ -1445,13 +1453,134 @@ function openBillingModal() {
 }
 
 function openMembersModal() {
-  document.getElementById('modal-title').textContent = 'Members';
-  document.getElementById('modal-body').innerHTML = db.players.map(p => `
+  const sid = currentUser?.user_metadata?.society_id;
+  document.getElementById('modal-title').textContent = 'Players';
+  const playerRows = db.players.map(p => `
     <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border)">
       ${avatarHtml(p, 36, 12)}
-      <div style="flex:1"><div style="font-size:14px;font-weight:500">${p.name}</div><div style="font-size:11px;color:var(--text-3)">Hcp ${parseFloat(p.handicap_index||0).toFixed(1)}</div></div>
-    </div>`).join('') || '<div class="empty">No members yet</div>';
+      <div style="flex:1;min-width:0">
+        <div style="font-size:14px;font-weight:500;color:var(--text)">${p.name}</div>
+        <div style="font-size:11px;color:var(--text-3)">Hcp ${parseFloat(p.handicap_index||0).toFixed(1)} · ${p.role==='admin'?'Admin':'Member'}</div>
+      </div>
+      <div style="display:flex;gap:6px">
+        <button onclick="editPlayer('${p.id}')" class="btn sm" style="padding:5px 10px">Edit</button>
+        <button onclick="removePlayer('${p.id}','${p.name}')" class="btn sm danger" style="padding:5px 10px">✕</button>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('modal-body').innerHTML = `
+    <button onclick="openAddPlayerModal()" class="btn primary full" style="margin-bottom:14px">+ Add player</button>
+    ${playerRows || '<div class="empty" style="padding:1rem">No players yet</div>'}
+  `;
   document.getElementById('modal-overlay').classList.add('open');
+}
+
+function openAddPlayerModal() {
+  document.getElementById('modal-title').textContent = 'Add player';
+  document.getElementById('modal-body').innerHTML = `
+    <div class="field"><label>Full name</label><input type="text" id="ap-name" placeholder="e.g. Shane Whelan"></div>
+    <div class="field"><label>Email (optional)</label><input type="email" id="ap-email" placeholder="their@email.com"></div>
+    <div class="field"><label>Handicap index</label><input type="number" id="ap-hcp" value="18.0" step="0.1" min="0" max="54"></div>
+    <div class="field"><label>Role</label>
+      <select id="ap-role">
+        <option value="member">Member</option>
+        <option value="admin">Admin</option>
+      </select>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+      <label class="toggle-switch"><input type="checkbox" id="ap-provisional"><div class="toggle-slider"></div></label>
+      <span style="font-size:13px;color:var(--text-2)">Provisional handicap</span>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button onclick="openMembersModal()" class="btn" style="flex-shrink:0">← Back</button>
+      <button onclick="saveNewPlayer()" class="btn primary" style="flex:1">Add player</button>
+    </div>
+  `;
+}
+
+async function saveNewPlayer() {
+  const sid = currentUser?.user_metadata?.society_id;
+  const name = document.getElementById('ap-name').value.trim();
+  const email = document.getElementById('ap-email').value.trim();
+  const hcp = parseFloat(document.getElementById('ap-hcp').value) || 18.0;
+  const role = document.getElementById('ap-role').value;
+  const provisional = document.getElementById('ap-provisional').checked;
+  if (!name) { toast('Enter a name', 'error'); return; }
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/players`, {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${currentUser.access_token}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+      body: JSON.stringify({ society_id: sid, name, email: email||null, handicap_index: hcp, role, provisional })
+    });
+    if (!res.ok) { const e = await res.text(); throw new Error(e); }
+    const player = await res.json();
+    db.players.push(player[0]);
+    db.players.sort((a,b) => a.name.localeCompare(b.name));
+    toast(name + ' added!', 'success');
+    openMembersModal();
+    renderAll();
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+function editPlayer(pid) {
+  const p = db.players.find(x=>x.id===pid);
+  if (!p) return;
+  document.getElementById('modal-title').textContent = 'Edit player';
+  document.getElementById('modal-body').innerHTML = `
+    <div class="field"><label>Full name</label><input type="text" id="ep-name" value="${p.name}"></div>
+    <div class="field"><label>Email</label><input type="email" id="ep-email" value="${p.email||''}"></div>
+    <div class="field"><label>Handicap index</label><input type="number" id="ep-hcp" value="${parseFloat(p.handicap_index||18).toFixed(1)}" step="0.1" min="0" max="54"></div>
+    <div class="field"><label>Role</label>
+      <select id="ep-role">
+        <option value="member" ${p.role==='member'?'selected':''}>Member</option>
+        <option value="admin" ${p.role==='admin'?'selected':''}>Admin</option>
+      </select>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+      <label class="toggle-switch"><input type="checkbox" id="ep-provisional" ${p.provisional?'checked':''}><div class="toggle-slider"></div></label>
+      <span style="font-size:13px;color:var(--text-2)">Provisional handicap</span>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button onclick="openMembersModal()" class="btn" style="flex-shrink:0">← Back</button>
+      <button onclick="saveEditPlayer('${pid}')" class="btn primary" style="flex:1">Save changes</button>
+    </div>
+  `;
+}
+
+async function saveEditPlayer(pid) {
+  const name  = document.getElementById('ep-name').value.trim();
+  const email = document.getElementById('ep-email').value.trim();
+  const hcp   = parseFloat(document.getElementById('ep-hcp').value) || 18.0;
+  const role  = document.getElementById('ep-role').value;
+  const provisional = document.getElementById('ep-provisional').checked;
+  if (!name) { toast('Enter a name', 'error'); return; }
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/players?id=eq.${pid}`, {
+      method: 'PATCH',
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${currentUser.access_token}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+      body: JSON.stringify({ name, email: email||null, handicap_index: hcp, role, provisional })
+    });
+    if (!res.ok) { const e = await res.text(); throw new Error(e); }
+    const idx = db.players.findIndex(p=>p.id===pid);
+    if (idx>=0) db.players[idx] = { ...db.players[idx], name, email, handicap_index: hcp, role, provisional };
+    toast('Saved!', 'success');
+    openMembersModal();
+    renderAll();
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function removePlayer(pid, name) {
+  if (!confirm(`Remove ${name} from the society?`)) return;
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/players?id=eq.${pid}`, {
+      method: 'DELETE',
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${currentUser.access_token}` }
+    });
+    db.players = db.players.filter(p=>p.id!==pid);
+    toast(name + ' removed', 'success');
+    openMembersModal();
+    renderAll();
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
 }
 
 function openBrandingModal() {
@@ -1736,7 +1865,106 @@ window.authApi = async (path, body) => {
   return data;
 };
 
-init();
+function openEventsModal() {
+  document.getElementById('modal-title').textContent = 'Events';
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const eventRows = [...db.events].sort((a,b)=>b.event_date.localeCompare(a.event_date)).map(ev => {
+    const [y,m,d] = ev.event_date.split('-');
+    const isOuting = ev.event_type === 'outing_18';
+    return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border)">
+      <div style="background:var(--primary);border-radius:8px;padding:6px 8px;text-align:center;flex-shrink:0;min-width:38px">
+        <div style="font-size:16px;font-weight:800;color:white;line-height:1">${parseInt(d)}</div>
+        <div style="font-size:8px;font-weight:600;color:var(--accent);text-transform:uppercase">${months[parseInt(m)-1]}</div>
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${ev.course_name||'TBD'}</div>
+        <div style="font-size:11px;color:var(--text-3)">${isOuting?'Outing · 18h':'Sunday · 9h'} · ${ev.published?'Published':'Draft'}</div>
+      </div>
+      <button onclick="deleteEvent('${ev.id}')" class="btn sm danger" style="padding:5px 8px;flex-shrink:0">✕</button>
+    </div>`;
+  }).join('');
+
+  document.getElementById('modal-body').innerHTML = `
+    <button onclick="openCreateEventModal()" class="btn primary full" style="margin-bottom:14px">+ Create event</button>
+    ${eventRows || '<div class="empty" style="padding:1rem">No events yet</div>'}
+  `;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function openCreateEventModal() {
+  const s = societySettings || {};
+  const today = new Date().toISOString().slice(0,10);
+  document.getElementById('modal-title').textContent = 'Create event';
+  document.getElementById('modal-body').innerHTML = `
+    <div class="field"><label>Date</label><input type="date" id="ce-date" value="${today}"></div>
+    <div class="field"><label>Course name</label><input type="text" id="ce-course" value="${s.home_course||''}" placeholder="e.g. Bray Head Golf Club"></div>
+    <div class="field"><label>Event type</label>
+      <select id="ce-type" onchange="toggleEventType()">
+        <option value="sunday_9">Sunday (9 holes)</option>
+        <option value="outing_18">Outing (18 holes)</option>
+      </select>
+    </div>
+    <div id="ce-course-details" style="background:var(--bg);border-radius:var(--radius);padding:12px;margin-bottom:14px">
+      <div style="font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Course details</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+        <div class="field" style="margin:0"><label>Slope</label><input type="number" id="ce-slope" value="${s.home_course_slope||113}"></div>
+        <div class="field" style="margin:0"><label>CR</label><input type="number" id="ce-cr" step="0.1" value="${s.home_course_cr||69.0}"></div>
+        <div class="field" style="margin:0"><label>Par</label><input type="number" id="ce-par" value="${s.home_course_par||70}"></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button onclick="openEventsModal()" class="btn" style="flex-shrink:0">← Back</button>
+      <button onclick="saveNewEvent()" class="btn primary" style="flex:1">Create event</button>
+    </div>
+  `;
+}
+
+function toggleEventType() {
+  const type = document.getElementById('ce-type')?.value;
+  const details = document.getElementById('ce-course-details');
+  if (details) details.style.display = type === 'outing_18' ? 'block' : 'none';
+}
+
+async function saveNewEvent() {
+  const sid = currentUser?.user_metadata?.society_id;
+  const date   = document.getElementById('ce-date').value;
+  const course = document.getElementById('ce-course').value.trim();
+  const type   = document.getElementById('ce-type').value;
+  const slope  = parseFloat(document.getElementById('ce-slope')?.value || 113);
+  const cr     = parseFloat(document.getElementById('ce-cr')?.value || 69.0);
+  const par    = parseInt(document.getElementById('ce-par')?.value || 70);
+  if (!date) { toast('Pick a date', 'error'); return; }
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/events`, {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${currentUser.access_token}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+      body: JSON.stringify({ society_id: sid, event_date: date, course_name: course||'TBD', event_type: type, holes: type==='outing_18'?18:9, slope_rating: slope, course_rating: cr, par, published: false })
+    });
+    if (!res.ok) { const e = await res.text(); throw new Error(e); }
+    const ev = await res.json();
+    db.events.push(ev[0]);
+    toast('Event created!', 'success');
+    openEventsModal();
+    renderAll();
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function deleteEvent(eid) {
+  const ev = db.events.find(e=>e.id===eid);
+  if (!confirm(`Delete ${ev?.course_name||'this event'}?`)) return;
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/events?id=eq.${eid}`, {
+      method: 'DELETE',
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${currentUser.access_token}` }
+    });
+    db.events = db.events.filter(e=>e.id!==eid);
+    toast('Event deleted', 'success');
+    openEventsModal();
+    renderAll();
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+
 </script>
 </body>
 </html>
