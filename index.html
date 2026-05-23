@@ -132,7 +132,7 @@ body { height: 100%; overflow: hidden; overscroll-behavior: none; position: rela
   backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
   border-top: 1px solid rgba(255,255,255,0.08);
   display: flex;
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 8px);
 }
 .nav-btn {
   flex: 1; display: flex; flex-direction: column; align-items: center;
@@ -801,10 +801,16 @@ async function afterLogin() {
 async function loadSocietySettings() {
   try {
     const sid = currentUser?.user_metadata?.society_id;
-    if (!sid) return;
-    const settings = await get(`society_settings?society_id=eq.${sid}&select=*`);
-    const society = await get(`societies?id=eq.${sid}&select=*`);
+    if (!sid) { console.warn('loadSocietySettings: no society_id'); return; }
+    const headers = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${currentUser.access_token}` };
+    const [sRes, soRes] = await Promise.all([
+      fetch(`${SUPABASE_URL}/rest/v1/society_settings?society_id=eq.${sid}&select=*`, { headers }),
+      fetch(`${SUPABASE_URL}/rest/v1/societies?id=eq.${sid}&select=*`, { headers })
+    ]);
+    const settings = sRes.ok ? await sRes.json() : [];
+    const society  = soRes.ok ? await soRes.json() : [];
     societySettings = { ...(settings?.[0]||{}), ...(society?.[0]||{}) };
+    console.log('Society settings loaded:', societySettings);
     applyTheme(societySettings);
     updateBranding(societySettings);
   } catch(e) { console.error('loadSocietySettings:', e.message); }
