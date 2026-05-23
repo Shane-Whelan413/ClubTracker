@@ -31,7 +31,6 @@
   --radius:         10px;
   --radius-lg:      14px;
   --safe-top:       env(safe-area-inset-top, 0px);
-  --safe-bottom:    env(safe-area-inset-bottom, 0px);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
@@ -114,9 +113,10 @@ body { height: 100%; overflow: hidden; overscroll-behavior: none; position: rela
 
 /* Content area */
 .content {
-  padding: 1rem 1rem 140px;
+  padding: 1.5rem 1.5rem 140px;
+  overflow-x: hidden;
   height: calc(100vh - calc(56px + env(safe-area-inset-top, 0px)));
-  overflow-y: auto; overflow-x: hidden;
+  overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
 }
@@ -137,6 +137,7 @@ body { height: 100%; overflow: hidden; overscroll-behavior: none; position: rela
   padding-bottom: env(safe-area-inset-bottom, 0px);
   overflow: visible;
 }
+.nav::-webkit-scrollbar { display: none; }
 .nav-btn {
   flex: 1; display: flex; flex-direction: column; align-items: center;
   gap: 3px; padding: 10px 2px 8px;
