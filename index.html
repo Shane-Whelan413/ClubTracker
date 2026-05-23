@@ -308,6 +308,7 @@ input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px;
   <div class="splash-name" id="splash-society-name">GolfSoc</div>
   <div class="splash-sub">Golf Society Management</div>
   <div class="splash-spinner"></div>
+  <div id="splash-escape" style="display:none;margin-top:20px;font-size:12px;color:rgba(255,255,255,0.3);cursor:pointer" onclick="emergencyReset()">Taking too long? Tap to reset</div>
 </div>
 
 <!-- Auth Screen -->
@@ -1822,7 +1823,17 @@ function toast(msg, type='') {
 }
 
 // ── Init ──
+function emergencyReset() {
+  localStorage.clear();
+  location.reload();
+}
+
 async function init() {
+  // Show escape hatch after 3 seconds
+  setTimeout(() => {
+    const esc = document.getElementById('splash-escape');
+    if (esc && document.getElementById('splash').style.display !== 'none') esc.style.display = 'block';
+  }, 3000);
   const showAuth = () => {
     document.getElementById('splash').classList.add('out');
     setTimeout(() => {
