@@ -491,6 +491,30 @@ input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px;
   <div class="topbar">
     <div class="topbar-logo" id="topbar-logo-wrap">
       <span class="topbar-logo-text" id="topbar-logo-initials">GS</span>
+  
+  <nav class="nav" id="bottom-nav">
+    <button class="nav-btn active" onclick="showTab('home')" id="nav-home">
+      <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M3 12L12 3l9 9"/><path d="M9 21V12h6v9"/><path d="M3 12v9h18V12"/></svg></div>
+      <span class="nav-label">Home</span>
+    </button>
+    <button class="nav-btn" onclick="showTab('leaderboard')" id="nav-leaderboard">
+      <div class="nav-icon"><svg viewBox="0 0 24 24"><rect x="2" y="14" width="4" height="7" rx="1"/><rect x="9" y="9" width="4" height="12" rx="1"/><rect x="16" y="4" width="4" height="17" rx="1"/></svg></div>
+      <span class="nav-label">Standings</span>
+    </button>
+    <button class="nav-btn" onclick="showTab('schedule')" id="nav-schedule">
+      <div class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg></div>
+      <span class="nav-label">Schedule</span>
+    </button>
+    <button class="nav-btn" onclick="showTab('profile')" id="nav-profile">
+      <div class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
+      <span class="nav-label">Profile</span>
+    </button>
+    <button class="nav-btn" onclick="showTab('settings')" id="nav-settings" style="display:none">
+      <div class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></div>
+      <span class="nav-label">Settings</span>
+    </button>
+  </nav>
+
     </div>
     <div class="topbar-name" id="topbar-society-name">GolfSoc</div>
     <div class="topbar-actions">
@@ -532,30 +556,6 @@ input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px;
   </div>
 
 </div>
-
-  <nav class="nav" id="bottom-nav" style="display:none">
-    <button class="nav-btn active" onclick="showTab('home')" id="nav-home">
-      <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M3 12L12 3l9 9"/><path d="M9 21V12h6v9"/><path d="M3 12v9h18V12"/></svg></div>
-      <span class="nav-label">Home</span>
-    </button>
-    <button class="nav-btn" onclick="showTab('leaderboard')" id="nav-leaderboard">
-      <div class="nav-icon"><svg viewBox="0 0 24 24"><rect x="2" y="14" width="4" height="7" rx="1"/><rect x="9" y="9" width="4" height="12" rx="1"/><rect x="16" y="4" width="4" height="17" rx="1"/></svg></div>
-      <span class="nav-label">Standings</span>
-    </button>
-    <button class="nav-btn" onclick="showTab('schedule')" id="nav-schedule">
-      <div class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg></div>
-      <span class="nav-label">Schedule</span>
-    </button>
-    <button class="nav-btn" onclick="showTab('profile')" id="nav-profile">
-      <div class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
-      <span class="nav-label">Profile</span>
-    </button>
-    <button class="nav-btn" onclick="showTab('settings')" id="nav-settings" style="display:none">
-      <div class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></div>
-      <span class="nav-label">Settings</span>
-    </button>
-  </nav>
-
 
 
 <!-- Modal -->
@@ -800,7 +800,7 @@ async function afterLogin() {
   document.getElementById('splash').classList.add('out');
   setTimeout(() => { document.getElementById('splash').style.display = 'none'; }, 400);
   document.getElementById('app').classList.add('active');
-  document.getElementById('bottom-nav').style.display = 'flex';
+  
   if (currentUser?.user_metadata?.role === 'admin') {
     document.getElementById('nav-settings').style.display = 'flex';
   }
@@ -1839,7 +1839,7 @@ async function finishWizard() {
 
     document.getElementById('setup-wizard').style.display = 'none';
     document.getElementById('app').classList.add('active');
-    document.getElementById('bottom-nav').style.display = 'flex';
+    
     document.getElementById('nav-settings').style.display = 'flex';
 
     applyTheme(societySettings);
