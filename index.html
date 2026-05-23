@@ -752,13 +752,16 @@ async function afterLogin() {
   document.getElementById('auth-screen').classList.remove('active');
   document.getElementById('splash').style.display = 'flex';
   document.getElementById('splash').classList.remove('out');
-  await loadSocietySettings();
-  await loadAll();
-  renderAll();
+  try {
+    await loadSocietySettings();
+    await loadAll();
+    renderAll();
+  } catch(e) {
+    console.error('afterLogin error:', e);
+  }
   document.getElementById('splash').classList.add('out');
   setTimeout(() => { document.getElementById('splash').style.display = 'none'; }, 400);
   document.getElementById('app').classList.add('active');
-  // Show settings tab for admins
   if (currentUser?.user_metadata?.role === 'admin') {
     document.getElementById('nav-settings').style.display = 'flex';
   }
@@ -1820,28 +1823,44 @@ function toast(msg, type='') {
 
 // ── Init ──
 async function init() {
-  // Check for existing session
-  try {
-    const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
-      headers:{'apikey':SUPABASE_ANON_KEY,'Authorization':`Bearer ${localStorage.getItem('gs_token')||''}`}
-    });
-    if (res.ok) {
-      const user = await res.json();
-      if (user.id) {
-        currentUser = { ...user, access_token: localStorage.getItem('gs_token') };
-        await afterLogin();
-        return;
-      }
-    }
-  } catch(e) {}
-  // No session — show auth
-  setTimeout(() => {
+  const showAuth = () => {
     document.getElementById('splash').classList.add('out');
     setTimeout(() => {
       document.getElementById('splash').style.display = 'none';
       document.getElementById('auth-screen').classList.add('active');
     }, 400);
-  }, 800);
+  };
+
+  const token = localStorage.getItem('gs_token');
+  if (!token) { setTimeout(showAuth, 800); return; }
+
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 6000);
+    const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${token}` },
+      signal: controller.signal
+    });
+    clearTimeout(timer);
+
+    if (!res.ok) {
+      // Token invalid or expired — clear it and show auth
+      localStorage.removeItem('gs_token');
+      setTimeout(showAuth, 800);
+      return;
+    }
+
+    const user = await res.json();
+    if (!user.id) { localStorage.removeItem('gs_token'); setTimeout(showAuth, 800); return; }
+
+    currentUser = { ...user, access_token: token };
+    await afterLogin();
+  } catch(e) {
+    // Network error or timeout — show auth
+    console.error('Init error:', e.message);
+    localStorage.removeItem('gs_token');
+    setTimeout(showAuth, 800);
+  }
 }
 
 // Intercept login to store token
