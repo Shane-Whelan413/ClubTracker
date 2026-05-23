@@ -1466,16 +1466,23 @@ function openBrandingModal() {
 
 async function saveBranding() {
   const sid = currentUser?.user_metadata?.society_id;
+  if (!sid) { toast('No society found — please restart', 'error'); return; }
   const name = document.getElementById('brand-name').value.trim();
   if (!name) { toast('Enter a name', 'error'); return; }
   try {
-    await patch(`societies?id=eq.${sid}`, { name });
-    await patch(`society_settings?society_id=eq.${sid}`, { society_name: name });
+    await fetch(`${SUPABASE_URL}/rest/v1/societies?id=eq.${sid}`, {
+      method:'PATCH', headers:{'apikey':SUPABASE_ANON_KEY,'Authorization':`Bearer ${currentUser.access_token}`,'Content-Type':'application/json','Prefer':'return=representation'},
+      body: JSON.stringify({ name })
+    });
+    await fetch(`${SUPABASE_URL}/rest/v1/society_settings?society_id=eq.${sid}`, {
+      method:'PATCH', headers:{'apikey':SUPABASE_ANON_KEY,'Authorization':`Bearer ${currentUser.access_token}`,'Content-Type':'application/json','Prefer':'return=representation'},
+      body: JSON.stringify({ society_name: name })
+    });
     societySettings = { ...societySettings, society_name: name };
     updateBranding(societySettings);
     toast('Name saved!', 'success');
     closeModal(); renderSettings();
-  } catch(e) { toast('Error saving', 'error'); }
+  } catch(e) { toast('Error saving: '+e.message, 'error'); }
 }
 
 // ── Setup Wizard ──
@@ -1551,36 +1558,122 @@ async function finishWizard() {
   toast('Setting up your society…');
   try {
     const theme = THEMES.find(t=>t.id===wizardData.themeId) || THEMES[0];
-    const inviteCode = wizardData.societyName.replace(/\s+/g,'-').toUpperCase().slice(0,8)+'-'+Math.random().toString(36).slice(2,6).toUpperCase();
-    // Create society
-    const society = await post('societies', {
-      name: wizardData.societyName,
-      invite_code: inviteCode,
-      subscription_status: 'trial',
-      trial_ends_at: new Date(Date.now()+30*86400000).toISOString()
+    const inviteCode = (wizardData.societyName||'GOLF').replace(/[^A-Z0-9]/gi,'').toUpperCase().slice(0,6)+'-'+Math.random().toString(36).slice(2,6).toUpperCase();
+
+    // 1. Create society
+    const societyRes = await fetch(`${SUPABASE_URL}/rest/v1/societies`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${currentUser.access_token}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      },
+      body: JSON.stringify({
+        name: wizardData.societyName,
+        invite_code: inviteCode,
+        contact_email: currentUser.email,
+        subscription_status: 'trial',
+        trial_ends_at: new Date(Date.now()+30*86400000).toISOString()
+      })
     });
+    if (!societyRes.ok) { const e = await societyRes.text(); throw new Error('Society: '+e); }
+    const society = await societyRes.json();
     const sid = society[0].id;
-    // Create settings
-    await post('society_settings', {
+
+    // 2. Create society settings
+    const settingsRes = await fetch(`${SUPABASE_URL}/rest/v1/society_settings`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${currentUser.access_token}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      },
+      body: JSON.stringify({
+        society_id: sid,
+        society_name: wizardData.societyName,
+        home_course: wizardData.homeCourse || '',
+        primary_colour: theme.primary,
+        secondary_colour: theme.accent,
+        theme_preset: wizardData.themeId,
+        handicap_mode: wizardData.hcpMode,
+        cut_1st: -1.0, cut_2nd: -0.5, cut_3rd: -0.2,
+        add_non_podium: 0.2, max_handicap: 36, provisional_rounds: 3,
+        league_pts_mode: 'bhgs', holes_per_round: 9
+      })
+    });
+    if (!settingsRes.ok) { const e = await settingsRes.text(); throw new Error('Settings: '+e); }
+
+    // 3. Create player record for the admin
+    await fetch(`${SUPABASE_URL}/rest/v1/players`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${currentUser.access_token}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      },
+      body: JSON.stringify({
+        society_id: sid,
+        user_id: currentUser.id,
+        name: currentUser.user_metadata?.full_name || currentUser.email,
+        email: currentUser.email,
+        handicap_index: 18.0,
+        role: 'admin'
+      })
+    });
+
+    // 4. Update user metadata with society_id
+    const metaRes = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+      method: 'PUT',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${currentUser.access_token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        data: {
+          full_name: currentUser.user_metadata?.full_name || '',
+          society_id: sid,
+          role: 'admin'
+        }
+      })
+    });
+    if (!metaRes.ok) { const e = await metaRes.text(); throw new Error('Metadata: '+e); }
+    const updatedUser = await metaRes.json();
+
+    // 5. Update local user object
+    currentUser = {
+      ...currentUser,
+      user_metadata: { ...currentUser.user_metadata, society_id: sid, role: 'admin' }
+    };
+
+    // 6. Load settings and launch app
+    societySettings = {
       society_id: sid,
       society_name: wizardData.societyName,
-      home_course: wizardData.homeCourse,
+      home_course: wizardData.homeCourse || '',
       primary_colour: theme.primary,
       secondary_colour: theme.accent,
-      handicap_mode: wizardData.hcpMode,
-      cut_1st: -1.0, cut_2nd: -0.5, cut_3rd: -0.2, add_non_podium: 0.2, max_handicap: 36, provisional_rounds: 3,
-      league_pts_mode: 'bhgs', holes_per_round: 9
-    });
-    // Update user metadata
-    await fetch(`${SUPABASE_URL}/auth/v1/user`, {
-      method:'PUT', headers:{'apikey':SUPABASE_ANON_KEY,'Authorization':`Bearer ${currentUser.access_token}`,'Content-Type':'application/json'},
-      body: JSON.stringify({ data:{ ...currentUser.user_metadata, society_id:sid, role:'admin' } })
-    });
-    currentUser.user_metadata = { ...currentUser.user_metadata, society_id:sid, role:'admin' };
+      invite_code: inviteCode,
+      subscription_status: 'trial'
+    };
+
     document.getElementById('setup-wizard').style.display = 'none';
-    await afterLogin();
+    document.getElementById('app').classList.add('active');
+    document.getElementById('nav-settings').style.display = 'flex';
+
+    applyTheme(societySettings);
+    updateBranding(societySettings);
+    await loadAll();
+    renderAll();
+
     toast('Society created! Welcome to GolfSoc 🎉', 'success');
-  } catch(e) { toast('Setup failed: '+e.message, 'error'); }
+  } catch(e) {
+    console.error('finishWizard error:', e);
+    toast('Setup failed: ' + e.message, 'error');
+  }
 }
 
 // ── Modal helpers ──
