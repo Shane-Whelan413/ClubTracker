@@ -114,8 +114,7 @@ body { height: 100%; overflow: hidden; overscroll-behavior: none; position: rela
 
 /* Content area */
 .content {
-  max-width: 960px; margin: 0 auto;
-  padding: 1rem 1rem 120px;
+  padding: 1rem 1rem 140px;
   height: calc(100vh - calc(56px + env(safe-area-inset-top, 0px)));
   overflow-y: auto; overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
@@ -125,23 +124,18 @@ body { height: 100%; overflow: hidden; overscroll-behavior: none; position: rela
 .section.active { display: block; animation: fadeUp 0.2s ease; }
 @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-/* Bottom nav — fixed, dark, blur */
+/* Bottom nav — matches BHGS exactly */
 .nav {
-  position: fixed; bottom: 0; left: 0; right: 0; z-index: 49;
-  background: rgba(10,22,40,0.97);
-  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-  border-top: 1px solid rgba(255,255,255,0.08);
-  display: flex;
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-}
-/* Fill the gap below nav on iPhone */
-.nav::after {
-  content: '';
   position: fixed;
   bottom: 0; left: 0; right: 0;
-  height: env(safe-area-inset-bottom, 0px);
+  z-index: 49;
   background: rgba(10,22,40,0.97);
-  z-index: 48;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  overflow: visible;
 }
 .nav-btn {
   flex: 1; display: flex; flex-direction: column; align-items: center;
@@ -536,6 +530,8 @@ input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px;
     </div>
   </div>
 
+</div>
+
   <nav class="nav" id="bottom-nav">
     <button class="nav-btn active" onclick="showTab('home')" id="nav-home">
       <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M3 12L12 3l9 9"/><path d="M9 21V12h6v9"/><path d="M3 12v9h18V12"/></svg></div>
@@ -558,7 +554,8 @@ input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px;
       <span class="nav-label">Settings</span>
     </button>
   </nav>
-</div>
+
+
 
 <!-- Modal -->
 <div id="modal-overlay" onclick="closeModalOutside(event)">
@@ -802,6 +799,7 @@ async function afterLogin() {
   document.getElementById('splash').classList.add('out');
   setTimeout(() => { document.getElementById('splash').style.display = 'none'; }, 400);
   document.getElementById('app').classList.add('active');
+  document.getElementById('bottom-nav').style.display = 'flex';
   if (currentUser?.user_metadata?.role === 'admin') {
     document.getElementById('nav-settings').style.display = 'flex';
   }
@@ -1840,6 +1838,7 @@ async function finishWizard() {
 
     document.getElementById('setup-wizard').style.display = 'none';
     document.getElementById('app').classList.add('active');
+    document.getElementById('bottom-nav').style.display = 'flex';
     document.getElementById('nav-settings').style.display = 'flex';
 
     applyTheme(societySettings);
@@ -1901,20 +1900,38 @@ async function init() {
   };
 
   const token = localStorage.getItem('gs_token');
-  if (!token) { setTimeout(showAuth, 800); return; }
+  const refreshToken = localStorage.getItem('gs_refresh');
+  if (!token && !refreshToken) { setTimeout(showAuth, 800); return; }
 
   try {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 6000);
-    const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
-      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${token}` },
+    let res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${token||''}` },
       signal: controller.signal
     });
     clearTimeout(timer);
 
+    // If access token expired, try refresh token
+    if (!res.ok && refreshToken) {
+      const refreshRes = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
+        method: 'POST',
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refresh_token: refreshToken })
+      });
+      if (refreshRes.ok) {
+        const refreshData = await refreshRes.json();
+        localStorage.setItem('gs_token', refreshData.access_token);
+        if (refreshData.refresh_token) localStorage.setItem('gs_refresh', refreshData.refresh_token);
+        res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+          headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${refreshData.access_token}` }
+        });
+      }
+    }
+
     if (!res.ok) {
-      // Token invalid or expired — clear it and show auth
       localStorage.removeItem('gs_token');
+      localStorage.removeItem('gs_refresh');
       setTimeout(showAuth, 800);
       return;
     }
@@ -1936,7 +1953,10 @@ async function init() {
 const _origAuthApi = authApi;
 async function patchedLogin(path, body) {
   const data = await _origAuthApi(path, body);
-  if (data?.access_token) localStorage.setItem('gs_token', data.access_token);
+  if (data?.access_token) {
+    localStorage.setItem('gs_token', data.access_token);
+    if (data?.refresh_token) localStorage.setItem('gs_refresh', data.refresh_token);
+  }
   return data;
 }
 
@@ -1949,7 +1969,10 @@ window.authApi = async (path, body) => {
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error_description||data.msg||'Auth error');
-  if (data?.access_token) localStorage.setItem('gs_token', data.access_token);
+  if (data?.access_token) {
+    localStorage.setItem('gs_token', data.access_token);
+    if (data?.refresh_token) localStorage.setItem('gs_refresh', data.refresh_token);
+  }
   return data;
 };
 
