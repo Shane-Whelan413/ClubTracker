@@ -1282,6 +1282,12 @@ async function init() {
   }
 }
 
+// ── URL reset param ──
+if (location.search.includes('reset')) {
+  localStorage.clear();
+  history.replaceState({}, '', location.pathname);
+}
+
 init();
 </script>
 </body>
