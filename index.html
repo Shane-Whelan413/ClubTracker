@@ -778,32 +778,55 @@ async function loadSocietySettings() {
 
 // ── Data loading ──
 async function loadAll() {
-  const sid = currentUser?.user_metadata?.society_id;
-  if (!sid) return;
-  const filter = `society_id=eq.${sid}`;
-  const fetchWithTimeout = (path, ms=8000) => {
-    const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), ms);
-    return api(path, { method:'GET', prefer:'', cache:'no-store', signal: ctrl.signal }).finally(() => clearTimeout(timer));
-  };
-  const safe = async (path) => { try { return await fetchWithTimeout(path); } catch(e) { return []; } };
+  const pill = document.getElementById('conn-pill');
   try {
+    // Get society_id from multiple sources
+    let sid = currentUser?.user_metadata?.society_id;
+
+    // If not in metadata, try fetching fresh user data
+    if (!sid) {
+      try {
+        const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+          headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${currentUser.access_token}` }
+        });
+        const freshUser = await res.json();
+        sid = freshUser?.user_metadata?.society_id;
+        if (sid) currentUser.user_metadata = freshUser.user_metadata;
+      } catch(e) { console.error('Fresh user fetch failed:', e); }
+    }
+
+    if (!sid) {
+      console.warn('No society_id found — user may still be in wizard');
+      pill.textContent = 'No society'; pill.className = 'conn-pill err';
+      return;
+    }
+
+    const fetchWithTimeout = (path, ms=8000) => {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), ms);
+      return api(path, { method:'GET', prefer:'', cache:'no-store', signal: ctrl.signal }).finally(() => clearTimeout(timer));
+    };
+    const safe = async (path) => { try { return await fetchWithTimeout(path); } catch(e) { console.error('fetch failed:', path, e.message); return []; } };
+
     const [players, events, rounds, noticeboard] = await Promise.all([
-      safe(`players?${filter}&order=name`),
-      safe(`events?${filter}&order=event_date`),
-      safe(`rounds?${filter}&order=created_at`),
-      safe(`noticeboard?${filter}&order=created_at.desc`),
+      safe(`players?society_id=eq.${sid}&order=name`),
+      safe(`events?society_id=eq.${sid}&order=event_date`),
+      safe(`rounds?society_id=eq.${sid}&order=created_at`),
+      safe(`noticeboard?society_id=eq.${sid}&order=created_at.desc`),
     ]);
+
     db.players     = players     || [];
     db.events      = events      || [];
     db.rounds      = rounds      || [];
     db.noticeboard = noticeboard || [];
-    const pill = document.getElementById('conn-pill');
+
     pill.textContent = 'Connected'; pill.className = 'conn-pill ok';
     setTimeout(() => { pill.style.opacity = '0'; }, 2000);
   } catch(e) {
-    const pill = document.getElementById('conn-pill');
+    console.error('loadAll error:', e);
     pill.textContent = 'Offline'; pill.className = 'conn-pill err';
+    pill.style.cursor = 'pointer';
+    pill.onclick = () => { pill.textContent = 'Connecting…'; pill.className = 'conn-pill'; pill.style.opacity = '1'; loadAll().then(renderAll); };
   }
 }
 
