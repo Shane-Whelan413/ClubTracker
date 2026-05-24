@@ -786,7 +786,15 @@ function renderHome() {
     var label = diff===0?'Today!':diff===1?'Tomorrow':diff+' days';
     countdown = '<div style="background:var(--primary);border-radius:var(--radius-lg);padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;position:relative;overflow:hidden"><div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent-dark),var(--accent),var(--accent),var(--accent-dark))"></div><div><div style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px">Next event</div><div style="font-size:15px;font-weight:600;color:white">'+(next.course_name||fmtDate(next.event_date))+'</div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px">'+fmtDate(next.event_date)+'</div></div><div style="background:var(--accent);color:var(--primary);font-size:14px;font-weight:800;padding:7px 16px;border-radius:99px;flex-shrink:0">'+label+'</div></div>';
   }
-  var result = db.noticeboard.length ? '<div style="background:white;border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px"><div style="font-size:13px;font-weight:600;color:var(--text-2);margin-bottom:10px">Latest result</div><div class="empty-sub">Results will appear here</div></div>' : '<div class="empty"><div class="empty-icon">&#9971;</div><div class="empty-title">No results yet</div><div class="empty-sub">Results appear here after your first event</div></div>';
+  var noData = !db.players.length;
+  var result = '';
+  if (db.noticeboard.length) {
+    result = '<div style="background:white;border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px"><div style="font-size:13px;font-weight:600;color:var(--text-2);margin-bottom:10px">Latest result</div><div class="empty-sub">Results will appear here</div></div>';
+  } else if (noData) {
+    result = '<div style="background:white;border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden"><div style="background:var(--primary);padding:14px 16px;position:relative"><div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent-dark),var(--accent),var(--accent),var(--accent-dark))"></div><div style="font-family:DM Serif Display,serif;font-size:16px;color:white">Example Result</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px">This is how results will appear</div></div><div style="padding:4px 16px 0"><div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border)"><div style="width:26px;height:26px;border-radius:50%;background:#B8860B;color:white;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center">1st</div><div style="flex:1;font-size:13px;font-weight:600;color:var(--text)">Jamie Murphy</div><div style="font-size:15px;font-weight:800;color:#B8860B">34 pts</div></div><div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border)"><div style="width:26px;height:26px;border-radius:50%;background:#888;color:white;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center">2nd</div><div style="flex:1;font-size:13px;color:var(--text)">Ciara Walsh</div><div style="font-size:15px;font-weight:800;color:#666">31 pts</div></div><div style="display:flex;align-items:center;gap:10px;padding:10px 0"><div style="width:26px;height:26px;border-radius:50%;background:#8B4513;color:white;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center">3rd</div><div style="flex:1;font-size:13px;color:var(--text)">Declan Byrne</div><div style="font-size:15px;font-weight:800;color:#8B4513">29 pts</div></div></div><div style="padding:8px 16px;border-top:0.5px solid var(--border);font-size:11px;color:var(--text-3);text-align:center">Go to Settings to add players and create events</div></div>';
+  } else {
+    result = '<div class="empty"><div class="empty-icon">&#9971;</div><div class="empty-title">No results yet</div><div class="empty-sub">Results appear here after your first event</div></div>';
+  }
   feed.innerHTML = statsBar + countdown + result;
 }
 
@@ -796,7 +804,20 @@ function renderLeaderboard() {
   var rows = db.players.map(function(p) {
     return Object.assign({}, p, { pts: db.rounds.filter(function(r){ return r.player_id===p.id&&r.verified&&pubEids.has(r.event_id); }).reduce(function(s,r){ return s+(r.league_points||0); }, 0) });
   }).sort(function(a,b){ return b.pts - a.pts; });
-  if (!rows.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">&#127942;</div><div class="empty-title">No standings yet</div></div>'; return; }
+  if (!rows.length) {
+    var preview = [
+      { name:'Jamie Murphy', hcp:12.4, pts:47, pos:'1st', bg:'#B8860B', pc:'#B8860B', cls:'lb-card-gold' },
+      { name:'Ciara Walsh', hcp:18.0, pts:43, pos:'2nd', bg:'#888', pc:'#666', cls:'lb-card-silver' },
+      { name:'Declan Byrne', hcp:9.2, pts:41, pos:'3rd', bg:'#8B4513', pc:'#8B4513', cls:'lb-card-bronze' },
+      { name:"Sarah O'Brien", hcp:22.1, pts:38, pos:'4th', bg:'var(--primary)', pc:'var(--green)', cls:'' },
+      { name:'Padraig Doyle', hcp:15.6, pts:35, pos:'5th', bg:'var(--primary)', pc:'var(--green)', cls:'' }
+    ];
+    el.innerHTML = '<div style="background:var(--accent-light);border:1px solid var(--accent);border-radius:var(--radius);padding:8px 12px;margin-bottom:10px;font-size:12px;color:var(--accent-dark);text-align:center">Preview - add players to see real standings</div>' +
+      preview.map(function(p) {
+        return '<div class="lb-wrap"><div class="lb-card '+p.cls+'"><div style="width:34px;height:34px;border-radius:50%;background:'+p.bg+';color:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:700">'+p.pos+'</div><div class="avatar" style="width:34px;height:34px;font-size:12px">'+p.name.split(' ').map(function(w){return w[0];}).join('')+'</div><div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:500;color:var(--text)">'+p.name+'</div><div style="font-size:11px;color:var(--text-3)">Hcp '+p.hcp.toFixed(1)+'</div></div><div style="font-size:20px;font-weight:700;color:'+p.pc+';flex-shrink:0">'+p.pts+'<span style="font-size:11px;font-weight:400;color:var(--text-3)"> pts</span></div></div></div>';
+      }).join('');
+    return;
+  }
   var pos = 1;
   el.innerHTML = rows.map(function(p, i) {
     if (i > 0 && p.pts < rows[i-1].pts) pos = i + 1;
@@ -814,7 +835,20 @@ function renderSchedule() {
   var mo = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   var upcoming = db.events.filter(function(e){ return e.event_date >= today; }).sort(function(a,b){ return a.event_date.localeCompare(b.event_date); });
   var past = db.events.filter(function(e){ return e.event_date < today; }).sort(function(a,b){ return b.event_date.localeCompare(a.event_date); }).slice(0,5);
-  if (!upcoming.length && !past.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">&#128197;</div><div class="empty-title">No events yet</div><div class="empty-sub">Events appear once added by your admin</div></div>'; return; }
+  if (!upcoming.length && !past.length) {
+    var now = new Date();
+    var mo2 = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var previewEvs = [
+      { d: new Date(now.getFullYear(), now.getMonth(), now.getDate()+7), name:'Your Home Course', type:'Sunday - 9 holes' },
+      { d: new Date(now.getFullYear(), now.getMonth(), now.getDate()+14), name:'Your Home Course', type:'Sunday - 9 holes' },
+      { d: new Date(now.getFullYear(), now.getMonth()+1, 12), name:'Away Day Outing', type:'Outing - 18 holes' }
+    ];
+    el.innerHTML = '<div style="background:var(--accent-light);border:1px solid var(--accent);border-radius:var(--radius);padding:8px 12px;margin-bottom:10px;font-size:12px;color:var(--accent-dark);text-align:center">Preview - create events in Settings to get started</div>' +
+      previewEvs.map(function(ev) {
+        return '<div class="event-card" style="opacity:0.7"><div style="display:flex;align-items:center;gap:12px;padding:12px 14px"><div class="ev-date"><div class="ev-day">'+ev.d.getDate()+'</div><div class="ev-month">'+mo2[ev.d.getMonth()]+'</div></div><div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600;color:var(--text)">'+ev.name+'</div><div style="font-size:11px;color:var(--text-3);margin-top:2px">'+ev.type+'</div></div></div></div>';
+      }).join('');
+    return;
+  }
   function evRow(ev, isPast) {
     var p = ev.event_date.split('-');
     var isOuting = ev.event_type === 'outing_18';
