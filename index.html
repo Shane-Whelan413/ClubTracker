@@ -1148,7 +1148,33 @@ async function uploadLogo(event) {
 
 function openHcpModal() {
   var s = societySettings || {};
-  openModal('Handicap rules', '<div class="field"><label>Mode</label><select id="hcp-mode" onchange="document.getElementById(\'hcp-custom\').style.display=this.value===\'gui\'?\'none\':\'block\'"><option value="bhgs" '+(s.handicap_mode==='bhgs'||!s.handicap_mode?'selected':'')+'>Points-based</option><option value="gui" '+(s.handicap_mode==='gui'?'selected':'')+'>GUI standard</option><option value="custom" '+(s.handicap_mode==='custom'?'selected':'')+'>Custom</option></select></div><div id="hcp-custom" style="'+(s.handicap_mode==='gui'?'display:none':'')+'"><div style="background:var(--bg);border-radius:var(--radius);padding:12px 14px;margin-bottom:14px"><div class="hcp-rule-row"><div class="hcp-rule-label">1st place cut</div><input class="hcp-rule-input" type="number" step="0.1" id="hcp-1" value="'+(s.cut_1st||-1.0)+'"></div><div class="hcp-rule-row"><div class="hcp-rule-label">2nd place cut</div><input class="hcp-rule-input" type="number" step="0.1" id="hcp-2" value="'+(s.cut_2nd||-0.5)+'"></div><div class="hcp-rule-row"><div class="hcp-rule-label">3rd place cut</div><input class="hcp-rule-input" type="number" step="0.1" id="hcp-3" value="'+(s.cut_3rd||-0.2)+'"></div><div class="hcp-rule-row"><div class="hcp-rule-label">4th place cut</div><input class="hcp-rule-input" type="number" step="0.1" id="hcp-4" value="'+(s.cut_4th||0.0)+'"></div><div class="hcp-rule-row"><div class="hcp-rule-label">5th place cut</div><input class="hcp-rule-input" type="number" step="0.1" id="hcp-5" value="'+(s.cut_5th||0.0)+'"></div><div style="font-size:11px;color:var(--text-3);padding:6px 0;border-bottom:0.5px solid var(--border)">Set to 0 to not cut that position</div><div class="hcp-rule-row"><div class="hcp-rule-label">All others addition</div><input class="hcp-rule-input" type="number" step="0.1" id="hcp-add" value="'+(s.add_non_podium||0.2)+'"></div><div class="hcp-rule-row"><div class="hcp-rule-label">Max handicap</div><input class="hcp-rule-input" type="number" id="hcp-max" value="'+(s.max_handicap||36)+'"></div><div class="hcp-rule-row" style="border:none"><div class="hcp-rule-label">Provisional rounds</div><input class="hcp-rule-input" type="number" id="hcp-prov" value="'+(s.provisional_rounds||3)+'"></div></div></div><button class="btn accent full" onclick="saveHcp()">Save rules</button>');
+  var tb = s.tiebreaker || 'back3';
+  openModal('Handicap rules',
+    '<div class="field"><label>Mode</label><select id="hcp-mode" onchange="document.getElementById(\'hcp-custom\').style.display=this.value===\'gui\'?\'none\':\'block\'"><option value="bhgs" '+(s.handicap_mode==='bhgs'||!s.handicap_mode?'selected':'')+'>Points-based</option><option value="gui" '+(s.handicap_mode==='gui'?'selected':'')+'>GUI standard</option><option value="custom" '+(s.handicap_mode==='custom'?'selected':'')+'>Custom</option></select></div>' +
+    '<div id="hcp-custom" style="'+(s.handicap_mode==='gui'?'display:none':'')+'">' +
+    '<div style="background:var(--bg);border-radius:var(--radius);padding:12px 14px;margin-bottom:14px">' +
+    '<div class="hcp-rule-row"><div class="hcp-rule-label">1st place cut</div><input class="hcp-rule-input" type="number" step="0.1" id="hcp-1" value="'+(s.cut_1st||-1.0)+'"></div>' +
+    '<div class="hcp-rule-row"><div class="hcp-rule-label">2nd place cut</div><input class="hcp-rule-input" type="number" step="0.1" id="hcp-2" value="'+(s.cut_2nd||-0.5)+'"></div>' +
+    '<div class="hcp-rule-row"><div class="hcp-rule-label">3rd place cut</div><input class="hcp-rule-input" type="number" step="0.1" id="hcp-3" value="'+(s.cut_3rd||-0.2)+'"></div>' +
+    '<div class="hcp-rule-row"><div class="hcp-rule-label">4th place cut</div><input class="hcp-rule-input" type="number" step="0.1" id="hcp-4" value="'+(s.cut_4th||0.0)+'"></div>' +
+    '<div class="hcp-rule-row"><div class="hcp-rule-label">5th place cut</div><input class="hcp-rule-input" type="number" step="0.1" id="hcp-5" value="'+(s.cut_5th||0.0)+'"></div>' +
+    '<div style="font-size:11px;color:var(--text-3);padding:6px 0;border-bottom:0.5px solid var(--border)">Set to 0 to not cut that position</div>' +
+    '<div class="hcp-rule-row"><div class="hcp-rule-label">All others addition</div><input class="hcp-rule-input" type="number" step="0.1" id="hcp-add" value="'+(s.add_non_podium||0.2)+'"></div>' +
+    '<div class="hcp-rule-row"><div class="hcp-rule-label">Max handicap</div><input class="hcp-rule-input" type="number" id="hcp-max" value="'+(s.max_handicap||36)+'"></div>' +
+    '<div class="hcp-rule-row" style="border:none"><div class="hcp-rule-label">Provisional rounds</div><input class="hcp-rule-input" type="number" id="hcp-prov" value="'+(s.provisional_rounds||3)+'"></div>' +
+    '</div></div>' +
+    '<div class="field"><label>Tiebreaker method</label>' +
+    '<select id="hcp-tb">' +
+    '<option value="back3" '+(tb==="back3"?"selected":"")+'>Back 3 holes (then back 4, 5, 6...)</option>' +
+    '<option value="back9" '+(tb==="back9"?"selected":"")+'>Back 9 holes (then back 8, 7, 6...)</option>' +
+    '<option value="back18" '+(tb==="back18"?"selected":"")+'>Back 18 holes (then 17, 16, 15...)</option>' +
+    '</select>' +
+    '<div style="font-size:11px;color:var(--text-3);margin-top:6px">When scores are tied, compares points on the last X holes, working back one hole at a time until the tie is broken.</div>' +
+    '</div>' +
+    '<button class="btn accent full" onclick="saveHcp()">Save rules</button>'
+  );
+}
+
 }
 
 async function saveHcp() {
@@ -1162,6 +1188,7 @@ async function saveHcp() {
     cut_5th: parseFloat(document.getElementById('hcp-5')?document.getElementById('hcp-5').value:0),
     add_non_podium: parseFloat(document.getElementById('hcp-add')?document.getElementById('hcp-add').value:0.2),
     max_handicap: parseInt(document.getElementById('hcp-max')?document.getElementById('hcp-max').value:36),
+    tiebreaker: document.getElementById('hcp-tb') ? document.getElementById('hcp-tb').value : 'back3',
     provisional_rounds: parseInt(document.getElementById('hcp-prov')?document.getElementById('hcp-prov').value:3)
   };
   try { await apiPatch('society_settings?society_id=eq.' + sid, payload); societySettings = Object.assign({}, societySettings, payload); toast('Saved!', 'success'); closeModal(); renderSettings(); } catch(e) { toast('Error: ' + e.message, 'error'); }
@@ -1463,7 +1490,29 @@ async function publishEvent(eid) {
   // Apply handicap changes
   var sid = currentUser && currentUser.user_metadata ? currentUser.user_metadata.society_id : null;
   var s = societySettings || {};
-  var sorted = verifiedRounds.slice().sort(function(a,b){ return (b.stableford_points||0)-(a.stableford_points||0); });
+  var sorted = verifiedRounds.slice().sort(function(a,b){
+    if ((b.stableford_points||0) !== (a.stableford_points||0)) return (b.stableford_points||0) - (a.stableford_points||0);
+    // Tiebreaker
+    var tb = s.tiebreaker || 'back3';
+    var aScores = a.hole_scores ? (typeof a.hole_scores==='string'?JSON.parse(a.hole_scores):a.hole_scores) : [];
+    var bScores = b.hole_scores ? (typeof b.hole_scores==='string'?JSON.parse(b.hole_scores):b.hole_scores) : [];
+    var aPars = a.par_values ? (typeof a.par_values==='string'?JSON.parse(a.par_values):a.par_values) : [];
+    var bPars = b.par_values ? (typeof b.par_values==='string'?JSON.parse(b.par_values):b.par_values) : [];
+    var holes = aScores.length || 9;
+    // Starting hole index for comparison
+    var startBack = tb === 'back3' ? 3 : tb === 'back9' ? 9 : holes;
+    for (var back = startBack; back <= holes; back++) {
+      var aBack = 0, bBack = 0;
+      for (var h = holes - back; h < holes; h++) {
+        var sc_a = parseInt(aScores[h])||0, par_a = parseInt(aPars[h])||4;
+        var sc_b = parseInt(bScores[h])||0, par_b = parseInt(bPars[h])||4;
+        aBack += Math.max(0, 2 - (sc_a - par_a));
+        bBack += Math.max(0, 2 - (sc_b - par_b));
+      }
+      if (bBack !== aBack) return bBack - aBack;
+    }
+    return 0;
+  });
 
   // Calculate league points and handicap changes
   var lbPts = s.league_pts_table || {1:20,2:17,3:15,4:13,5:11,6:10,7:9,8:8,9:7,10:6};
@@ -1526,6 +1575,7 @@ async function unpublishEvent(eid) {
 }
 
 
+function openBillingModal() {
   var s = societySettings || {};
   openModal('Subscription', '<div style="background:var(--bg);border-radius:var(--radius-lg);padding:16px;margin-bottom:16px;text-align:center"><div style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Current plan</div><div style="font-size:24px;font-weight:800;color:var(--text)">'+(s.subscription_status==='active'?'Active':'Trial')+'</div></div><div style="background:var(--primary);border-radius:var(--radius-lg);padding:20px;margin-bottom:10px"><div style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">Founding rate</div><div style="font-size:32px;font-weight:800;color:var(--accent)">50/year</div><div style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:4px">Lock in forever. Standard rate is €200/year after year 1</div></div><button class="btn accent full" onclick="toast(\'Redirecting to payment...\')">Subscribe €50/year - Lock in founding rate</button>');
 }
