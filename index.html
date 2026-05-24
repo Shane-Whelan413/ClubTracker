@@ -1816,23 +1816,34 @@ function renderScoreHole(holeIdx) {
   var allFilled = se.scores.filter(function(s){ return s > 0; }).length;
 
   document.getElementById('modal-body').innerHTML =
-    // Header strip
+    // Header strip — player name + running total always visible
     '<div style="background:var(--primary);margin:-16px -20px 16px;padding:14px 20px 12px">' +
-      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">' +
-        '<div style="font-size:12px;color:rgba(255,255,255,0.5)">'+(se.ev.course_name||'Event')+'</div>' +
-        '<div style="font-size:12px;color:rgba(255,255,255,0.5)">Hcp '+parseFloat(se.player.handicap_index||0).toFixed(1)+(strokesOnHole>0?' (+'+strokesOnHole+'&#9651;)':'')+'</div>' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">' +
+        '<div style="font-size:15px;font-weight:700;color:white">'+se.player.name+'</div>' +
+        '<div style="background:rgba(255,255,255,0.12);border-radius:99px;padding:4px 12px;display:flex;align-items:center;gap:6px">' +
+          '<div style="font-size:18px;font-weight:800;color:var(--accent)">'+runningPts+'</div>' +
+          '<div style="font-size:11px;color:rgba(255,255,255,0.5)">pts</div>' +
+        '</div>' +
       '</div>' +
       '<div style="display:flex;gap:4px;align-items:center;justify-content:center">'+dots+'</div>' +
     '</div>' +
-    // Hole header
+    // Hole header — big par badge
     '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">' +
-      '<div>' +
-        '<div style="font-size:32px;font-weight:800;color:var(--text);line-height:1">Hole '+(h+1)+'</div>' +
-        '<div style="font-size:14px;color:var(--text-3);margin-top:2px">Par '+par+(strokesOnHole>0?' &middot; '+strokesOnHole+' stroke'+(strokesOnHole>1?'s':''):' &middot; scratch')+'</div>' +
+      '<div style="display:flex;align-items:center;gap:12px">' +
+        '<div>' +
+          '<div style="font-size:13px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em">Hole</div>' +
+          '<div style="font-size:40px;font-weight:800;color:var(--text);line-height:1">'+(h+1)+'</div>' +
+        '</div>' +
+        '<div style="width:1px;height:48px;background:var(--border)"></div>' +
+        '<div>' +
+          '<div style="font-size:13px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em">Par</div>' +
+          '<div style="font-size:40px;font-weight:800;color:var(--primary);line-height:1">'+par+'</div>' +
+        '</div>' +
+        (strokesOnHole > 0 ? '<div style="background:#dbeafe;border-radius:8px;padding:6px 10px;text-align:center"><div style="font-size:10px;font-weight:600;color:#1e40af">STROKE'+(strokesOnHole>1?'S':'')+'</div><div style="font-size:20px;font-weight:800;color:#1e40af">+'+strokesOnHole+'</div></div>' : '') +
       '</div>' +
-      '<div style="text-align:right">' +
-        '<div style="font-size:32px;font-weight:800;color:'+ptColor+';line-height:1">'+ptLabel+'</div>' +
-        '<div style="font-size:11px;color:var(--text-3);margin-top:2px">Running: '+runningPts+' pts</div>' +
+      '<div style="text-align:center;min-width:60px">' +
+        '<div style="font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">This hole</div>' +
+        '<div style="font-size:40px;font-weight:800;color:'+ptColor+';line-height:1">'+ptLabel+'</div>' +
       '</div>' +
     '</div>' +
     // Score grid
