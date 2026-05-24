@@ -758,7 +758,39 @@ function renderHome() {
   var feed = document.getElementById('home-feed');
   var pid = currentUser ? currentUser.id : null;
   var player = db.players.filter(function(p){ return p.user_id === pid; })[0];
+  var isAdmin = currentUser && currentUser.user_metadata && currentUser.user_metadata.role === 'admin';
   var pubEids = new Set(db.events.filter(function(e){ return e.published; }).map(function(e){ return e.id; }));
+
+  // ── Admin action card — events needing scores ──
+  var adminCard = '';
+  if (isAdmin) {
+    var today = new Date().toISOString().slice(0,10);
+    var sevenDaysAgo = new Date(Date.now() - 7*86400000).toISOString().slice(0,10);
+    // Events in last 7 days or today that aren't published yet
+    var needsScores = db.events.filter(function(e){
+      return !e.published && e.event_date <= today && e.event_date >= sevenDaysAgo;
+    }).sort(function(a,b){ return b.event_date.localeCompare(a.event_date); });
+
+    if (needsScores.length) {
+      adminCard = needsScores.map(function(ev) {
+        var verifiedCount = db.rounds.filter(function(r){ return r.event_id===ev.id && r.verified; }).length;
+        var totalCount = db.rounds.filter(function(r){ return r.event_id===ev.id; }).length;
+        var statusText = verifiedCount > 0 ? verifiedCount+' verified, '+totalCount+' entered' : 'No scores yet';
+        var isReady = verifiedCount > 0;
+        return '<div style="background:var(--accent-light);border:2px solid var(--accent);border-radius:var(--radius-lg);padding:14px 16px;margin-bottom:10px">' +
+          '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">' +
+            '<div style="width:36px;height:36px;border-radius:50%;background:var(--accent);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">&#9998;</div>' +
+            '<div style="flex:1"><div style="font-size:14px;font-weight:700;color:var(--primary)">'+(ev.course_name||'Event')+'</div>' +
+            '<div style="font-size:11px;color:var(--accent-dark);margin-top:2px">'+fmtDate(ev.event_date)+' &middot; '+statusText+'</div></div>' +
+          '</div>' +
+          '<div style="display:flex;gap:8px">' +
+            '<button onclick="openScoreEntry(\''+ev.id+'\')" class="btn primary" style="flex:1;padding:10px">Enter scores</button>' +
+            (isReady ? '<button onclick="publishEvent(\''+ev.id+'\')" class="btn accent" style="flex:1;padding:10px">&#10003; Publish</button>' : '') +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+  }
   var statsBar = '';
   if (player) {
     var sorted = db.players.map(function(p) {
@@ -802,7 +834,7 @@ function renderHome() {
   } else {
     result = '<div class="empty"><div class="empty-icon">&#9971;</div><div class="empty-title">No results yet</div><div class="empty-sub">Results appear here after your first event</div></div>';
   }
-  feed.innerHTML = statsBar + countdown + result;
+  feed.innerHTML = adminCard + statsBar + countdown + result;
 }
 
 function renderLeaderboard() {
