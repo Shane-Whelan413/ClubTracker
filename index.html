@@ -512,7 +512,7 @@ let wizData = { societyName:'', homeCourse:'', themeId:'navy-gold', hcpMode:'', 
 // API
 const apiHeaders = () => ({
   'apikey': SUPABASE_KEY,
-  'Authorization': 'Bearer ' + (currentUser ? currentUser.access_token : SUPABASE_KEY),
+  'Authorization': 'Bearer ' + (currentUser ? (currentUser.isMemberSession ? SUPABASE_KEY : (currentUser.access_token || SUPABASE_KEY)) : SUPABASE_KEY),
   'Content-Type': 'application/json',
   'Prefer': 'return=representation'
 });
@@ -894,7 +894,8 @@ function showPendingPopup(member) {
 async function loadSocietySettings() {
   var sid = currentUser && currentUser.user_metadata ? currentUser.user_metadata.society_id : null;
   if (!sid) return;
-  var h = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + currentUser.access_token, 'Prefer': '' };
+  var token = (currentUser && currentUser.isMemberSession) ? SUPABASE_KEY : (currentUser.access_token || SUPABASE_KEY);
+  var h = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + token, 'Prefer': '' };
   var sRes = await fetch(SUPABASE_URL + '/rest/v1/society_settings?society_id=eq.' + sid + '&select=*', { headers: h });
   var soRes = await fetch(SUPABASE_URL + '/rest/v1/societies?id=eq.' + sid + '&select=*', { headers: h });
   var settings = sRes.ok ? await sRes.json() : [];
@@ -907,11 +908,13 @@ async function loadSocietySettings() {
 async function loadAll() {
   var sid = currentUser && currentUser.user_metadata ? currentUser.user_metadata.society_id : null;
   var pill = document.getElementById('conn-pill');
-  if (!sid) {
-    // Try to get fresh user data
+  var token = (currentUser && currentUser.isMemberSession) ? SUPABASE_KEY : (currentUser && currentUser.access_token ? currentUser.access_token : SUPABASE_KEY);
+
+  if (!sid && !currentUser.isMemberSession) {
+    // Try to get fresh user data for admin sessions only
     try {
       var res = await fetch(SUPABASE_URL + '/auth/v1/user', {
-        headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + (currentUser ? currentUser.access_token : '') }
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + token }
       });
       if (res.ok) {
         var u = await res.json();
