@@ -438,6 +438,11 @@ input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px;
   <div class="section" id="sec-settings"><div id="settings-content"></div></div>
 </div>
 
+<!-- Score Entry Screen - Full Screen -->
+<div id="score-screen" style="display:none;position:fixed;inset:0;z-index:250;background:var(--bg);flex-direction:column;overflow:hidden;">
+  <div id="score-screen-body" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;"></div>
+</div>
+
 <!-- Modal -->
 <div id="modal-overlay" onclick="if(event.target===this)closeModal()">
   <div class="modal">
@@ -1759,8 +1764,11 @@ function openPlayerScoreEntry(eid, pid) {
   }
 
   document.getElementById('modal-title').textContent = player.name;
+  var screen = document.getElementById('score-screen');
+  screen.style.display = 'flex';
   renderScoreHole(0);
-  document.getElementById('modal-overlay').classList.add('open');
+  // Close modal if open
+  document.getElementById('modal-overlay').classList.remove('open');
 }
 
 function renderScoreHole(holeIdx) {
@@ -1812,43 +1820,60 @@ function renderScoreHole(holeIdx) {
     '</button>';
   }
 
-  var isComplete = se.scores.every(function(s){ return s > 0; });
   var allFilled = se.scores.filter(function(s){ return s > 0; }).length;
+  var body = document.getElementById('score-screen-body');
+  if (!body) { document.getElementById('modal-body').innerHTML = ''; return; }
 
-  document.getElementById('modal-body').innerHTML =
-    // Header strip — player name + running total always visible
-    '<div style="background:var(--primary);margin:-16px -20px 16px;padding:14px 20px 12px">' +
-      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">' +
+  body.innerHTML =
+    // Full screen header
+    '<div style="background:var(--primary);padding:calc(env(safe-area-inset-top,0px) + 14px) 20px 14px;position:sticky;top:0;z-index:10">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">' +
+        '<button onclick="closeScoreScreen()" style="background:rgba(255,255,255,0.1);border:none;border-radius:8px;padding:6px 12px;color:white;font-size:13px;font-weight:600;cursor:pointer">&#x2715; Cancel</button>' +
         '<div style="font-size:15px;font-weight:700;color:white">'+se.player.name+'</div>' +
-        '<div style="background:rgba(255,255,255,0.12);border-radius:99px;padding:4px 12px;display:flex;align-items:center;gap:6px">' +
-          '<div style="font-size:18px;font-weight:800;color:var(--accent)">'+runningPts+'</div>' +
+        '<div style="background:rgba(255,255,255,0.12);border-radius:99px;padding:5px 14px;display:flex;align-items:center;gap:6px">' +
+          '<div style="font-size:20px;font-weight:800;color:var(--accent)">'+runningPts+'</div>' +
           '<div style="font-size:11px;color:rgba(255,255,255,0.5)">pts</div>' +
         '</div>' +
       '</div>' +
       '<div style="display:flex;gap:4px;align-items:center;justify-content:center">'+dots+'</div>' +
     '</div>' +
-    // Hole header — big par badge
-    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">' +
-      '<div style="display:flex;align-items:center;gap:12px">' +
-        '<div>' +
-          '<div style="font-size:13px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em">Hole</div>' +
-          '<div style="font-size:40px;font-weight:800;color:var(--text);line-height:1">'+(h+1)+'</div>' +
+    // Main content area
+    '<div style="padding:20px 20px 0">' +
+      // Hole / Par / Stroke info — full width, prominent
+      '<div style="display:flex;align-items:stretch;gap:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:20px">' +
+        '<div style="flex:1;padding:18px 16px;text-align:center;border-right:1px solid var(--border)">' +
+          '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-3);margin-bottom:4px">Hole</div>' +
+          '<div style="font-size:52px;font-weight:800;color:var(--text);line-height:1">'+(h+1)+'</div>' +
+          '<div style="font-size:11px;color:var(--text-3);margin-top:4px">of '+holes+'</div>' +
         '</div>' +
-        '<div style="width:1px;height:48px;background:var(--border)"></div>' +
-        '<div>' +
-          '<div style="font-size:13px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em">Par</div>' +
-          '<div style="font-size:40px;font-weight:800;color:var(--primary);line-height:1">'+par+'</div>' +
+        '<div style="flex:1;padding:18px 16px;text-align:center;border-right:1px solid var(--border);background:var(--accent-light)">' +
+          '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--accent-dark);margin-bottom:4px">Par</div>' +
+          '<div style="font-size:52px;font-weight:800;color:var(--primary);line-height:1">'+par+'</div>' +
+          '<div style="font-size:11px;color:var(--accent-dark);margin-top:4px">SI '+sis[h]+'</div>' +
         '</div>' +
-        (strokesOnHole > 0 ? '<div style="background:#dbeafe;border-radius:8px;padding:6px 10px;text-align:center"><div style="font-size:10px;font-weight:600;color:#1e40af">STROKE'+(strokesOnHole>1?'S':'')+'</div><div style="font-size:20px;font-weight:800;color:#1e40af">+'+strokesOnHole+'</div></div>' : '') +
+        '<div style="flex:1;padding:18px 16px;text-align:center">' +
+          '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-3);margin-bottom:4px">Points</div>' +
+          '<div style="font-size:52px;font-weight:800;color:'+ptColor+';line-height:1">'+ptLabel+'</div>' +
+          '<div style="font-size:11px;color:var(--text-3);margin-top:4px">'+(strokesOnHole>0?'+'+strokesOnHole+' stroke':'scratch')+'</div>' +
+        '</div>' +
       '</div>' +
-      '<div style="text-align:center;min-width:60px">' +
-        '<div style="font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">This hole</div>' +
-        '<div style="font-size:40px;font-weight:800;color:'+ptColor+';line-height:1">'+ptLabel+'</div>' +
-      '</div>' +
+      // Score buttons — full width, bigger
+      '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:20px">'+scoreButtons+'</div>' +
     '</div>' +
-    // Score grid
-    '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:16px">'+scoreButtons+'</div>' +
-
+    // Bottom nav — sticky
+    '<div style="padding:12px 20px calc(env(safe-area-inset-bottom,0px) + 12px);background:var(--surface);border-top:1px solid var(--border);position:sticky;bottom:0">' +
+      '<div style="display:flex;gap:8px">' +
+        (h > 0 ? '<button onclick="renderScoreHole('+(h-1)+')" class="btn" style="padding:14px 20px;font-size:15px">&#8592;</button>' : '<div style="width:60px"></div>') +
+        (h < holes-1 ?
+          '<button onclick="nextHole()" class="btn primary" style="flex:1;padding:14px;font-size:15px;font-weight:700">Next hole &#8594;</button>' :
+          '<div style="flex:1;display:flex;gap:8px">' +
+            '<button onclick="savePlayerScore(\''+se.eid+'\',\''+se.pid+'\')" class="btn primary" style="flex:1;padding:14px;font-size:15px">Save</button>' +
+            '<button onclick="savePlayerScore(\''+se.eid+'\',\''+se.pid+'\',true)" class="btn accent" style="flex:1;padding:14px;font-size:15px;font-weight:700">&#10003; Verify</button>' +
+          '</div>'
+        ) +
+      '</div>' +
+      (allFilled > 0 ? '<div style="text-align:center;font-size:12px;color:var(--text-3);margin-top:8px">'+allFilled+'/'+holes+' holes &middot; '+runningPts+' pts total</div>' : '') +
+    '</div>';
     // Nav buttons
     '<div style="display:flex;gap:8px">' +
       '<button onclick="openScoreEntry(\''+se.eid+'\')" class="btn" style="padding:12px 16px">&#x2715;</button>' +
@@ -1864,6 +1889,12 @@ function renderScoreHole(holeIdx) {
     // Score summary if any entered
     (allFilled > 0 ? '<div style="text-align:center;font-size:12px;color:var(--text-3);margin-top:12px">'+allFilled+'/'+holes+' holes entered &middot; '+runningPts+' pts total</div>' : '');
 }
+
+function closeScoreScreen() {
+  document.getElementById('score-screen').style.display = 'none';
+  window._scoreEntry = null;
+}
+
 
 function selectScore(s) {
   var se = window._scoreEntry;
@@ -1938,6 +1969,7 @@ async function savePlayerScore(eid, pid, verify) {
     }
     toast(verify ? '&#10003; '+player.name+' verified — '+totalPts+' pts' : 'Score saved', 'success');
     window._scoreEntry = null;
+    document.getElementById('score-screen').style.display = 'none';
     openScoreEntry(eid);
     renderAll();
   } catch(e) { toast('Error: '+e.message, 'error'); }
