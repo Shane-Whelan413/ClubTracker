@@ -169,6 +169,8 @@ body { height: 100%; overflow: hidden; overscroll-behavior: none; position: rela
 .theme-label { font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.6); text-align: center; padding: 5px 0 4px; background: rgba(255,255,255,0.05); }
 
 /* ── Splash ── */
+#topbar, #bottom-nav, #main-content { display: none; }
+
 #splash {
   position: fixed; inset: 0; z-index: 1000;
   background: var(--primary);
@@ -377,7 +379,7 @@ input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px;
 </div>
 
 <!-- Topbar — always rendered, hidden via CSS when auth showing -->
-<div class="topbar" id="topbar" style="display:none">
+<div class="topbar" id="topbar">
   <div class="topbar-logo" id="topbar-logo">
     <span class="topbar-logo-text" id="topbar-initials">GS</span>
   </div>
@@ -389,7 +391,7 @@ input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px;
 </div>
 
 <!-- Nav — always rendered, hidden via CSS when auth showing -->
-<nav class="nav" id="bottom-nav" style="display:none">
+<nav class="nav" id="bottom-nav">
   <button class="nav-btn active" onclick="showTab('home')" id="nav-home">
     <div class="tab-icon"><svg viewBox="0 0 18 18"><path d="M2 7.5L9 2l7 5.5V16a1 1 0 01-1 1H3a1 1 0 01-1-1V7.5z"/><path d="M6 17V10h6v7"/></svg></div>
     Home
@@ -413,7 +415,7 @@ input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px;
 </nav>
 
 <!-- Content -->
-<div class="content" id="main-content" style="display:none">
+<div class="content" id="main-content">
   <div class="section active" id="sec-home">
     <div id="home-feed">
       <div class="skeleton" style="height:80px;border-radius:12px;margin-bottom:10px"></div>
@@ -559,6 +561,9 @@ function showApp() {
   document.getElementById('auth-screen').style.display = 'none';
   document.getElementById('setup-wizard').style.display = 'none';
   document.getElementById('splash').style.display = 'none';
+  document.getElementById('topbar').style.removeProperty('display');
+  document.getElementById('bottom-nav').style.removeProperty('display');
+  document.getElementById('main-content').style.removeProperty('display');
   document.getElementById('topbar').style.display = 'flex';
   document.getElementById('bottom-nav').style.display = 'flex';
   document.getElementById('main-content').style.display = 'block';
