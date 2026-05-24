@@ -1092,6 +1092,7 @@ async function saveBranding() {
 }
 
 function openThemeModal() {
+function openBillingModal() {
   var s = societySettings || {};
   var presets = THEMES.map(function(t) {
     return '<div class="theme-opt" onclick="applyThemePreset(\''+t.id+'\')" id="to-'+t.id+'"><div class="theme-preview"><div style="flex:2;background:'+t.primary+'"></div><div style="flex:1;background:'+t.accent+'"></div></div><div class="theme-label">'+t.name+'</div></div>';
@@ -1260,7 +1261,23 @@ function openEventsModal() {
   var mo = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   var rows = db.events.slice().sort(function(a,b){ return b.event_date.localeCompare(a.event_date); }).map(function(ev) {
     var p = ev.event_date.split('-');
-    return '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border)"><div class="ev-date" style="min-width:42px"><div class="ev-day">'+parseInt(p[2])+'</div><div class="ev-month">'+mo[parseInt(p[1])-1]+'</div></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600">'+(ev.course_name||'TBD')+'</div><div style="font-size:11px;color:var(--text-3)">'+(ev.event_type==='outing_18'?'Outing - 18h':'Sunday - 9h')+' - '+(ev.published?'Published':'Draft')+'</div></div><button onclick="deleteEvent(\''+ev.id+'\')" class="btn sm danger">X</button></div>';
+    var roundCount = db.rounds.filter(function(r){ return r.event_id === ev.id; }).length;
+    var verifiedCount = db.rounds.filter(function(r){ return r.event_id === ev.id && r.verified; }).length;
+    var statusColor = ev.published ? 'var(--green)' : verifiedCount > 0 ? 'var(--accent-dark)' : 'var(--text-3)';
+    var statusText = ev.published ? 'Published' : verifiedCount > 0 ? verifiedCount+'/'+db.players.length+' verified' : 'No scores yet';
+    return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px;margin-bottom:8px">' +
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">' +
+        '<div class="ev-date" style="min-width:42px"><div class="ev-day">'+parseInt(p[2])+'</div><div class="ev-month">'+mo[parseInt(p[1])-1]+'</div></div>' +
+        '<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:var(--text)">'+(ev.course_name||'TBD')+'</div>' +
+        '<div style="font-size:11px;color:'+statusColor+';margin-top:2px">'+statusText+'</div></div>' +
+        '<button onclick="deleteEvent(\''+ev.id+'\')" class="btn sm danger" style="flex-shrink:0">&#x2715;</button>' +
+      '</div>' +
+      '<div style="display:flex;gap:6px">' +
+        '<button onclick="openScoreEntry(\''+ev.id+'\')" class="btn sm primary" style="flex:1">&#9998; Enter scores</button>' +
+        (!ev.published && verifiedCount > 0 ? '<button onclick="publishEvent(\''+ev.id+'\')" class="btn sm accent" style="flex:1">&#10003; Publish</button>' : '') +
+        (ev.published ? '<button onclick="unpublishEvent(\''+ev.id+'\')" class="btn sm" style="flex:1">Unpublish</button>' : '') +
+      '</div>' +
+    '</div>';
   }).join('');
   openModal('Events', '<button class="btn accent full" onclick="openCreateEventModal()" style="margin-bottom:14px">+ Create event</button>' + (rows || '<div class="empty" style="padding:1rem">No events yet</div>'));
 }
@@ -1297,7 +1314,218 @@ async function deleteEvent(eid) {
   } catch(e) { toast('Error: ' + e.message, 'error'); }
 }
 
-function openBillingModal() {
+function openScoreEntry(eid) {
+  var ev = db.events.filter(function(e){ return e.id === eid; })[0];
+  if (!ev) return;
+  var holes = ev.holes || 9;
+  var players = db.players.slice().sort(function(a,b){ return a.name.localeCompare(b.name); });
+  if (!players.length) { toast('Add players first', 'error'); return; }
+
+  var rows = players.map(function(p) {
+    var round = db.rounds.filter(function(r){ return r.event_id === eid && r.player_id === p.id; })[0];
+    var pts = round ? (round.stableford_points || '--') : '--';
+    var verified = round && round.verified;
+    var statusDot = verified
+      ? '<span style="color:var(--green);font-size:12px;font-weight:700">&#10003; Verified</span>'
+      : round
+      ? '<span style="color:var(--accent-dark);font-size:12px">Entered</span>'
+      : '<span style="color:var(--text-3);font-size:12px">No score</span>';
+    return '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border)">' +
+      '<div class="avatar" style="width:32px;height:32px;font-size:11px;flex-shrink:0">'+p.name.split(' ').map(function(w){return w[0];}).join('')+'</div>' +
+      '<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:500;color:var(--text)">'+p.name+'</div>' +
+      '<div style="font-size:11px;color:var(--text-3)">Hcp '+parseFloat(p.handicap_index||0).toFixed(1)+'</div></div>' +
+      '<div style="display:flex;align-items:center;gap:8px">' +
+        statusDot +
+        '<span style="font-size:15px;font-weight:700;color:var(--text);min-width:28px;text-align:right">'+pts+'</span>' +
+        '<button onclick="openPlayerScoreEntry(\''+eid+'\',\''+p.id+'\')" class="btn sm" style="padding:5px 10px">'+(round?'Edit':'Add')+'</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  var verifiedCount = db.rounds.filter(function(r){ return r.event_id===eid && r.verified; }).length;
+  document.getElementById('modal-title').textContent = (ev.course_name||'Event') + ' - Scores';
+  document.getElementById('modal-body').innerHTML =
+    '<div style="background:var(--bg);border-radius:var(--radius);padding:10px 12px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between">' +
+      '<div style="font-size:12px;color:var(--text-2)">'+holes+' holes &middot; '+players.length+' players</div>' +
+      '<div style="font-size:12px;color:var(--text-2)">'+verifiedCount+'/'+players.length+' verified</div>' +
+    '</div>' +
+    rows +
+    (verifiedCount > 0 ?
+      '<button onclick="publishEvent(\''+eid+'\')" class="btn accent full" style="margin-top:14px">&#10003; Publish results</button>' : '') +
+    '<button onclick="openEventsModal()" class="btn full" style="margin-top:8px">&#8592; Back to events</button>';
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function openPlayerScoreEntry(eid, pid) {
+  var ev = db.events.filter(function(e){ return e.id === eid; })[0];
+  var player = db.players.filter(function(p){ return p.id === pid; })[0];
+  if (!ev || !player) return;
+  var holes = ev.holes || 9;
+  var existing = db.rounds.filter(function(r){ return r.event_id===eid && r.player_id===pid; })[0];
+  var existingScores = existing && existing.hole_scores ? (typeof existing.hole_scores === 'string' ? JSON.parse(existing.hole_scores) : existing.hole_scores) : [];
+  var existingPars = existing && existing.par_values ? (typeof existing.par_values === 'string' ? JSON.parse(existing.par_values) : existing.par_values) : [];
+  var defaultPar = Math.round((ev.par || (holes === 9 ? 35 : 70)) / (holes === 9 ? 1 : 2));
+
+  var holeInputs = '';
+  for (var h = 0; h < holes; h++) {
+    var sc = existingScores[h] || '';
+    var par = existingPars[h] || defaultPar;
+    holeInputs += '<div style="display:grid;grid-template-columns:32px 1fr 1fr;align-items:center;gap:8px;padding:8px 0;border-bottom:0.5px solid var(--border)">' +
+      '<div style="font-size:12px;font-weight:600;color:var(--text-3);text-align:center">'+(h+1)+'</div>' +
+      '<div style="display:flex;align-items:center;gap:4px"><span style="font-size:11px;color:var(--text-3)">Par</span><input type="number" id="par-'+(h)+'" value="'+par+'" min="3" max="6" style="width:48px;padding:6px 8px;border-radius:6px;border:1px solid var(--border-strong);background:var(--bg);font-size:13px;text-align:center"></div>' +
+      '<div style="display:flex;align-items:center;gap:4px"><span style="font-size:11px;color:var(--text-3)">Score</span><input type="number" id="sc-'+(h)+'" value="'+sc+'" min="1" max="15" placeholder="-" style="width:52px;padding:6px 8px;border-radius:6px;border:1px solid var(--border-strong);background:var(--bg);font-size:13px;text-align:center"></div>' +
+    '</div>';
+  }
+
+  document.getElementById('modal-title').textContent = player.name + ' - Score entry';
+  document.getElementById('modal-body').innerHTML =
+    '<div style="background:var(--primary);border-radius:var(--radius);padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between">' +
+      '<div style="color:white;font-size:13px;font-weight:600">' + (ev.course_name||'Event') + '</div>' +
+      '<div style="color:var(--accent);font-size:12px">Hcp ' + parseFloat(player.handicap_index||0).toFixed(1) + '</div>' +
+    '</div>' +
+    '<div style="font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Enter gross score per hole</div>' +
+    holeInputs +
+    '<div style="display:flex;gap:8px;margin-top:14px">' +
+      '<button onclick="openScoreEntry(\''+eid+'\')" class="btn" style="flex-shrink:0">&#8592; Back</button>' +
+      '<button onclick="savePlayerScore(\''+eid+'\',\''+pid+'\')" class="btn primary" style="flex:1">Save score</button>' +
+      '<button onclick="savePlayerScore(\''+eid+'\',\''+pid+'\',true)" class="btn accent" style="flex-shrink:0">Save &amp; verify</button>' +
+    '</div>';
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+async function savePlayerScore(eid, pid, verify) {
+  var ev = db.events.filter(function(e){ return e.id === eid; })[0];
+  var player = db.players.filter(function(p){ return p.id === pid; })[0];
+  if (!ev || !player) return;
+  var holes = ev.holes || 9;
+  var sid = currentUser && currentUser.user_metadata ? currentUser.user_metadata.society_id : null;
+
+  var scores = [], pars = [], totalPts = 0, totalGross = 0;
+  var hasScores = false;
+  for (var h = 0; h < holes; h++) {
+    var scEl = document.getElementById('sc-'+h);
+    var parEl = document.getElementById('par-'+h);
+    var sc = scEl ? parseInt(scEl.value) : 0;
+    var par = parEl ? parseInt(parEl.value) : 4;
+    scores.push(sc || 0);
+    pars.push(par || 4);
+    if (sc > 0) {
+      hasScores = true;
+      totalGross += sc;
+      // Calculate stableford with handicap strokes
+      var courseHcp = Math.round(parseFloat(player.handicap_index||0) * (ev.slope_rating||113) / 113);
+      var strokesOnHole = Math.floor(courseHcp / holes) + (h < (courseHcp % holes) ? 1 : 0);
+      var net = sc - par - strokesOnHole;
+      totalPts += Math.max(0, 2 - net);
+    }
+  }
+
+  if (!hasScores) { toast('Enter at least one score', 'error'); return; }
+
+  var existing = db.rounds.filter(function(r){ return r.event_id===eid && r.player_id===pid; })[0];
+  var courseHcp = Math.round(parseFloat(player.handicap_index||0) * (ev.slope_rating||113) / 113);
+
+  var payload = {
+    society_id: sid,
+    event_id: eid,
+    player_id: pid,
+    hole_scores: scores,
+    par_values: pars,
+    stableford_points: totalPts,
+    gross_score: totalGross,
+    course_handicap: courseHcp,
+    handicap_before: parseFloat(player.handicap_index||0),
+    verified: verify ? true : false
+  };
+
+  try {
+    var res;
+    if (existing) {
+      res = await apiPatch('rounds?id=eq.'+existing.id, payload);
+      var idx = db.rounds.findIndex(function(r){ return r.id === existing.id; });
+      if (idx >= 0) db.rounds[idx] = Object.assign({}, db.rounds[idx], payload, { id: existing.id });
+    } else {
+      res = await apiPost('rounds', payload);
+      db.rounds.push(res[0]);
+    }
+    toast(verify ? player.name+' verified - '+totalPts+' pts' : 'Score saved', 'success');
+    openScoreEntry(eid);
+    renderAll();
+  } catch(e) { toast('Error: '+e.message, 'error'); }
+}
+
+async function publishEvent(eid) {
+  var ev = db.events.filter(function(e){ return e.id === eid; })[0];
+  if (!ev) return;
+  var verifiedRounds = db.rounds.filter(function(r){ return r.event_id===eid && r.verified; });
+  if (!verifiedRounds.length) { toast('Verify at least one score first', 'error'); return; }
+
+  // Apply handicap changes
+  var sid = currentUser && currentUser.user_metadata ? currentUser.user_metadata.society_id : null;
+  var s = societySettings || {};
+  var sorted = verifiedRounds.slice().sort(function(a,b){ return (b.stableford_points||0)-(a.stableford_points||0); });
+
+  // Calculate league points and handicap changes
+  var lbPts = s.league_pts_table || {1:20,2:17,3:15,4:13,5:11,6:10,7:9,8:8,9:7,10:6};
+  var cutMap = { 1: parseFloat(s.cut_1st||-1.0), 2: parseFloat(s.cut_2nd||-0.5), 3: parseFloat(s.cut_3rd||-0.2), 4: parseFloat(s.cut_4th||0), 5: parseFloat(s.cut_5th||0) };
+  var addition = parseFloat(s.add_non_podium||0.2);
+  var maxHcp = parseFloat(s.max_handicap||36);
+
+  try {
+    for (var i = 0; i < sorted.length; i++) {
+      var r = sorted[i];
+      var pos = i + 1;
+      var leaguePts = lbPts[pos] || lbPts[10] || 0;
+      var player = db.players.filter(function(p){ return p.id === r.player_id; })[0];
+      if (!player) continue;
+      var currentHcp = parseFloat(player.handicap_index || 0);
+      var hcpChange = cutMap[pos] !== undefined && cutMap[pos] !== 0 ? cutMap[pos] : (pos > 5 ? addition : addition);
+      var newHcp = Math.min(maxHcp, Math.max(0, currentHcp + hcpChange));
+
+      // Update round with league points and handicap after
+      await apiPatch('rounds?id=eq.'+r.id, { league_points: leaguePts, handicap_after: newHcp });
+      // Update player handicap
+      await apiPatch('players?id=eq.'+r.player_id, { handicap_index: newHcp });
+
+      // Update local db
+      var rIdx = db.rounds.findIndex(function(x){ return x.id === r.id; });
+      if (rIdx >= 0) { db.rounds[rIdx].league_points = leaguePts; db.rounds[rIdx].handicap_after = newHcp; }
+      var pIdx = db.players.findIndex(function(x){ return x.id === r.player_id; });
+      if (pIdx >= 0) db.players[pIdx].handicap_index = newHcp;
+    }
+
+    // Publish event and post to noticeboard
+    await apiPatch('events?id=eq.'+eid, { published: true });
+    var evIdx = db.events.findIndex(function(e){ return e.id === eid; });
+    if (evIdx >= 0) db.events[evIdx].published = true;
+
+    await apiPost('noticeboard', {
+      society_id: sid,
+      event_id: eid,
+      post_type: 'result',
+      published: true
+    });
+
+    await loadAll();
+    renderAll();
+    closeModal();
+    toast('Results published! Handicaps updated.', 'success');
+  } catch(e) { toast('Error publishing: '+e.message, 'error'); }
+}
+
+async function unpublishEvent(eid) {
+  if (!confirm('Unpublish this event? Results will be hidden from members.')) return;
+  try {
+    await apiPatch('events?id=eq.'+eid, { published: false });
+    var idx = db.events.findIndex(function(e){ return e.id === eid; });
+    if (idx >= 0) db.events[idx].published = false;
+    await loadAll(); renderAll();
+    toast('Event unpublished', 'success');
+    openEventsModal();
+  } catch(e) { toast('Error: '+e.message, 'error'); }
+}
+
+
   var s = societySettings || {};
   openModal('Subscription', '<div style="background:var(--bg);border-radius:var(--radius-lg);padding:16px;margin-bottom:16px;text-align:center"><div style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Current plan</div><div style="font-size:24px;font-weight:800;color:var(--text)">'+(s.subscription_status==='active'?'Active':'Trial')+'</div></div><div style="background:var(--primary);border-radius:var(--radius-lg);padding:20px;margin-bottom:10px"><div style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">Founding rate</div><div style="font-size:32px;font-weight:800;color:var(--accent)">50/year</div><div style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:4px">Lock in forever. Standard rate is €200/year after year 1</div></div><button class="btn accent full" onclick="toast(\'Redirecting to payment...\')">Subscribe €50/year - Lock in founding rate</button>');
 }
