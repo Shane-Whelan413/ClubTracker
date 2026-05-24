@@ -786,7 +786,8 @@ function renderHome() {
     var label = diff===0?'Today!':diff===1?'Tomorrow':diff+' days';
     countdown = '<div style="background:var(--primary);border-radius:var(--radius-lg);padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;position:relative;overflow:hidden"><div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent-dark),var(--accent),var(--accent),var(--accent-dark))"></div><div><div style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px">Next event</div><div style="font-size:15px;font-weight:600;color:white">'+(next.course_name||fmtDate(next.event_date))+'</div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px">'+fmtDate(next.event_date)+'</div></div><div style="background:var(--accent);color:var(--primary);font-size:14px;font-weight:800;padding:7px 16px;border-radius:99px;flex-shrink:0">'+label+'</div></div>';
   }
-  var noData = !db.players.length;
+  var previewEnabled = !societySettings || societySettings.show_preview !== false;
+  var noData = previewEnabled && !db.noticeboard.length && db.rounds.filter(function(r){ return r.verified; }).length === 0;
   var result = '';
   if (db.noticeboard.length) {
     result = '<div style="background:white;border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px"><div style="font-size:13px;font-weight:600;color:var(--text-2);margin-bottom:10px">Latest result</div><div class="empty-sub">Results will appear here</div></div>';
@@ -804,7 +805,8 @@ function renderLeaderboard() {
   var rows = db.players.map(function(p) {
     return Object.assign({}, p, { pts: db.rounds.filter(function(r){ return r.player_id===p.id&&r.verified&&pubEids.has(r.event_id); }).reduce(function(s,r){ return s+(r.league_points||0); }, 0) });
   }).sort(function(a,b){ return b.pts - a.pts; });
-  if (!rows.length) {
+  var previewEnabled2 = !societySettings || societySettings.show_preview !== false;
+  if (!rows.some(function(r){ return r.pts > 0; })) {
     var preview = [
       { name:'Jamie Murphy', hcp:12.4, pts:47, pos:'1st', bg:'#B8860B', pc:'#B8860B', cls:'lb-card-gold' },
       { name:'Ciara Walsh', hcp:18.0, pts:43, pos:'2nd', bg:'#888', pc:'#666', cls:'lb-card-silver' },
@@ -892,7 +894,8 @@ function renderSettings() {
     '<div class="settings-row" onclick="openInviteModal()"><div class="settings-row-label">Invite link</div><div class="settings-row-value">Share &#8250;</div></div></div>' +
     '<div class="settings-section"><div class="settings-section-title">Events</div>' +
     '<div class="settings-row" onclick="openEventsModal()"><div class="settings-row-label">Manage events</div><div class="settings-row-value">'+db.events.length+' events &#8250;</div></div></div>' +
-    '<div class="settings-section"><div class="settings-section-title">Subscription</div>' +
+    '<div class="settings-section"><div class="settings-section-title">Display</div>' +
+    '<div class="settings-row"><div class="settings-row-label">Show preview data</div><div class="settings-row-value"><label class="toggle-switch"><input type="checkbox" id="toggle-preview" '+(s.show_preview !== false ? 'checked' : '')+' onchange="savePreviewToggle(this.checked)"><div class="toggle-slider"></div></label></div></div></div>' +
     '<div class="settings-row" onclick="openBillingModal()"><div class="settings-row-label">Plan</div><div class="settings-row-value"><span class="sub-pill '+subClass+'">'+subLabel+'</span> &#8250;</div></div></div>' +
     '<div style="height:20px"></div>';
 }
@@ -910,6 +913,18 @@ function openBrandingModal() {
   var s = societySettings || {};
   openModal('Society name', '<div class="field"><label>Society name</label><input type="text" id="brand-name" value="'+(s.society_name||s.name||'')+'"></div><button class="btn accent full" onclick="saveBranding()">Save</button>');
 }
+
+async function savePreviewToggle(val) {
+  var sid = currentUser && currentUser.user_metadata ? currentUser.user_metadata.society_id : null;
+  if (!sid) return;
+  try {
+    await apiPatch('society_settings?society_id=eq.' + sid, { show_preview: val });
+    societySettings = Object.assign({}, societySettings, { show_preview: val });
+    toast(val ? 'Preview enabled' : 'Preview hidden', 'success');
+    renderAll();
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
 
 async function saveBranding() {
   var sid = currentUser && currentUser.user_metadata ? currentUser.user_metadata.society_id : null;
