@@ -977,7 +977,7 @@ function renderAll() {
 function renderHome() {
   var feed = document.getElementById('home-feed');
   var pid = currentUser ? currentUser.id : null;
-  var player = db.players.filter(function(p){ return p.user_id === pid; })[0];
+  var player = db.players.filter(function(p){ return p.user_id === pid || (currentUser && currentUser.isMemberSession && p.id === pid); })[0];
   var isAdmin = currentUser && currentUser.user_metadata && currentUser.user_metadata.role === 'admin';
   var pubEids = new Set(db.events.filter(function(e){ return e.published; }).map(function(e){ return e.id; }));
 
@@ -1218,7 +1218,7 @@ function renderSchedule() {
 function renderProfile() {
   var el = document.getElementById('profile-content');
   var pid = currentUser ? currentUser.id : null;
-  var player = db.players.filter(function(p){ return p.user_id === pid; })[0];
+  var player = db.players.filter(function(p){ return p.user_id === pid || (currentUser && currentUser.isMemberSession && p.id === pid); })[0];
   var isAdmin = currentUser && currentUser.user_metadata && currentUser.user_metadata.role === 'admin';
   // Stat cards helper
   function makeStatCards(rounds, rank) {
