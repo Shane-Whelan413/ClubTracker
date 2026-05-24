@@ -929,12 +929,12 @@ function buildProgressionCharts(rounds, player) {
   var hcpPoints = sorted.filter(function(r){ return r.handicap_after != null; }).map(function(r,i){
     return { label: 'R'+(i+1), val: parseFloat(r.handicap_after) };
   });
-  if (hcpPoints.length >= 2) {
+  if (hcpPoints.length >= 1) {
     var hcpMin = Math.min.apply(null, hcpPoints.map(function(p){return p.val;}));
     var hcpMax = Math.max.apply(null, hcpPoints.map(function(p){return p.val;}));
     var hcpRange = hcpMax - hcpMin || 1;
     var svgW = 280, svgH = 80, pad = 20;
-    var stepX = (svgW - pad*2) / (hcpPoints.length - 1);
+    var stepX = hcpPoints.length > 1 ? (svgW - pad*2) / (hcpPoints.length - 1) : 0;
     var pts = hcpPoints.map(function(p,i){
       var x = pad + i * stepX;
       var y = pad + (1 - (p.val - hcpMin) / hcpRange) * (svgH - pad*2);
@@ -962,12 +962,12 @@ function buildProgressionCharts(rounds, player) {
   var ptsPoints = sorted.filter(function(r){ return r.stableford_points != null; }).map(function(r,i){
     return { label:'R'+(i+1), val: r.stableford_points||0 };
   });
-  if (ptsPoints.length >= 2) {
+  if (ptsPoints.length >= 1) {
     var pMin = Math.min.apply(null, ptsPoints.map(function(p){return p.val;}));
     var pMax = Math.max.apply(null, ptsPoints.map(function(p){return p.val;}));
     var pRange = pMax - pMin || 1;
     var svgW2 = 280, svgH2 = 80, pad2 = 20;
-    var stepX2 = (svgW2 - pad2*2) / (ptsPoints.length - 1);
+    var stepX2 = ptsPoints.length > 1 ? (svgW2 - pad2*2) / (ptsPoints.length - 1) : 0;
     var pts2 = ptsPoints.map(function(p,i){
       var x = pad2 + i * stepX2;
       var y = pad2 + (1 - (p.val - pMin) / pRange) * (svgH2 - pad2*2);
