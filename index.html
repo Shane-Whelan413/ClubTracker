@@ -824,7 +824,65 @@ async function afterLogin() {
   try { await loadAll(); } catch(e) { console.error('loadAll:', e); }
   renderAll();
   showApp();
+  startPolling();
 }
+
+var _pollInterval = null;
+var _lastPendingCount = -1;
+var _lastNoticeboardCount = -1;
+
+function startPolling() {
+  if (_pollInterval) clearInterval(_pollInterval);
+  _pollInterval = setInterval(async function() {
+    if (!currentUser) { clearInterval(_pollInterval); return; }
+    var sid = currentUser.user_metadata ? currentUser.user_metadata.society_id : null;
+    if (!sid) return;
+    var isAdmin = currentUser.user_metadata && currentUser.user_metadata.role === 'admin';
+    var token = currentUser.isMemberSession ? SUPABASE_KEY : (currentUser.access_token || SUPABASE_KEY);
+    var h = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + token, 'Prefer': '' };
+    try {
+      if (isAdmin) {
+        var pRes = await fetch(SUPABASE_URL + '/rest/v1/players?society_id=eq.'+sid+'&status=eq.pending&select=id,name,mobile', { headers: h });
+        var pending = pRes.ok ? await pRes.json() : [];
+        if (_lastPendingCount >= 0 && pending.length > _lastPendingCount) {
+          var newMember = pending[pending.length - 1];
+          showPendingPopup(newMember);
+          // Refresh players in db
+          var allPlayers = await fetch(SUPABASE_URL + '/rest/v1/players?society_id=eq.'+sid+'&order=name', { headers: h });
+          if (allPlayers.ok) db.players = await allPlayers.json();
+          renderHome();
+        }
+        _lastPendingCount = pending.length;
+      }
+      // Check noticeboard for new results
+      var nRes = await fetch(SUPABASE_URL + '/rest/v1/noticeboard?society_id=eq.'+sid+'&order=created_at.desc&limit=5&select=*', { headers: h });
+      var notices = nRes.ok ? await nRes.json() : [];
+      if (_lastNoticeboardCount >= 0 && notices.length > _lastNoticeboardCount) {
+        db.noticeboard = notices;
+        renderHome();
+      }
+      _lastNoticeboardCount = notices.length;
+    } catch(e) {}
+  }, 30000);
+}
+
+function showPendingPopup(member) {
+  var existing = document.getElementById('pending-banner');
+  if (existing) existing.remove();
+  var banner = document.createElement('div');
+  banner.id = 'pending-banner';
+  banner.style.cssText = 'position:fixed;top:calc(env(safe-area-inset-top,0px) + 68px);left:12px;right:12px;background:#856404;color:white;border-radius:12px;padding:12px 16px;z-index:500;box-shadow:0 4px 20px rgba(0,0,0,0.3);display:flex;align-items:center;gap:10px';
+  banner.innerHTML =
+    '<div style="font-size:20px">&#128276;</div>' +
+    '<div style="flex:1"><div style="font-size:13px;font-weight:700">New member request</div>' +
+    '<div style="font-size:12px;opacity:0.85">'+member.name+' wants to join</div></div>' +
+    '<button onclick="showTab(\'home\');this.closest(\'#pending-banner\').remove()" style="background:rgba(255,255,255,0.2);border:none;border-radius:8px;padding:5px 10px;color:white;font-size:12px;font-weight:700;cursor:pointer">Review</button>' +
+    '<button onclick="this.closest(\'#pending-banner\').remove()" style="background:none;border:none;color:white;font-size:16px;cursor:pointer;padding:2px 4px">&#x2715;</button>';
+  document.body.appendChild(banner);
+  setTimeout(function(){ if (banner.parentNode) banner.remove(); }, 8000);
+}
+
+
 
 // Load settings
 async function loadSocietySettings() {
