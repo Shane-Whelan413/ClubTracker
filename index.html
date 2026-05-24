@@ -64,21 +64,18 @@ body { height: 100%; overflow: hidden; overscroll-behavior: none; position: rela
   position: fixed;
   bottom: 0; left: 0; right: 0;
   z-index: 49;
-  background: rgba(10,22,40,0.97);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: var(--primary);
   border-top: 1px solid rgba(255,255,255,0.1);
   display: flex;
   padding-bottom: env(safe-area-inset-bottom, 0px);
   overflow: visible;
 }
-/* Extend nav colour into safe area below home indicator */
 .nav::before {
   content: '';
   position: fixed;
   bottom: 0; left: 0; right: 0;
   height: env(safe-area-inset-bottom, 0px);
-  background: rgba(10,22,40,0.97);
+  background: var(--primary);
   z-index: -1;
 }
 .nav::-webkit-scrollbar { display: none; }
@@ -88,7 +85,7 @@ body { height: 100%; overflow: hidden; overscroll-behavior: none; position: rela
   font-size: 10px; font-weight: 500;
   font-family: 'DM Sans', sans-serif;
   border: none; background: transparent; cursor: pointer;
-  color: rgba(255,255,255,0.4);
+  color: rgba(255,255,255,0.45);
   transition: color 0.15s;
   min-width: 0; position: relative;
 }
@@ -99,7 +96,7 @@ body { height: 100%; overflow: hidden; overscroll-behavior: none; position: rela
 }
 .tab-icon svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 1.6; fill: none; stroke-linecap: round; stroke-linejoin: round; }
 .nav-btn.active { color: var(--accent); }
-.nav-btn.active .tab-icon { background: rgba(201,168,76,0.18); }
+.nav-btn.active .tab-icon { background: rgba(255,255,255,0.1); }
 
 /* ── Content — exact BHGS ── */
 .content {
