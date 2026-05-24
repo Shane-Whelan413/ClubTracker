@@ -296,11 +296,39 @@ input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px;
   </div>
   <div class="auth-title" id="auth-title">GolfSoc</div>
   <div class="auth-sub" id="auth-sub">Your golf society, connected</div>
-  <div class="auth-tabs">
-    <button class="auth-tab on" onclick="switchAuthTab('login')">Sign in</button>
-    <button class="auth-tab off" onclick="switchAuthTab('signup')">Create account</button>
+
+  <!-- Mode selector -->
+  <div class="auth-tabs" style="margin-bottom:16px">
+    <button class="auth-tab on" onclick="switchAuthMode('member')">Member</button>
+    <button class="auth-tab off" onclick="switchAuthMode('admin')">Admin</button>
   </div>
-  <div id="auth-login">
+
+  <!-- Member login: mobile + PIN -->
+  <div id="auth-member">
+    <div id="auth-member-login">
+      <span class="auth-label">Mobile number</span>
+      <input class="auth-input" type="tel" id="member-mobile" placeholder="e.g. 086 123 4567" autocomplete="tel">
+      <span class="auth-label">PIN</span>
+      <input class="auth-input" type="password" id="member-pin" placeholder="4-digit PIN" maxlength="4" inputmode="numeric">
+      <button class="auth-btn" id="member-login-btn" onclick="doMemberLogin()">Sign in</button>
+      <div class="auth-err" id="member-login-err"></div>
+      <div class="auth-forgot" onclick="switchMemberView('join')" style="margin-top:14px">New member? Join a society &rsaquo;</div>
+    </div>
+    <div id="auth-member-join" style="display:none">
+      <span class="auth-label">Your name</span>
+      <input class="auth-input" type="text" id="join-name" placeholder="First Last">
+      <span class="auth-label">Mobile number</span>
+      <input class="auth-input" type="tel" id="join-mobile" placeholder="e.g. 086 123 4567" autocomplete="tel">
+      <span class="auth-label">Invite code</span>
+      <input class="auth-input" type="text" id="join-code" placeholder="e.g. BHGS-2026" style="text-transform:uppercase">
+      <button class="auth-btn" id="join-btn" onclick="doMemberJoin()">Request to join</button>
+      <div class="auth-err" id="join-err"></div>
+      <div class="auth-forgot" onclick="switchMemberView('login')" style="margin-top:14px">Already a member? Sign in &rsaquo;</div>
+    </div>
+  </div>
+
+  <!-- Admin login: email + password -->
+  <div id="auth-admin" style="display:none">
     <span class="auth-label">Email</span>
     <input class="auth-input" type="email" id="login-email" placeholder="your@email.com" autocomplete="email">
     <span class="auth-label">Password</span>
@@ -308,19 +336,20 @@ input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px;
     <button class="auth-btn" id="login-btn" onclick="doLogin()">Sign in</button>
     <div class="auth-err" id="login-err"></div>
     <div class="auth-forgot" onclick="doForgot()">Forgot password?</div>
+    <div class="auth-forgot" onclick="switchAuthMode('admin-signup')" style="margin-top:8px">Create a new society &rsaquo;</div>
   </div>
-  <div id="auth-signup" style="display:none">
+
+  <!-- Admin signup -->
+  <div id="auth-admin-signup" style="display:none">
     <span class="auth-label">Your full name</span>
     <input class="auth-input" type="text" id="signup-name" placeholder="First Last">
     <span class="auth-label">Email</span>
     <input class="auth-input" type="email" id="signup-email" placeholder="your@email.com" autocomplete="email">
     <span class="auth-label">Password</span>
     <input class="auth-input" type="password" id="signup-password" placeholder="Min 8 characters" autocomplete="new-password">
-    <span class="auth-note">Leave invite code blank to create a new society</span>
-    <span class="auth-label">Invite code (optional)</span>
-    <input class="auth-input" type="text" id="signup-code" placeholder="e.g. BHGS-2026" style="text-transform:uppercase">
-    <button class="auth-btn" id="signup-btn" onclick="doSignup()">Create account</button>
+    <button class="auth-btn" id="signup-btn" onclick="doSignup()">Create society</button>
     <div class="auth-err" id="signup-err"></div>
+    <div class="auth-forgot" onclick="switchAuthMode('admin')" style="margin-top:8px">Already have an account? Sign in &rsaquo;</div>
   </div>
 </div>
 
@@ -575,13 +604,125 @@ function showApp() {
 }
 
 // Auth
-function switchAuthTab(tab) {
-  document.getElementById('auth-login').style.display = tab === 'login' ? 'block' : 'none';
-  document.getElementById('auth-signup').style.display = tab === 'signup' ? 'block' : 'none';
+function switchAuthMode(mode) {
+  document.getElementById('auth-member').style.display = mode === 'member' ? 'block' : 'none';
+  document.getElementById('auth-admin').style.display = mode === 'admin' ? 'block' : 'none';
+  document.getElementById('auth-admin-signup').style.display = mode === 'admin-signup' ? 'block' : 'none';
   document.querySelectorAll('.auth-tab').forEach(function(el, i) {
-    el.className = 'auth-tab ' + ((i===0&&tab==='login')||(i===1&&tab==='signup') ? 'on' : 'off');
+    var isMember = (i === 0 && mode === 'member');
+    var isAdmin = (i === 1 && (mode === 'admin' || mode === 'admin-signup'));
+    el.className = 'auth-tab ' + (isMember || isAdmin ? 'on' : 'off');
   });
 }
+
+function switchMemberView(view) {
+  document.getElementById('auth-member-login').style.display = view === 'login' ? 'block' : 'none';
+  document.getElementById('auth-member-join').style.display = view === 'join' ? 'block' : 'none';
+}
+
+// Check URL for invite code on load
+function checkInviteUrl() {
+  var params = new URLSearchParams(location.search);
+  var code = params.get('invite');
+  if (code) {
+    switchAuthMode('member');
+    switchMemberView('join');
+    var codeEl = document.getElementById('join-code');
+    if (codeEl) codeEl.value = code.toUpperCase();
+  }
+}
+
+async function doMemberLogin() {
+  var mobile = (document.getElementById('member-mobile').value || '').replace(/\s/g,'').trim();
+  var pin = (document.getElementById('member-pin').value || '').trim();
+  var err = document.getElementById('member-login-err');
+  err.classList.remove('show');
+  if (!mobile || !pin) { err.textContent = 'Enter your mobile number and PIN'; err.classList.add('show'); return; }
+  var btn = document.getElementById('member-login-btn');
+  btn.classList.add('loading'); btn.textContent = 'Signing in...';
+  try {
+    // Look up player by mobile + PIN
+    var h = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Prefer': '' };
+    var res = await fetch(SUPABASE_URL + '/rest/v1/players?mobile=eq.' + encodeURIComponent(mobile) + '&pin=eq.' + pin + '&select=*', { headers: h });
+    var players = await res.json();
+    if (!players || !players.length) {
+      err.textContent = 'Mobile number or PIN not found. Check with your admin.';
+      err.classList.add('show');
+      btn.classList.remove('loading'); btn.textContent = 'Sign in';
+      return;
+    }
+    var player = players[0];
+    if (player.status === 'pending') {
+      err.textContent = 'Your request is pending admin approval.';
+      err.classList.add('show');
+      btn.classList.remove('loading'); btn.textContent = 'Sign in';
+      return;
+    }
+    // Store member session locally
+    localStorage.setItem('gs_member_id', player.id);
+    localStorage.setItem('gs_member_society', player.society_id);
+    localStorage.setItem('gs_member_name', player.name);
+    localStorage.setItem('gs_member_role', player.role || 'member');
+    // Set up currentUser as a member session
+    currentUser = {
+      id: player.id,
+      isMemberSession: true,
+      user_metadata: { society_id: player.society_id, role: player.role || 'member', full_name: player.name }
+    };
+    await afterLogin();
+  } catch(e) {
+    err.textContent = 'Error: ' + e.message;
+    err.classList.add('show');
+    btn.classList.remove('loading'); btn.textContent = 'Sign in';
+  }
+}
+
+async function doMemberJoin() {
+  var name = (document.getElementById('join-name').value || '').trim();
+  var mobile = (document.getElementById('join-mobile').value || '').replace(/\s/g,'').trim();
+  var code = (document.getElementById('join-code').value || '').trim().toUpperCase();
+  var err = document.getElementById('join-err');
+  err.classList.remove('show');
+  if (!name || !mobile || !code) { err.textContent = 'Please fill in all fields'; err.classList.add('show'); return; }
+  var btn = document.getElementById('join-btn');
+  btn.classList.add('loading'); btn.textContent = 'Sending request...';
+  try {
+    var h = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Prefer': '' };
+    // Verify invite code
+    var socRes = await fetch(SUPABASE_URL + '/rest/v1/societies?invite_code=eq.' + code + '&select=id,name', { headers: h });
+    var socs = await socRes.json();
+    if (!socs || !socs.length) { err.textContent = 'Invalid invite code. Check with your admin.'; err.classList.add('show'); btn.classList.remove('loading'); btn.textContent = 'Request to join'; return; }
+    var sid = socs[0].id;
+    // Check not already registered
+    var existing = await fetch(SUPABASE_URL + '/rest/v1/players?mobile=eq.' + encodeURIComponent(mobile) + '&society_id=eq.' + sid + '&select=id,status', { headers: h });
+    var existingPlayers = await existing.json();
+    if (existingPlayers && existingPlayers.length) {
+      var p = existingPlayers[0];
+      if (p.status === 'pending') { err.textContent = 'Request already sent — waiting for admin approval.'; } else { err.textContent = 'This mobile number is already registered. Sign in instead.'; }
+      err.classList.add('show'); btn.classList.remove('loading'); btn.textContent = 'Request to join'; return;
+    }
+    // Create pending player
+    var postH = Object.assign({}, h, { 'Content-Type': 'application/json', 'Prefer': 'return=representation' });
+    await fetch(SUPABASE_URL + '/rest/v1/players', {
+      method: 'POST', headers: postH,
+      body: JSON.stringify({ society_id: sid, name: name, mobile: mobile, handicap_index: 18, role: 'member', status: 'pending' })
+    });
+    // Show success
+    document.getElementById('auth-member-join').innerHTML =
+      '<div style="text-align:center;padding:20px 0">' +
+        '<div style="font-size:40px;margin-bottom:16px">&#9971;</div>' +
+        '<div style="font-size:18px;font-weight:700;color:white;margin-bottom:8px">Request sent!</div>' +
+        '<div style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:20px">Your admin has been notified. Once approved you\'ll receive your PIN to log in.</div>' +
+        '<div style="font-size:12px;color:rgba(255,255,255,0.3)">Joining: ' + socs[0].name + '</div>' +
+      '</div>';
+  } catch(e) {
+    err.textContent = 'Error: ' + e.message;
+    err.classList.add('show');
+    btn.classList.remove('loading'); btn.textContent = 'Request to join';
+  }
+}
+
+
 
 async function doLogin() {
   var email = document.getElementById('login-email').value.trim();
@@ -656,17 +797,26 @@ async function doForgot() {
 }
 
 async function doLogout() {
-  try { await authFetch('logout', {}); } catch(e) {}
-  localStorage.removeItem('gs_token');
-  localStorage.removeItem('gs_refresh');
+  if (currentUser && currentUser.isMemberSession) {
+    localStorage.removeItem('gs_member_id');
+    localStorage.removeItem('gs_member_society');
+    localStorage.removeItem('gs_member_name');
+    localStorage.removeItem('gs_member_role');
+  } else {
+    try { await authFetch('logout', {}); } catch(e) {}
+    localStorage.removeItem('gs_token');
+    localStorage.removeItem('gs_refresh');
+  }
   currentUser = null; societySettings = null;
   db = { players:[], events:[], rounds:[], noticeboard:[] };
   document.getElementById('topbar').style.display = 'none';
   document.getElementById('bottom-nav').style.display = 'none';
   document.getElementById('main-content').style.display = 'none';
   document.getElementById('auth-screen').style.display = 'flex';
-  document.getElementById('login-email').value = '';
-  document.getElementById('login-password').value = '';
+  var loginEmail = document.getElementById('login-email');
+  var loginPass = document.getElementById('login-password');
+  if (loginEmail) loginEmail.value = '';
+  if (loginPass) loginPass.value = '';
 }
 
 async function afterLogin() {
@@ -764,7 +914,28 @@ function renderHome() {
   var isAdmin = currentUser && currentUser.user_metadata && currentUser.user_metadata.role === 'admin';
   var pubEids = new Set(db.events.filter(function(e){ return e.published; }).map(function(e){ return e.id; }));
 
-  // ── Admin action card — events needing scores ──
+  // ── Admin pending approvals card ──
+  var pendingCard = '';
+  if (isAdmin) {
+    var pendingMembers = db.players.filter(function(p){ return p.status === 'pending'; });
+    if (pendingMembers.length) {
+      pendingCard = '<div style="background:#fff3cd;border:2px solid #ffc107;border-radius:var(--radius-lg);padding:14px 16px;margin-bottom:10px">' +
+        '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">' +
+          '<div style="font-size:22px">&#128276;</div>' +
+          '<div><div style="font-size:14px;font-weight:700;color:#856404">'+pendingMembers.length+' member'+(pendingMembers.length>1?'s':'')+' awaiting approval</div>' +
+          '<div style="font-size:11px;color:#856404;margin-top:2px">Tap to review and assign PINs</div></div>' +
+        '</div>' +
+        pendingMembers.map(function(p){
+          return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-top:0.5px solid #ffc107">' +
+            '<div style="flex:1"><div style="font-size:13px;font-weight:600;color:#1a1510">'+p.name+'</div>' +
+            '<div style="font-size:11px;color:#856404">'+p.mobile+'</div></div>' +
+            '<button onclick="approveMember(\''+p.id+'\')" style="background:#28a745;border:none;border-radius:8px;padding:6px 12px;color:white;font-size:12px;font-weight:700;cursor:pointer">Approve</button>' +
+            '<button onclick="rejectMember(\''+p.id+'\')" style="background:#dc3545;border:none;border-radius:8px;padding:6px 12px;color:white;font-size:12px;font-weight:700;cursor:pointer">Reject</button>' +
+          '</div>';
+        }).join('') +
+      '</div>';
+    }
+  }
   var adminCard = '';
   if (isAdmin) {
     var today = new Date().toISOString().slice(0,10);
@@ -837,7 +1008,7 @@ function renderHome() {
   } else {
     result = '<div class="empty"><div class="empty-icon">&#9971;</div><div class="empty-title">No results yet</div><div class="empty-sub">Results appear here after your first event</div></div>';
   }
-  feed.innerHTML = adminCard + statsBar + countdown + result;
+  feed.innerHTML = pendingCard + adminCard + statsBar + countdown + result;
 }
 
 function renderLeaderboard() {
@@ -1175,6 +1346,51 @@ async function saveExtraPrizesSettings() {
     renderSettings();
   } catch(e) { toast('Error: '+e.message, 'error'); }
 }
+
+async function approveMember(pid) {
+  var player = db.players.filter(function(p){ return p.id === pid; })[0];
+  if (!player) return;
+  // Generate a random 4-digit PIN
+  var pin = String(Math.floor(1000 + Math.random() * 9000));
+  try {
+    await apiPatch('players?id=eq.' + pid, { status: 'active', pin: pin });
+    var idx = db.players.findIndex(function(p){ return p.id === pid; });
+    if (idx >= 0) { db.players[idx].status = 'active'; db.players[idx].pin = pin; }
+    // Show PIN to admin to share via WhatsApp
+    openModal('Member approved!',
+      '<div style="text-align:center;padding:10px 0">' +
+        '<div style="font-size:32px;margin-bottom:12px">&#10003;</div>' +
+        '<div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px">'+player.name+' approved</div>' +
+        '<div style="font-size:13px;color:var(--text-2);margin-bottom:20px">Share their PIN via WhatsApp:</div>' +
+        '<div style="background:var(--primary);border-radius:var(--radius-lg);padding:20px;margin-bottom:16px">' +
+          '<div style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">PIN</div>' +
+          '<div style="font-size:48px;font-weight:800;color:var(--accent);letter-spacing:.2em">'+pin+'</div>' +
+        '</div>' +
+        '<button onclick="sharePin(\''+player.name.replace(/'/g,"\\'")+'\',\''+pin+'\')" class="btn accent full" style="margin-bottom:8px">&#128279; Share PIN on WhatsApp</button>' +
+        '<button onclick="closeModal()" class="btn full">Done</button>' +
+      '</div>'
+    );
+    renderAll();
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+function sharePin(name, pin) {
+  var text = 'Hi ' + name + '! You\'ve been approved for the golf society app.\n\nYour PIN is: ' + pin + '\n\nTo sign in:\n1. Open the app\n2. Select Member\n3. Enter your mobile number and PIN';
+  window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+}
+
+async function rejectMember(pid) {
+  var player = db.players.filter(function(p){ return p.id === pid; })[0];
+  if (!player || !confirm('Reject ' + (player.name) + '?')) return;
+  try {
+    var h = apiHeaders(); h['Prefer'] = 'return=minimal';
+    await fetch(SUPABASE_URL + '/rest/v1/players?id=eq.' + pid, { method: 'DELETE', headers: h });
+    db.players = db.players.filter(function(p){ return p.id !== pid; });
+    toast('Member rejected', 'success');
+    renderAll();
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
 
 async function savePreviewToggle(val) {
   var sid = currentUser && currentUser.user_metadata ? currentUser.user_metadata.society_id : null;
@@ -2488,6 +2704,8 @@ if ('serviceWorker' in navigator) {
 }
 
 async function init() {
+  checkInviteUrl();
+
   var showAuth = function() {
     document.getElementById('splash').style.display = 'none';
     document.getElementById('auth-screen').style.display = 'flex';
@@ -2497,6 +2715,31 @@ async function init() {
     var e = document.getElementById('splash-escape');
     if (e) e.style.display = 'block';
   }, 3000);
+
+  // Check for member session first
+  var memberId = localStorage.getItem('gs_member_id');
+  var memberSociety = localStorage.getItem('gs_member_society');
+  if (memberId && memberSociety) {
+    try {
+      var h = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Prefer': '' };
+      var res = await fetch(SUPABASE_URL + '/rest/v1/players?id=eq.' + memberId + '&select=*', { headers: h });
+      var players = await res.json();
+      if (players && players.length && players[0].status !== 'pending') {
+        var p = players[0];
+        currentUser = {
+          id: p.id,
+          isMemberSession: true,
+          user_metadata: { society_id: p.society_id, role: p.role || 'member', full_name: p.name }
+        };
+        await afterLogin();
+        return;
+      }
+    } catch(e) {}
+    localStorage.removeItem('gs_member_id');
+    localStorage.removeItem('gs_member_society');
+    showAuth();
+    return;
+  }
 
   var token = localStorage.getItem('gs_token');
   var refresh = localStorage.getItem('gs_refresh');
