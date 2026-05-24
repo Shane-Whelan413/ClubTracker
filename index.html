@@ -281,7 +281,7 @@ input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px;
 <!-- Splash -->
 <div id="splash">
   <div class="splash-logo" id="splash-logo">
-    <span style="font-family:'DM Serif Display',serif;font-size:28px;color:var(--primary)" id="splash-initials">GS</span>
+    <span style="font-family:DM Serif Display,serif;font-size:28px;color:var(--primary)" id="splash-initials">GS</span>
   </div>
   <div class="splash-name" id="splash-name">GolfSoc</div>
   <div class="splash-sub">Golf Society Management</div>
@@ -547,10 +547,10 @@ function updateBranding(s) {
   document.getElementById('auth-sub').textContent = 'Sign in to ' + name;
   var logoHtml = logo
     ? '<img src="'+logo+'" style="width:100%;height:100%;object-fit:cover">'
-    : '<span style="font-family:\'DM Serif Display\',serif;font-size:14px;color:var(--primary)">'+i+'</span>';
+    : '<span style="font-family:DM Serif Display,serif;font-size:14px;color:var(--primary)">'+i+'</span>';
   var splashHtml = logo
     ? '<img src="'+logo+'" style="width:100%;height:100%;object-fit:cover">'
-    : '<span style="font-family:\'DM Serif Display\',serif;font-size:28px;color:var(--primary)">'+i+'</span>';
+    : '<span style="font-family:DM Serif Display,serif;font-size:28px;color:var(--primary)">'+i+'</span>';
   document.getElementById('topbar-logo').innerHTML = logoHtml;
   document.getElementById('splash-logo').innerHTML = splashHtml;
   document.getElementById('auth-logo').innerHTML = logo
@@ -792,7 +792,20 @@ function renderHome() {
   if (db.noticeboard.length) {
     result = '<div style="background:white;border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px"><div style="font-size:13px;font-weight:600;color:var(--text-2);margin-bottom:10px">Latest result</div><div class="empty-sub">Results will appear here</div></div>';
   } else if (noData) {
-    result = '<div style="background:white;border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden"><div style="background:var(--primary);padding:14px 16px;position:relative"><div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent-dark),var(--accent),var(--accent),var(--accent-dark))"></div><div style="font-family:DM Serif Display,serif;font-size:16px;color:white">Example Result</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px">This is how results will appear</div></div><div style="padding:4px 16px 0"><div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border)"><div style="width:26px;height:26px;border-radius:50%;background:#B8860B;color:white;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center">1st</div><div style="flex:1;font-size:13px;font-weight:600;color:var(--text)">Jamie Murphy</div><div style="font-size:15px;font-weight:800;color:#B8860B">34 pts</div></div><div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border)"><div style="width:26px;height:26px;border-radius:50%;background:#888;color:white;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center">2nd</div><div style="flex:1;font-size:13px;color:var(--text)">Ciara Walsh</div><div style="font-size:15px;font-weight:800;color:#666">31 pts</div></div><div style="display:flex;align-items:center;gap:10px;padding:10px 0"><div style="width:26px;height:26px;border-radius:50%;background:#8B4513;color:white;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center">3rd</div><div style="flex:1;font-size:13px;color:var(--text)">Declan Byrne</div><div style="font-size:15px;font-weight:800;color:#8B4513">29 pts</div></div></div><div style="padding:8px 16px;border-top:0.5px solid var(--border);font-size:11px;color:var(--text-3);text-align:center">Go to Settings to add players and create events</div></div>';
+    result = '<div style="background:white;border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden">' +
+      '<div style="background:var(--primary);padding:14px 16px;position:relative">' +
+      '<div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent-dark),var(--accent),var(--accent),var(--accent-dark))"></div>' +
+      '<div style="font-family:DM Serif Display,serif;font-size:16px;color:white">Example Result Card</div>' +
+      '<div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px">This is how results will appear after each event</div></div>' +
+      '<div style="padding:4px 16px 0">' +
+      '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border)"><div style="width:26px;height:26px;border-radius:50%;background:#B8860B;color:white;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center">1st</div><div style="flex:1;font-size:13px;font-weight:600;color:var(--text)">Jamie Murphy</div><div style="font-size:15px;font-weight:800;color:#B8860B">34 pts</div></div>' +
+      '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border)"><div style="width:26px;height:26px;border-radius:50%;background:#888;color:white;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center">2nd</div><div style="flex:1;font-size:13px;color:var(--text)">Ciara Walsh</div><div style="font-size:15px;font-weight:800;color:#666">31 pts</div></div>' +
+      '<div style="display:flex;align-items:center;gap:10px;padding:10px 0"><div style="width:26px;height:26px;border-radius:50%;background:#8B4513;color:white;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center">3rd</div><div style="flex:1;font-size:13px;color:var(--text)">Declan Byrne</div><div style="font-size:15px;font-weight:800;color:#8B4513">29 pts</div></div>' +
+      '</div>' +
+      '<div style="padding:10px 16px;border-top:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between">' +
+      '<div style="font-size:11px;color:var(--text-3)">Add players & events to get started</div>' +
+      '<button onclick="showTab(&quot;settings&quot;)" class="btn sm accent">Go to Settings</button>' +
+      '</div></div>';
   } else {
     result = '<div class="empty"><div class="empty-icon">&#9971;</div><div class="empty-title">No results yet</div><div class="empty-sub">Results appear here after your first event</div></div>';
   }
@@ -864,11 +877,23 @@ function renderProfile() {
   var pid = currentUser ? currentUser.id : null;
   var player = db.players.filter(function(p){ return p.user_id === pid; })[0];
   var isAdmin = currentUser && currentUser.user_metadata && currentUser.user_metadata.role === 'admin';
+  var previewEnabledP = !societySettings || societySettings.show_preview !== false;
   if (!player) {
-    el.innerHTML = '<div class="empty"><div class="empty-icon">&#128100;</div><div class="empty-title">Profile not set up</div><div class="empty-sub">Ask your admin to add you as a player</div></div><button class="btn danger full" onclick="doLogout()" style="margin-top:16px">Sign out</button>';
+    var profilePreview = previewEnabledP ? 
+      '<div style="background:var(--accent-light);border:1px solid var(--accent);border-radius:var(--radius);padding:8px 12px;margin-bottom:12px;font-size:12px;color:var(--accent-dark);text-align:center">Preview - this is what your profile will look like</div>' +
+      '<div class="profile-hero"><div class="avatar" style="width:60px;height:60px;font-size:20px">JM</div><div style="flex:1"><div style="font-family:DM Serif Display,serif;font-size:20px;color:white">Your Name</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px">Member</div></div><div style="text-align:right"><div style="font-size:28px;font-weight:800;color:var(--accent)">18.0</div><div style="font-size:10px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:.05em">Handicap</div></div></div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">' +
+        '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center"><div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);margin-bottom:6px">Season points</div><div style="font-size:24px;font-weight:800;color:var(--text)">--</div><div style="font-size:11px;color:var(--text-3);margin-top:2px">No rounds yet</div></div>' +
+        '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center"><div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);margin-bottom:6px">Best round</div><div style="font-size:24px;font-weight:800;color:var(--text)">--</div><div style="font-size:11px;color:var(--text-3);margin-top:2px">pts stableford</div></div>' +
+        '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center"><div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);margin-bottom:6px">Rounds played</div><div style="font-size:24px;font-weight:800;color:var(--text)">0</div><div style="font-size:11px;color:var(--text-3);margin-top:2px">this season</div></div>' +
+        '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center"><div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);margin-bottom:6px">Current rank</div><div style="font-size:24px;font-weight:800;color:var(--text)">--</div><div style="font-size:11px;color:var(--text-3);margin-top:2px">in standings</div></div>' +
+      '</div>' +
+      '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px"><div style="font-size:12px;font-weight:600;color:var(--text-2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em">Handicap history</div><div style="display:flex;align-items:center;justify-content:center;height:60px;color:var(--text-3);font-size:13px">Handicap changes will appear here after each round</div></div>'
+      : '';
+    el.innerHTML = profilePreview + '<button class="btn danger full" onclick="doLogout()" style="margin-top:8px">Sign out</button>';
     return;
   }
-  el.innerHTML = '<div class="profile-hero">'+avHtml(player,60,20)+'<div style="flex:1"><div style="font-family:\'DM Serif Display\',serif;font-size:20px;color:white">'+player.name+'</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px">'+(isAdmin?'Admin - ':'')+'Member</div></div><div style="text-align:right"><div style="font-size:28px;font-weight:800;color:var(--accent)">'+parseFloat(player.handicap_index||0).toFixed(1)+'</div><div style="font-size:10px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:.05em">Handicap</div></div></div><button class="btn danger full" onclick="doLogout()">Sign out</button>';
+  el.innerHTML = '<div class="profile-hero">'+avHtml(player,60,20)+'<div style="flex:1"><div style="font-family:DM Serif Display,serif;font-size:20px;color:white">'+player.name+'</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px">'+(isAdmin?'Admin - ':'')+'Member</div></div><div style="text-align:right"><div style="font-size:28px;font-weight:800;color:var(--accent)">'+parseFloat(player.handicap_index||0).toFixed(1)+'</div><div style="font-size:10px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:.05em">Handicap</div></div></div><button class="btn danger full" onclick="doLogout()">Sign out</button>';
 }
 
 function renderSettings() {
