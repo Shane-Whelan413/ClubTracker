@@ -1,7 +1,7 @@
 // GolfSoc Service Worker
-// BUMP THIS VERSION every time you push an update
-const VERSION = 'v1.0.4';
-const CACHE = 'golfsoc-' + VERSION;
+// iOS PWA: never cache HTML, always fetch fresh
+const VERSION = 'v1.0.5';
+const CACHE = 'golfsoc-assets-' + VERSION;
 
 self.addEventListener('install', function(e) {
   self.skipWaiting();
@@ -12,7 +12,6 @@ self.addEventListener('activate', function(e) {
     caches.keys().then(function(keys) {
       return Promise.all(
         keys.filter(function(k) { return k !== CACHE; }).map(function(k) {
-          console.log('Deleting old cache:', k);
           return caches.delete(k);
         })
       );
@@ -23,27 +22,35 @@ self.addEventListener('activate', function(e) {
 });
 
 self.addEventListener('fetch', function(e) {
-  // Always network-first for the main HTML page
-  if (e.request.mode === 'navigate') {
+  var url = e.request.url;
+
+  // NEVER cache HTML or navigation requests - always go to network
+  if (e.request.mode === 'navigate' ||
+      url.endsWith('.html') ||
+      url.endsWith('/') ||
+      url.indexOf('index') > -1) {
     e.respondWith(
-      fetch(e.request).then(function(response) {
-        var clone = response.clone();
-        caches.open(CACHE).then(function(cache) { cache.put(e.request, clone); });
-        return response;
-      }).catch(function() {
+      fetch(e.request, { cache: 'no-store' }).catch(function() {
         return caches.match(e.request);
       })
     );
     return;
   }
-  // Cache-first for assets
-  e.respondWith(
-    caches.match(e.request).then(function(cached) {
-      return cached || fetch(e.request).then(function(response) {
-        var clone = response.clone();
-        caches.open(CACHE).then(function(cache) { cache.put(e.request, clone); });
-        return response;
-      });
-    })
-  );
+
+  // Cache fonts only
+  if (url.indexOf('fonts.googleapis.com') > -1 || url.indexOf('fonts.gstatic.com') > -1) {
+    e.respondWith(
+      caches.match(e.request).then(function(cached) {
+        return cached || fetch(e.request).then(function(response) {
+          var clone = response.clone();
+          caches.open(CACHE).then(function(c) { c.put(e.request, clone); });
+          return response;
+        });
+      })
+    );
+    return;
+  }
+
+  // Everything else - network only
+  e.respondWith(fetch(e.request));
 });
