@@ -29,12 +29,12 @@
   --radius-lg:    14px;
 }
 
-/* ── Reset — exact BHGS ── */
+/* ── Reset -- exact BHGS ── */
 * { box-sizing: border-box; margin: 0; padding: 0; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 html { height: 100%; overflow: hidden; overscroll-behavior: none; }
 body { height: 100%; overflow: hidden; overscroll-behavior: none; position: relative; font-family: 'DM Sans', sans-serif; color: var(--text); background: var(--bg); }
 
-/* ── Topbar — exact BHGS padding ── */
+/* ── Topbar -- exact BHGS padding ── */
 .topbar {
   background: var(--primary);
   border-bottom: 1px solid rgba(201,168,76,0.15);
@@ -51,7 +51,7 @@ body { height: 100%; overflow: hidden; overscroll-behavior: none; position: rela
   z-index: 50;
 }
 
-/* ── Nav — exact BHGS ── */
+/* ── Nav -- exact BHGS ── */
 .nav {
   position: fixed;
   bottom: 0; left: 0; right: 0;
@@ -85,7 +85,7 @@ body { height: 100%; overflow: hidden; overscroll-behavior: none; position: rela
 .nav-badge { position: absolute; top: 6px; right: 2px; width: 16px; height: 16px; border-radius: 50%; background: #E24B4A; color: white; font-size: 9px; font-weight: 700; display: none; align-items: center; justify-content: center; }
 .nav-badge.show { display: flex; }
 
-/* ── Content — exact BHGS ── */
+/* ── Content -- exact BHGS ── */
 .content {
   padding: 1.5rem 1.5rem 140px;
   overflow-x: hidden;
@@ -391,7 +391,7 @@ input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px;
   <!-- Step 4 -->
   <div class="wiz-step" id="wiz-4">
     <div class="wiz-title">Upload your logo</div>
-    <div class="wiz-sub">Optional — you can add this later in Settings.</div>
+    <div class="wiz-sub">Optional -- you can add this later in Settings.</div>
     <div class="logo-drop" onclick="document.getElementById('wiz-logo-input').click()" id="wiz-logo-drop">
       <input type="file" id="wiz-logo-input" accept="image/*" onchange="previewWizLogo(event)">
       <div id="wiz-logo-preview" style="display:none;width:80px;height:80px;border-radius:16px;overflow:hidden;margin:0 auto 12px"></div>
@@ -715,7 +715,7 @@ function renderHome() {
     const myPos = myIdx+1;
     const myPts = sorted[myIdx]?.pts||0;
     const myRounds = db.rounds.filter(r=>r.player_id===player.id&&r.verified&&pubEids.has(r.event_id)).length;
-    const posLabel = myPos===1?'1st':myPos===2?'2nd':myPos===3?'3rd':myPos>0?myPos+'th':'—';
+    const posLabel = myPos===1?'1st':myPos===2?'2nd':myPos===3?'3rd':myPos>0?myPos+'th':'--';
     const rankCls = myPos===1?'rank-1':myPos===2?'rank-2':myPos===3?'rank-3':'';
     statsBar = `<div class="stat-grid">
       <div class="stat-tile ${rankCls}"><div class="stat-label">Rank</div><div class="stat-val">${posLabel}</div></div>
@@ -854,8 +854,8 @@ function renderSettings() {
     </div>
     <div class="settings-section">
       <div class="settings-section-title">Branding</div>
-      <div class="settings-row" onclick="openModal('Society name','<div class=\\'field\\'><label>Society name</label><input type=\\'text\\' id=\\'brand-name\\' value=\\'${s.society_name||s.name||\\'\\'}\\'></div><button class=\\'btn primary full\\' onclick=\\'saveBranding()\\' style=\\'margin-top:8px\\'>Save</button>')">
-        <div class="settings-row-label">Society name</div><div class="settings-row-value">${s.society_name||s.name||'—'} ›</div></div>
+      <div class="settings-row" onclick="openBrandingModal()">
+        <div class="settings-row-label">Society name</div><div class="settings-row-value">${s.society_name||s.name||'--'} ›</div></div>
       <div class="settings-row" onclick="openLogoModal()">
         <div class="settings-row-label">Logo</div><div class="settings-row-value">${s.logo_url?'Uploaded ✓':'Not set'} ›</div></div>
       <div class="settings-row" onclick="openThemeModal()">
@@ -990,7 +990,7 @@ function openHcpModal() {
         <div class="hcp-rule-row"><div class="hcp-rule-label">1st place cut</div><input class="hcp-rule-input" type="number" step="0.1" id="hcp-1" value="${s.cut_1st||-1.0}"></div>
         <div class="hcp-rule-row"><div class="hcp-rule-label">2nd place cut</div><input class="hcp-rule-input" type="number" step="0.1" id="hcp-2" value="${s.cut_2nd||-0.5}"></div>
         <div class="hcp-rule-row"><div class="hcp-rule-label">3rd place cut</div><input class="hcp-rule-input" type="number" step="0.1" id="hcp-3" value="${s.cut_3rd||-0.2}"></div>
-        <div class="hcp-rule-row"><div class="hcp-rule-label">4th–last addition</div><input class="hcp-rule-input" type="number" step="0.1" id="hcp-add" value="${s.add_non_podium||0.2}"></div>
+        <div class="hcp-rule-row"><div class="hcp-rule-label">4th-last addition</div><input class="hcp-rule-input" type="number" step="0.1" id="hcp-add" value="${s.add_non_podium||0.2}"></div>
         <div class="hcp-rule-row"><div class="hcp-rule-label">Max handicap</div><input class="hcp-rule-input" type="number" id="hcp-max" value="${s.max_handicap||36}"></div>
         <div class="hcp-rule-row" style="border:none"><div class="hcp-rule-label">Provisional rounds</div><input class="hcp-rule-input" type="number" id="hcp-prov" value="${s.provisional_rounds||3}"></div>
       </div>
@@ -1100,7 +1100,7 @@ async function removePlayer(pid, name) {
 }
 
 function openInviteModal() {
-  const code = societySettings?.invite_code||'—';
+  const code = societySettings?.invite_code||'--';
   openModal('Invite members',`<p style="font-size:13px;color:var(--text-2);margin-bottom:16px">Share this code with new members. They enter it when creating their account.</p>
     <div style="background:var(--bg);border-radius:var(--radius);padding:16px;text-align:center;margin-bottom:14px">
       <div style="font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Invite code</div>
@@ -1306,7 +1306,7 @@ async function init() {
     }, 400);
   };
 
-  // No tokens at all — go straight to login
+  // No tokens at all -- go straight to login
   const token = localStorage.getItem('gs_token');
   const refresh = localStorage.getItem('gs_refresh');
   if (!token && !refresh) {
@@ -1314,7 +1314,7 @@ async function init() {
     return;
   }
 
-  // Try to validate — but give up after 5 seconds no matter what
+  // Try to validate -- but give up after 5 seconds no matter what
   const bail = setTimeout(() => {
     localStorage.removeItem('gs_token');
     localStorage.removeItem('gs_refresh');
@@ -1369,9 +1369,6 @@ async function init() {
     showAuth();
   }
 }
-</script>
-</body>
-</html>
 
 init();
 </script>
