@@ -937,6 +937,24 @@ function renderHome() {
     }
   }
   var adminCard = '';
+  // Invite share card
+  var inviteCard = '';
+  if (isAdmin && societySettings && societySettings.invite_code) {
+    var code = societySettings.invite_code;
+    var appUrl = window.location.origin + window.location.pathname + '?invite=' + code;
+    window._inviteShareText = 'Join our golf society app!\n\nTap to join: ' + appUrl + '\n\nOr use invite code: ' + code;
+    inviteCard = '<div style="background:var(--primary);border-radius:var(--radius-lg);padding:14px 16px;margin-bottom:10px;position:relative;overflow:hidden">' +
+      '<div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent-dark),var(--accent),var(--accent),var(--accent-dark))"></div>' +
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">' +
+        '<div style="font-size:22px">&#128279;</div>' +
+        '<div><div style="font-size:14px;font-weight:700;color:white">Invite members</div>' +
+        '<div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:1px">Code: <span style="color:var(--accent);font-weight:700;letter-spacing:.05em">'+code+'</span></div></div>' +
+      '</div>' +
+      '<button onclick="shareInviteLink()" style="width:100%;padding:10px;border-radius:var(--radius);border:none;background:#25D366;color:white;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-family:DM Sans,sans-serif">' +
+        '&#128279; Share invite on WhatsApp' +
+      '</button>' +
+    '</div>';
+  }
   if (isAdmin) {
     var today = new Date().toISOString().slice(0,10);
     var sevenDaysAgo = new Date(Date.now() - 7*86400000).toISOString().slice(0,10);
@@ -1008,7 +1026,7 @@ function renderHome() {
   } else {
     result = '<div class="empty"><div class="empty-icon">&#9971;</div><div class="empty-title">No results yet</div><div class="empty-sub">Results appear here after your first event</div></div>';
   }
-  feed.innerHTML = pendingCard + adminCard + statsBar + countdown + result;
+  feed.innerHTML = pendingCard + inviteCard + adminCard + statsBar + countdown + result;
 }
 
 function renderLeaderboard() {
@@ -1346,6 +1364,16 @@ async function saveExtraPrizesSettings() {
     renderSettings();
   } catch(e) { toast('Error: '+e.message, 'error'); }
 }
+
+function shareInviteLink() {
+  var text = window._inviteShareText || '';
+  if (navigator.share) {
+    navigator.share({ title: 'Join our golf society', text: text }).catch(function(){});
+  } else {
+    window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+  }
+}
+
 
 async function approveMember(pid) {
   var player = db.players.filter(function(p){ return p.id === pid; })[0];
