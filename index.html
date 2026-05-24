@@ -869,6 +869,7 @@ function renderProfile() {
   el.innerHTML =
     '<div class="profile-hero">'+avHtml(player,60,20)+'<div style="flex:1"><div style="font-size:20px;color:white;font-weight:600">'+player.name+'</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px">'+(isAdmin?'Admin - ':'')+'Member</div></div><div style="text-align:right"><div style="font-size:28px;font-weight:800;color:var(--accent)">'+parseFloat(player.handicap_index||0).toFixed(1)+'</div><div style="font-size:10px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:.05em">Handicap</div></div></div>' +
     makeStatCards(myRounds, myRank) +
+    buildProgressionCharts(myRounds, player) +
     '<button class="btn danger full" onclick="doLogout()">Sign out</button>';
 }
 
@@ -915,6 +916,118 @@ function openBrandingModal() {
   var s = societySettings || {};
   openModal('Society name', '<div class="field"><label>Society name</label><input type="text" id="brand-name" value="'+(s.society_name||s.name||'')+'"></div><button class="btn accent full" onclick="saveBranding()">Save</button>');
 }
+
+function buildProgressionCharts(rounds, player) {
+  if (!rounds || !rounds.length) {
+    return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:10px;text-align:center;color:var(--text-3);font-size:13px">Play your first round to see detailed stats</div>';
+  }
+
+  var sorted = rounds.slice().sort(function(a,b){ return (a.created_at||'').localeCompare(b.created_at||''); });
+  var html = '';
+
+  // ── Handicap progression ──
+  var hcpPoints = sorted.filter(function(r){ return r.handicap_after != null; }).map(function(r,i){
+    return { label: 'R'+(i+1), val: parseFloat(r.handicap_after) };
+  });
+  if (hcpPoints.length >= 2) {
+    var hcpMin = Math.min.apply(null, hcpPoints.map(function(p){return p.val;}));
+    var hcpMax = Math.max.apply(null, hcpPoints.map(function(p){return p.val;}));
+    var hcpRange = hcpMax - hcpMin || 1;
+    var svgW = 280, svgH = 80, pad = 20;
+    var stepX = (svgW - pad*2) / (hcpPoints.length - 1);
+    var pts = hcpPoints.map(function(p,i){
+      var x = pad + i * stepX;
+      var y = pad + (1 - (p.val - hcpMin) / hcpRange) * (svgH - pad*2);
+      return x.toFixed(1)+','+y.toFixed(1);
+    });
+    var trend = hcpPoints[hcpPoints.length-1].val < hcpPoints[0].val ? 'Down ' : 'Up ';
+    var diff = Math.abs(hcpPoints[hcpPoints.length-1].val - hcpPoints[0].val).toFixed(1);
+    var trendColor = trend === 'Down ' ? '#16a34a' : '#dc2626';
+    html += '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">' +
+        '<div style="font-size:12px;font-weight:600;color:var(--text-2);text-transform:uppercase;letter-spacing:.05em">Handicap progression</div>' +
+        '<div style="font-size:12px;font-weight:700;color:'+trendColor+'">'+trend+diff+'</div>' +
+      '</div>' +
+      '<svg viewBox="0 0 '+svgW+' '+svgH+'" style="width:100%;height:80px">' +
+        '<polyline points="'+pts.join(' ')+'" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' +
+        pts.map(function(p,i){
+          var xy = p.split(',');
+          return '<circle cx="'+xy[0]+'" cy="'+xy[1]+'" r="3" fill="var(--primary)"/>' +
+            '<text x="'+xy[0]+'" y="'+(parseFloat(xy[1])-6)+'" text-anchor="middle" font-size="8" fill="var(--text-3)">'+hcpPoints[i].val.toFixed(1)+'</text>';
+        }).join('') +
+      '</svg></div>';
+  }
+
+  // ── Points per round chart ──
+  var ptsPoints = sorted.filter(function(r){ return r.stableford_points != null; }).map(function(r,i){
+    return { label:'R'+(i+1), val: r.stableford_points||0 };
+  });
+  if (ptsPoints.length >= 2) {
+    var pMin = Math.min.apply(null, ptsPoints.map(function(p){return p.val;}));
+    var pMax = Math.max.apply(null, ptsPoints.map(function(p){return p.val;}));
+    var pRange = pMax - pMin || 1;
+    var svgW2 = 280, svgH2 = 80, pad2 = 20;
+    var stepX2 = (svgW2 - pad2*2) / (ptsPoints.length - 1);
+    var pts2 = ptsPoints.map(function(p,i){
+      var x = pad2 + i * stepX2;
+      var y = pad2 + (1 - (p.val - pMin) / pRange) * (svgH2 - pad2*2);
+      return x.toFixed(1)+','+y.toFixed(1);
+    });
+    var avg = Math.round(ptsPoints.reduce(function(s,p){return s+p.val;},0) / ptsPoints.length);
+    html += '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">' +
+        '<div style="font-size:12px;font-weight:600;color:var(--text-2);text-transform:uppercase;letter-spacing:.05em">Points per round</div>' +
+        '<div style="font-size:12px;font-weight:700;color:var(--text-3)">Avg '+avg+' pts</div>' +
+      '</div>' +
+      '<svg viewBox="0 0 '+svgW2+' '+svgH2+'" style="width:100%;height:80px">' +
+        '<polyline points="'+pts2.join(' ')+'" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' +
+        pts2.map(function(p,i){
+          var xy = p.split(',');
+          return '<circle cx="'+xy[0]+'" cy="'+xy[1]+'" r="3" fill="var(--accent)"/>' +
+            '<text x="'+xy[0]+'" y="'+(parseFloat(xy[1])-6)+'" text-anchor="middle" font-size="8" fill="var(--text-3)">'+ptsPoints[i].val+'</text>';
+        }).join('') +
+      '</svg></div>';
+  }
+
+  // ── Par averages (from hole_scores + par_values) ──
+  var par3pts = [], par4pts = [], par5pts = [];
+  sorted.forEach(function(r) {
+    if (!r.hole_scores || !r.par_values) return;
+    var scores, pars;
+    try { scores = typeof r.hole_scores === 'string' ? JSON.parse(r.hole_scores) : r.hole_scores; } catch(e){ return; }
+    try { pars = typeof r.par_values === 'string' ? JSON.parse(r.par_values) : r.par_values; } catch(e){ return; }
+    if (!Array.isArray(scores) || !Array.isArray(pars)) return;
+    scores.forEach(function(s,i) {
+      var p = pars[i];
+      var sc = parseInt(s); var par = parseInt(p);
+      if (!sc || !par) return;
+      var stab = Math.max(0, 2 - (sc - par));
+      if (par === 3) par3pts.push(stab);
+      else if (par === 4) par4pts.push(stab);
+      else if (par === 5) par5pts.push(stab);
+    });
+  });
+
+  if (par3pts.length || par4pts.length || par5pts.length) {
+    function avg(arr) { return arr.length ? (arr.reduce(function(s,v){return s+v;},0)/arr.length).toFixed(2) : '--'; }
+    function bar(val, max) {
+      var pct = max > 0 ? Math.min(100, (parseFloat(val)/max)*100) : 0;
+      var color = parseFloat(val) >= 2 ? '#16a34a' : parseFloat(val) >= 1.5 ? 'var(--accent)' : '#dc2626';
+      return '<div style="height:8px;background:var(--border);border-radius:99px;margin-top:4px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:'+color+';border-radius:99px;transition:width 0.5s"></div></div>';
+    }
+    var a3 = avg(par3pts), a4 = avg(par4pts), a5 = avg(par5pts);
+    html += '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px">' +
+      '<div style="font-size:12px;font-weight:600;color:var(--text-2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px">Avg stableford by par</div>' +
+      '<div style="display:flex;flex-direction:column;gap:10px">' +
+        (par3pts.length ? '<div><div style="display:flex;justify-content:space-between"><span style="font-size:13px;color:var(--text)">Par 3</span><span style="font-size:13px;font-weight:700;color:var(--text)">'+a3+' pts</span></div>'+bar(a3,2)+'</div>' : '') +
+        (par4pts.length ? '<div><div style="display:flex;justify-content:space-between"><span style="font-size:13px;color:var(--text)">Par 4</span><span style="font-size:13px;font-weight:700;color:var(--text)">'+a4+' pts</span></div>'+bar(a4,2)+'</div>' : '') +
+        (par5pts.length ? '<div><div style="display:flex;justify-content:space-between"><span style="font-size:13px;color:var(--text)">Par 5</span><span style="font-size:13px;font-weight:700;color:var(--text)">'+a5+' pts</span></div>'+bar(a5,2)+'</div>' : '') +
+      '</div></div>';
+  }
+
+  return html || '';
+}
+
 
 async function savePreviewToggle(val) {
   var sid = currentUser && currentUser.user_metadata ? currentUser.user_metadata.society_id : null;
