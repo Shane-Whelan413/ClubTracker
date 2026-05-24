@@ -1288,6 +1288,82 @@ if (location.search.includes('reset')) {
   history.replaceState({}, '', location.pathname);
 }
 
+async function init() {
+  const showAuth = () => {
+    document.getElementById('splash').classList.add('out');
+    setTimeout(() => {
+      document.getElementById('splash').style.display = 'none';
+      document.getElementById('auth-screen').classList.add('active');
+    }, 400);
+  };
+
+  // No tokens at all — go straight to login
+  const token = localStorage.getItem('gs_token');
+  const refresh = localStorage.getItem('gs_refresh');
+  if (!token && !refresh) {
+    showAuth();
+    return;
+  }
+
+  // Try to validate — but give up after 5 seconds no matter what
+  const bail = setTimeout(() => {
+    localStorage.removeItem('gs_token');
+    localStorage.removeItem('gs_refresh');
+    showAuth();
+  }, 5000);
+
+  try {
+    let accessToken = token;
+
+    // Try access token first
+    let res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${token || ''}` }
+    });
+
+    // If failed and we have refresh token, try to refresh
+    if (!res.ok && refresh) {
+      const rr = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
+        method: 'POST',
+        headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refresh_token: refresh })
+      });
+      if (rr.ok) {
+        const rd = await rr.json();
+        accessToken = rd.access_token;
+        localStorage.setItem('gs_token', rd.access_token);
+        if (rd.refresh_token) localStorage.setItem('gs_refresh', rd.refresh_token);
+        res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${accessToken}` }
+        });
+      }
+    }
+
+    clearTimeout(bail);
+
+    if (!res.ok) {
+      localStorage.removeItem('gs_token');
+      localStorage.removeItem('gs_refresh');
+      showAuth();
+      return;
+    }
+
+    const user = await res.json();
+    if (!user?.id) { localStorage.removeItem('gs_token'); localStorage.removeItem('gs_refresh'); showAuth(); return; }
+    currentUser = { ...user, access_token: accessToken };
+    await afterLogin();
+
+  } catch(e) {
+    clearTimeout(bail);
+    console.error('Init error:', e);
+    localStorage.removeItem('gs_token');
+    localStorage.removeItem('gs_refresh');
+    showAuth();
+  }
+}
+</script>
+</body>
+</html>
+
 init();
 </script>
 </body>
