@@ -1079,10 +1079,24 @@ function renderHome() {
   if (db.noticeboard.length) {
     result = db.noticeboard.slice(0,3).map(function(post) {
       var ev = db.events.filter(function(e){ return e.id === post.event_id; })[0];
+      // Parse extra_data - handle both string and object
       var extra = {};
-      try { extra = post.extra_data ? (typeof post.extra_data==='string'?JSON.parse(post.extra_data):post.extra_data) : {}; } catch(e2){}
+      try {
+        if (post.extra_data) {
+          extra = typeof post.extra_data === 'string' ? JSON.parse(post.extra_data) : post.extra_data;
+        }
+      } catch(e2){}
       var top = extra.topPlayers || [];
       var prizes = extra.extraPrizes || {};
+      // If no topPlayers in extra_data, build from rounds
+      if (!top.length && ev) {
+        var evRounds = db.rounds.filter(function(r){ return r.event_id === ev.id && r.verified && r.stableford_points > 0; });
+        evRounds.sort(function(a,b){ return (b.stableford_points||0)-(a.stableford_points||0); });
+        top = evRounds.slice(0,3).map(function(r){
+          var pl = db.players.filter(function(p){ return p.id === r.player_id; })[0];
+          return { name: pl ? pl.name : '?', pts: r.stableford_points || 0 };
+        });
+      }
       var medals = ['1st','2nd','3rd'];
       var medalColors = ['#B8860B','#888','#8B4513'];
       var rows = top.map(function(p,i){
@@ -1097,16 +1111,23 @@ function renderHome() {
           '<div style="flex:1;font-size:11px;color:var(--text-3)">'+pr+'</div>' +
           '<div style="font-size:12px;font-weight:600;color:var(--accent-dark)">'+prizes[pr]+'</div></div>';
       }).join('');
-      var shareLines = top.map(function(p,i){return medals[i]+' '+p.name+' - '+p.pts+' pts';}).join('\\n');
-      Object.keys(prizes).forEach(function(pr){shareLines += '\\n'+pr+': '+prizes[pr];});
-      var shareText = encodeURIComponent('\u26f3 '+(ev?ev.course_name:'Golf')+' Results\n\n'+shareLines+'\n\nPosted via GolfSoc');
+      // Build share text cleanly
+      var shareParts = ['⛳ '+(ev?ev.course_name:'Golf')+' Results', ''];
+      top.forEach(function(p,i){ shareParts.push(medals[i]+' '+p.name+' - '+p.pts+' pts'); });
+      Object.keys(prizes).forEach(function(pr){ shareParts.push(''); shareParts.push(pr+': '+prizes[pr]); });
+      shareParts.push(''); shareParts.push('Posted via GolfSoc');
+      var shareMsg = shareParts.join('\\n');
+      var postId = post.id || ev && ev.id || '';
+      // Store share text globally indexed by post
+      window._shareTexts = window._shareTexts || {};
+      window._shareTexts[postId] = shareMsg;
       return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:8px">' +
         '<div style="background:var(--primary);padding:12px 16px;position:relative">' +
           '<div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent-dark),var(--accent),var(--accent-dark))"></div>' +
           '<div style="display:flex;align-items:center;justify-content:space-between">' +
             '<div><div style="font-size:14px;font-weight:700;color:white">'+(ev?ev.course_name:'Event')+'</div>' +
             '<div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:1px">'+(ev?fmtDate(ev.event_date):'')+'</div></div>' +
-            '<button onclick="window.open(\'https://wa.me/?text=\'+encodeURIComponent(shareLines)+\'\',\'_blank\')">Share</button>' +
+            '<button onclick="shareResult(this.getAttribute(\'data-post\'))" data-post="'+postId+'" style="background:#25D366;border:none;border-radius:8px;padding:5px 10px;color:white;font-size:11px;font-weight:700;cursor:pointer">Share</button>' +
           '</div>' +
         '</div>' +
         '<div style="padding:4px 16px 4px">'+rows+'</div>' +
@@ -1173,7 +1194,7 @@ function renderLeaderboard() {
     var cls = pos===1?'lb-card-gold':pos===2?'lb-card-silver':pos===3?'lb-card-bronze':'';
     var bg = pos===1?'#B8860B':pos===2?'#888':pos===3?'#8B4513':'var(--primary)';
     var pc = pos===1?'#B8860B':pos===2?'#666':pos===3?'#8B4513':'var(--green)';
-    return '<div class="lb-wrap"><div class="lb-card '+cls+'"><div style="width:34px;height:34px;border-radius:50%;background:'+bg+';color:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:700">'+lbl+'</div>'+avHtml(p,34,12)+'<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+p.name+'</div><div style="font-size:11px;color:var(--text-3)">Hcp '+parseFloat(p.handicap_index||0).toFixed(1)+'</div></div><div style="font-size:20px;font-weight:700;color:'+pc+';flex-shrink:0">'+p.pts+'<span style="font-size:11px;font-weight:400;color:var(--text-3)"> pts</span></div></div></div>';
+    return '<div class="lb-wrap" onclick="openPlayerProfile(\''+p.id+'\')"><div class="lb-card '+cls+'"><div style="width:34px;height:34px;border-radius:50%;background:'+bg+';color:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:700">'+lbl+'</div>'+avHtml(p,34,12)+'<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+p.name+'</div><div style="font-size:11px;color:var(--text-3)">Hcp '+parseFloat(p.handicap_index||0).toFixed(1)+'</div></div><div style="font-size:20px;font-weight:700;color:'+pc+';flex-shrink:0">'+p.pts+'<span style="font-size:11px;font-weight:400;color:var(--text-3)"> pts</span></div></div></div>';
   }).join('');
 }
 
@@ -1210,10 +1231,112 @@ function renderSchedule() {
   function evRow(ev, isPast) {
     var p = ev.event_date.split('-');
     var isOuting = ev.event_type === 'outing_18';
-    return '<div class="event-card" style="'+(isPast?'opacity:0.6':'')+'"><div style="display:flex;align-items:center;gap:12px;padding:12px 14px"><div class="ev-date"><div class="ev-day">'+parseInt(p[2])+'</div><div class="ev-month">'+mo[parseInt(p[1])-1]+'</div></div><div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(ev.course_name||'TBD')+'</div><div style="font-size:11px;color:var(--text-3);margin-top:2px">'+(isOuting?'Outing - 18 holes':'Sunday - 9 holes')+(ev.published?' - Results posted':'')+'</div></div></div></div>';
+    var today = new Date().toISOString().slice(0,10);
+    var evDate = ev.event_date;
+    // Show handicap breakdown in the week of the event (3 days before to 3 days after)
+    var evDateObj = new Date(evDate);
+    var todayObj = new Date(today);
+    var diffDays = Math.round((evDateObj - todayObj) / 86400000);
+    var isThisWeek = diffDays >= -3 && diffDays <= 3;
+    var hcpBreakdown = '';
+    if (isThisWeek && !ev.published) {
+      var activePlayers = db.players.filter(function(pl){ return pl.status !== 'pending'; });
+      if (activePlayers.length) {
+        var slope = parseFloat(ev.slope_rating) || 113;
+        hcpBreakdown = '<div style="border-top:0.5px solid var(--border);padding:8px 14px">' +
+          '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);margin-bottom:6px">Playing handicaps</div>' +
+          '<div style="display:flex;flex-wrap:wrap;gap:4px">' +
+          activePlayers.map(function(pl){
+            var courseHcp = Math.round(parseFloat(pl.handicap_index||0) * slope / 113);
+            return '<div style="background:var(--bg);border-radius:6px;padding:4px 8px;font-size:11px;color:var(--text-2)">' +
+              pl.name.split(' ')[0]+' <strong>'+courseHcp+'</strong></div>';
+          }).join('') +
+          '</div></div>';
+      }
+    }
+    var actionBtn = '';
+    if (ev.published) {
+      actionBtn = '<button onclick="openEventResults(\''+ev.id+'\')" style="margin:0 14px 10px;width:calc(100% - 28px);padding:8px;border-radius:var(--radius);border:none;background:var(--primary);color:var(--accent);font-size:12px;font-weight:700;cursor:pointer;font-family:DM Sans,sans-serif">View results</button>';
+    }
+    return '<div class="event-card" style="'+(isPast?'opacity:0.7':'')+'">' +
+      '<div style="display:flex;align-items:center;gap:12px;padding:12px 14px">' +
+        '<div class="ev-date"><div class="ev-day">'+parseInt(p[2])+'</div><div class="ev-month">'+mo[parseInt(p[1])-1]+'</div></div>' +
+        '<div style="flex:1;min-width:0">' +
+          '<div style="font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(ev.course_name||'TBD')+'</div>' +
+          '<div style="font-size:11px;color:var(--text-3);margin-top:2px">'+(isOuting?'Outing - 18 holes':'Sunday - 9 holes')+(ev.published?' · Results posted':'')+'</div>' +
+        '</div>' +
+      '</div>' +
+      hcpBreakdown +
+      actionBtn +
+    '</div>';
   }
   el.innerHTML = adminBtn + upcoming.map(function(e){ return evRow(e,false); }).join('') + (past.length ? '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-3);padding:8px 2px;margin-top:6px">Past events</div>' + past.map(function(e){ return evRow(e,true); }).join('') : '');
 }
+
+function openEventResults(eid) {
+  var ev = db.events.filter(function(e){ return e.id === eid; })[0];
+  if (!ev) return;
+  var evRounds = db.rounds.filter(function(r){ return r.event_id === eid && r.verified; });
+  evRounds.sort(function(a,b){ return (b.stableford_points||0)-(a.stableford_points||0); });
+  var medals = ['1st','2nd','3rd'];
+  var medalColors = ['#B8860B','#888','#8B4513'];
+  var rows = evRounds.map(function(r,i){
+    var pl = db.players.filter(function(p){ return p.id === r.player_id; })[0];
+    var pos = i+1;
+    var mc = pos<=3 ? medalColors[pos-1] : 'var(--primary)';
+    var lbl = pos<=3 ? medals[pos-1] : pos+'th';
+    return '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border)">' +
+      '<div style="width:32px;height:32px;border-radius:50%;background:'+mc+';color:white;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+lbl+'</div>' +
+      '<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:var(--text)">'+(pl?pl.name:'?')+'</div>' +
+      '<div style="font-size:11px;color:var(--text-3)">Hcp '+(pl?parseFloat(pl.handicap_index||0).toFixed(1):'?')+(r.handicap_after?' \u2192 '+parseFloat(r.handicap_after).toFixed(1):'')+'</div></div>' +
+      '<div style="text-align:right"><div style="font-size:18px;font-weight:800;color:'+mc+'">'+r.stableford_points+'</div>' +
+      '<div style="font-size:10px;color:var(--text-3)">'+(r.league_points?'+'+r.league_points+' pts':'')+'</div></div>' +
+    '</div>';
+  }).join('') || '<div class="empty" style="padding:1rem">No results</div>';
+
+  // Build share text
+  var shareParts = ['\u26f3 '+ev.course_name+' Results', ''];
+  evRounds.slice(0,3).forEach(function(r,i){
+    var pl = db.players.filter(function(p){ return p.id === r.player_id; })[0];
+    shareParts.push(medals[i]+' '+(pl?pl.name:'?')+' - '+r.stableford_points+' pts');
+  });
+  shareParts.push(''); shareParts.push('Posted via GolfSoc');
+  var shareMsg = shareParts.join('\\n');
+
+  openModal(ev.course_name+' — '+fmtDate(ev.event_date),
+    '<div style="padding:4px 0">'+rows+'</div>' +
+    '<button onclick="window.open(\'https://wa.me/?text=\'+encodeURIComponent(\''+shareMsg.replace(/'/g,"\\'").replace(/\n/g,'\\n')+'\'),\'_blank\')" style="width:100%;margin-top:14px;padding:12px;border-radius:var(--radius);border:none;background:#25D366;color:white;font-size:13px;font-weight:700;cursor:pointer;font-family:DM Sans,sans-serif">Share results on WhatsApp</button>'
+  );
+}
+
+function openPlayerProfile(pid) {
+  var player = db.players.filter(function(p){ return p.id === pid; })[0];
+  if (!player) return;
+  var pubEids = new Set(db.events.filter(function(e){ return e.published; }).map(function(e){ return e.id; }));
+  var myRounds = db.rounds.filter(function(r){ return r.player_id === pid && r.verified && pubEids.has(r.event_id); });
+  var myPts = myRounds.reduce(function(s,r){ return s+(r.league_points||0); }, 0);
+  var best = myRounds.length ? Math.max.apply(null, myRounds.map(function(r){ return r.stableford_points||0; })) : null;
+  var allSorted = db.players.map(function(p){ return { id:p.id, pts:db.rounds.filter(function(r){ return r.player_id===p.id&&r.verified&&pubEids.has(r.event_id); }).reduce(function(s,r){ return s+(r.league_points||0); },0) }; }).sort(function(a,b){ return b.pts-a.pts; });
+  var rank = allSorted.findIndex(function(p){ return p.id===pid; })+1;
+  var rankLabel = rank===1?'1st':rank===2?'2nd':rank===3?'3rd':rank>0?rank+'th':'--';
+  openModal(player.name,
+    '<div style="background:var(--primary);border-radius:var(--radius-lg);padding:16px;margin-bottom:14px;display:flex;align-items:center;gap:14px">' +
+      avHtml(player,52,18) +
+      '<div style="flex:1"><div style="font-size:18px;font-weight:700;color:white">'+player.name+'</div>' +
+      '<div style="font-size:12px;color:rgba(255,255,255,0.45);margin-top:2px">'+(player.role==='admin'?'Admin':'Member')+'</div></div>' +
+      '<div style="text-align:right"><div style="font-size:28px;font-weight:800;color:var(--accent)">'+parseFloat(player.handicap_index||0).toFixed(1)+'</div>' +
+      '<div style="font-size:10px;color:rgba(255,255,255,0.45)">Handicap</div></div>' +
+    '</div>' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:4px">' +
+      '<div style="background:var(--bg);border-radius:var(--radius);padding:12px;text-align:center"><div style="font-size:10px;color:var(--text-3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em">Rank</div><div style="font-size:22px;font-weight:800;color:var(--text)">'+rankLabel+'</div></div>' +
+      '<div style="background:var(--bg);border-radius:var(--radius);padding:12px;text-align:center"><div style="font-size:10px;color:var(--text-3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em">Points</div><div style="font-size:22px;font-weight:800;color:var(--text)">'+(myPts||0)+'</div></div>' +
+      '<div style="background:var(--bg);border-radius:var(--radius);padding:12px;text-align:center"><div style="font-size:10px;color:var(--text-3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em">Rounds</div><div style="font-size:22px;font-weight:800;color:var(--text)">'+myRounds.length+'</div></div>' +
+    '</div>' +
+    (best !== null ? '<div style="background:var(--bg);border-radius:var(--radius);padding:12px;text-align:center;margin-bottom:4px"><div style="font-size:10px;color:var(--text-3);margin-bottom:2px;text-transform:uppercase;letter-spacing:.05em">Best round</div><div style="font-size:22px;font-weight:800;color:var(--text)">'+best+' pts</div></div>' : '')
+  );
+}
+
+
 
 function renderProfile() {
   var el = document.getElementById('profile-content');
@@ -1494,6 +1617,18 @@ async function saveExtraPrizesSettings() {
     renderSettings();
   } catch(e) { toast('Error: '+e.message, 'error'); }
 }
+
+function shareResult(postId) {
+  var text = (window._shareTexts && window._shareTexts[postId]) || 'Check out our golf results!';
+  if (navigator.share) {
+    navigator.share({ title: 'Golf Results', text: text }).catch(function(){
+      window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+    });
+  } else {
+    window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+  }
+}
+
 
 function shareInviteLink() {
   var text = window._inviteShareText || '';
