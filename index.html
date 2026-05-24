@@ -281,7 +281,7 @@ input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px;
 <!-- Splash -->
 <div id="splash">
   <div class="splash-logo" id="splash-logo">
-    <span style="font-family:DM Serif Display,serif;font-size:28px;color:var(--primary)" id="splash-initials">GS</span>
+    <span style="font-family:'DM Serif Display',serif;font-size:28px;color:var(--primary)" id="splash-initials">GS</span>
   </div>
   <div class="splash-name" id="splash-name">GolfSoc</div>
   <div class="splash-sub">Golf Society Management</div>
@@ -426,11 +426,7 @@ input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px;
     </div>
   </div>
   <div class="section" id="sec-leaderboard">
-    <div class="lb-filters">
-      <button class="lb-filter active" onclick="setLbFilter('all')">All</button>
-      <button class="lb-filter" onclick="setLbFilter('sunday')">Sundays</button>
-      <button class="lb-filter" onclick="setLbFilter('outing')">Outings</button>
-    </div>
+    <div class="lb-filters" id="lb-filters"></div>
     <div id="lb-table">
       <div class="skeleton" style="height:52px;margin-bottom:6px;border-radius:10px"></div>
       <div class="skeleton" style="height:52px;margin-bottom:6px;border-radius:10px"></div>
@@ -547,10 +543,10 @@ function updateBranding(s) {
   document.getElementById('auth-sub').textContent = 'Sign in to ' + name;
   var logoHtml = logo
     ? '<img src="'+logo+'" style="width:100%;height:100%;object-fit:cover">'
-    : '<span style="font-family:DM Serif Display,serif;font-size:14px;color:var(--primary)">'+i+'</span>';
+    : '<span style="font-family:\'DM Serif Display\',serif;font-size:14px;color:var(--primary)">'+i+'</span>';
   var splashHtml = logo
     ? '<img src="'+logo+'" style="width:100%;height:100%;object-fit:cover">'
-    : '<span style="font-family:DM Serif Display,serif;font-size:28px;color:var(--primary)">'+i+'</span>';
+    : '<span style="font-family:\'DM Serif Display\',serif;font-size:28px;color:var(--primary)">'+i+'</span>';
   document.getElementById('topbar-logo').innerHTML = logoHtml;
   document.getElementById('splash-logo').innerHTML = splashHtml;
   document.getElementById('auth-logo').innerHTML = logo
@@ -786,53 +782,27 @@ function renderHome() {
     var label = diff===0?'Today!':diff===1?'Tomorrow':diff+' days';
     countdown = '<div style="background:var(--primary);border-radius:var(--radius-lg);padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;position:relative;overflow:hidden"><div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent-dark),var(--accent),var(--accent),var(--accent-dark))"></div><div><div style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px">Next event</div><div style="font-size:15px;font-weight:600;color:white">'+(next.course_name||fmtDate(next.event_date))+'</div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px">'+fmtDate(next.event_date)+'</div></div><div style="background:var(--accent);color:var(--primary);font-size:14px;font-weight:800;padding:7px 16px;border-radius:99px;flex-shrink:0">'+label+'</div></div>';
   }
-  var previewEnabled = !societySettings || societySettings.show_preview !== false;
-  var noData = previewEnabled && !db.noticeboard.length && db.rounds.filter(function(r){ return r.verified; }).length === 0;
-  var result = '';
-  if (db.noticeboard.length) {
-    result = '<div style="background:white;border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px"><div style="font-size:13px;font-weight:600;color:var(--text-2);margin-bottom:10px">Latest result</div><div class="empty-sub">Results will appear here</div></div>';
-  } else if (noData) {
-    result = '<div style="background:white;border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden">' +
-      '<div style="background:var(--primary);padding:14px 16px;position:relative">' +
-      '<div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent-dark),var(--accent),var(--accent),var(--accent-dark))"></div>' +
-      '<div style="font-family:DM Serif Display,serif;font-size:16px;color:white">Example Result Card</div>' +
-      '<div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px">This is how results will appear after each event</div></div>' +
-      '<div style="padding:4px 16px 0">' +
-      '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border)"><div style="width:26px;height:26px;border-radius:50%;background:#B8860B;color:white;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center">1st</div><div style="flex:1;font-size:13px;font-weight:600;color:var(--text)">Jamie Murphy</div><div style="font-size:15px;font-weight:800;color:#B8860B">34 pts</div></div>' +
-      '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border)"><div style="width:26px;height:26px;border-radius:50%;background:#888;color:white;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center">2nd</div><div style="flex:1;font-size:13px;color:var(--text)">Ciara Walsh</div><div style="font-size:15px;font-weight:800;color:#666">31 pts</div></div>' +
-      '<div style="display:flex;align-items:center;gap:10px;padding:10px 0"><div style="width:26px;height:26px;border-radius:50%;background:#8B4513;color:white;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center">3rd</div><div style="flex:1;font-size:13px;color:var(--text)">Declan Byrne</div><div style="font-size:15px;font-weight:800;color:#8B4513">29 pts</div></div>' +
-      '</div>' +
-      '<div style="padding:10px 16px;border-top:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between">' +
-      '<div style="font-size:11px;color:var(--text-3)">Add players & events to get started</div>' +
-      '<button onclick="showTab(&quot;settings&quot;)" class="btn sm accent">Go to Settings</button>' +
-      '</div></div>';
-  } else {
-    result = '<div class="empty"><div class="empty-icon">&#9971;</div><div class="empty-title">No results yet</div><div class="empty-sub">Results appear here after your first event</div></div>';
-  }
+  var result = db.noticeboard.length ? '<div style="background:white;border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px"><div style="font-size:13px;font-weight:600;color:var(--text-2);margin-bottom:10px">Latest result</div><div class="empty-sub">Results will appear here</div></div>' : '<div class="empty"><div class="empty-icon">&#9971;</div><div class="empty-title">No results yet</div><div class="empty-sub">Results appear here after your first event</div></div>';
   feed.innerHTML = statsBar + countdown + result;
 }
 
 function renderLeaderboard() {
   var el = document.getElementById('lb-table');
+  var filtersEl = document.getElementById('lb-filters');
+  if (filtersEl) {
+    var hasSunday = db.events.some(function(e){ return e.event_type==='sunday_9'; });
+    var hasOuting = db.events.some(function(e){ return e.event_type==='outing_18'; });
+    function fbtn(f, lbl) { return '<button class="lb-filter '+(lbFilter===f?'active':'')+'" onclick="setLbFilter(\'' + f + '\')">'+lbl+'</button>'; }
+    var fb = fbtn('all','All');
+    if (hasSunday) fb += fbtn('sunday','Sundays');
+    if (hasOuting) fb += fbtn('outing','Outings');
+    filtersEl.innerHTML = fb;
+  }
   var pubEids = new Set(db.events.filter(function(e){ return e.published; }).map(function(e){ return e.id; }));
   var rows = db.players.map(function(p) {
     return Object.assign({}, p, { pts: db.rounds.filter(function(r){ return r.player_id===p.id&&r.verified&&pubEids.has(r.event_id); }).reduce(function(s,r){ return s+(r.league_points||0); }, 0) });
   }).sort(function(a,b){ return b.pts - a.pts; });
-  var previewEnabled2 = !societySettings || societySettings.show_preview !== false;
-  if (!rows.some(function(r){ return r.pts > 0; })) {
-    var preview = [
-      { name:'Jamie Murphy', hcp:12.4, pts:47, pos:'1st', bg:'#B8860B', pc:'#B8860B', cls:'lb-card-gold' },
-      { name:'Ciara Walsh', hcp:18.0, pts:43, pos:'2nd', bg:'#888', pc:'#666', cls:'lb-card-silver' },
-      { name:'Declan Byrne', hcp:9.2, pts:41, pos:'3rd', bg:'#8B4513', pc:'#8B4513', cls:'lb-card-bronze' },
-      { name:"Sarah O'Brien", hcp:22.1, pts:38, pos:'4th', bg:'var(--primary)', pc:'var(--green)', cls:'' },
-      { name:'Padraig Doyle', hcp:15.6, pts:35, pos:'5th', bg:'var(--primary)', pc:'var(--green)', cls:'' }
-    ];
-    el.innerHTML = '<div style="background:var(--accent-light);border:1px solid var(--accent);border-radius:var(--radius);padding:8px 12px;margin-bottom:10px;font-size:12px;color:var(--accent-dark);text-align:center">Preview - add players to see real standings</div>' +
-      preview.map(function(p) {
-        return '<div class="lb-wrap"><div class="lb-card '+p.cls+'"><div style="width:34px;height:34px;border-radius:50%;background:'+p.bg+';color:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:700">'+p.pos+'</div><div class="avatar" style="width:34px;height:34px;font-size:12px">'+p.name.split(' ').map(function(w){return w[0];}).join('')+'</div><div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:500;color:var(--text)">'+p.name+'</div><div style="font-size:11px;color:var(--text-3)">Hcp '+p.hcp.toFixed(1)+'</div></div><div style="font-size:20px;font-weight:700;color:'+p.pc+';flex-shrink:0">'+p.pts+'<span style="font-size:11px;font-weight:400;color:var(--text-3)"> pts</span></div></div></div>';
-      }).join('');
-    return;
-  }
+  if (!rows.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">&#127942;</div><div class="empty-title">No standings yet</div></div>'; return; }
   var pos = 1;
   el.innerHTML = rows.map(function(p, i) {
     if (i > 0 && p.pts < rows[i-1].pts) pos = i + 1;
@@ -850,20 +820,7 @@ function renderSchedule() {
   var mo = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   var upcoming = db.events.filter(function(e){ return e.event_date >= today; }).sort(function(a,b){ return a.event_date.localeCompare(b.event_date); });
   var past = db.events.filter(function(e){ return e.event_date < today; }).sort(function(a,b){ return b.event_date.localeCompare(a.event_date); }).slice(0,5);
-  if (!upcoming.length && !past.length) {
-    var now = new Date();
-    var mo2 = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    var previewEvs = [
-      { d: new Date(now.getFullYear(), now.getMonth(), now.getDate()+7), name:'Your Home Course', type:'Sunday - 9 holes' },
-      { d: new Date(now.getFullYear(), now.getMonth(), now.getDate()+14), name:'Your Home Course', type:'Sunday - 9 holes' },
-      { d: new Date(now.getFullYear(), now.getMonth()+1, 12), name:'Away Day Outing', type:'Outing - 18 holes' }
-    ];
-    el.innerHTML = '<div style="background:var(--accent-light);border:1px solid var(--accent);border-radius:var(--radius);padding:8px 12px;margin-bottom:10px;font-size:12px;color:var(--accent-dark);text-align:center">Preview - create events in Settings to get started</div>' +
-      previewEvs.map(function(ev) {
-        return '<div class="event-card" style="opacity:0.7"><div style="display:flex;align-items:center;gap:12px;padding:12px 14px"><div class="ev-date"><div class="ev-day">'+ev.d.getDate()+'</div><div class="ev-month">'+mo2[ev.d.getMonth()]+'</div></div><div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600;color:var(--text)">'+ev.name+'</div><div style="font-size:11px;color:var(--text-3);margin-top:2px">'+ev.type+'</div></div></div></div>';
-      }).join('');
-    return;
-  }
+  if (!upcoming.length && !past.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">&#128197;</div><div class="empty-title">No events yet</div><div class="empty-sub">Events appear once added by your admin</div></div>'; return; }
   function evRow(ev, isPast) {
     var p = ev.event_date.split('-');
     var isOuting = ev.event_type === 'outing_18';
@@ -877,23 +834,42 @@ function renderProfile() {
   var pid = currentUser ? currentUser.id : null;
   var player = db.players.filter(function(p){ return p.user_id === pid; })[0];
   var isAdmin = currentUser && currentUser.user_metadata && currentUser.user_metadata.role === 'admin';
-  var previewEnabledP = !societySettings || societySettings.show_preview !== false;
+  // Stat cards helper
+  function makeStatCards(rounds, rank) {
+    var pts = rounds.reduce(function(s,r){ return s+(r.league_points||0); }, 0);
+    var best = rounds.length ? Math.max.apply(null, rounds.map(function(r){ return r.stableford_points||0; })) : null;
+    var rLabel = rank===1?'1st':rank===2?'2nd':rank===3?'3rd':rank>0?rank+'th':'--';
+    return '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">' +
+      '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center"><div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);margin-bottom:6px">Season points</div><div style="font-size:24px;font-weight:800;color:var(--text)">'+(pts||'--')+'</div><div style="font-size:11px;color:var(--text-3);margin-top:2px">'+(rounds.length?'pts total':'No rounds yet')+'</div></div>' +
+      '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center"><div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);margin-bottom:6px">Best round</div><div style="font-size:24px;font-weight:800;color:var(--text)">'+(best!==null?best:'--')+'</div><div style="font-size:11px;color:var(--text-3);margin-top:2px">pts stableford</div></div>' +
+      '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center"><div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);margin-bottom:6px">Rounds played</div><div style="font-size:24px;font-weight:800;color:var(--text)">'+rounds.length+'</div><div style="font-size:11px;color:var(--text-3);margin-top:2px">this season</div></div>' +
+      '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center"><div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);margin-bottom:6px">Current rank</div><div style="font-size:24px;font-weight:800;color:var(--text)">'+rLabel+'</div><div style="font-size:11px;color:var(--text-3);margin-top:2px">in standings</div></div>' +
+      '</div>';
+  }
+
   if (!player) {
-    var profilePreview = previewEnabledP ? 
-      '<div style="background:var(--accent-light);border:1px solid var(--accent);border-radius:var(--radius);padding:8px 12px;margin-bottom:12px;font-size:12px;color:var(--accent-dark);text-align:center">Preview - this is what your profile will look like</div>' +
-      '<div class="profile-hero"><div class="avatar" style="width:60px;height:60px;font-size:20px">JM</div><div style="flex:1"><div style="font-family:DM Serif Display,serif;font-size:20px;color:white">Your Name</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px">Member</div></div><div style="text-align:right"><div style="font-size:28px;font-weight:800;color:var(--accent)">18.0</div><div style="font-size:10px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:.05em">Handicap</div></div></div>' +
-      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">' +
-        '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center"><div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);margin-bottom:6px">Season points</div><div style="font-size:24px;font-weight:800;color:var(--text)">--</div><div style="font-size:11px;color:var(--text-3);margin-top:2px">No rounds yet</div></div>' +
-        '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center"><div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);margin-bottom:6px">Best round</div><div style="font-size:24px;font-weight:800;color:var(--text)">--</div><div style="font-size:11px;color:var(--text-3);margin-top:2px">pts stableford</div></div>' +
-        '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center"><div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);margin-bottom:6px">Rounds played</div><div style="font-size:24px;font-weight:800;color:var(--text)">0</div><div style="font-size:11px;color:var(--text-3);margin-top:2px">this season</div></div>' +
-        '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center"><div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);margin-bottom:6px">Current rank</div><div style="font-size:24px;font-weight:800;color:var(--text)">--</div><div style="font-size:11px;color:var(--text-3);margin-top:2px">in standings</div></div>' +
-      '</div>' +
-      '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px"><div style="font-size:12px;font-weight:600;color:var(--text-2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em">Handicap history</div><div style="display:flex;align-items:center;justify-content:center;height:60px;color:var(--text-3);font-size:13px">Handicap changes will appear here after each round</div></div>'
-      : '';
-    el.innerHTML = profilePreview + '<button class="btn danger full" onclick="doLogout()" style="margin-top:8px">Sign out</button>';
+    var previewOnP = !societySettings || societySettings.show_preview !== false;
+    if (previewOnP) {
+      el.innerHTML =
+        '<div style="background:var(--accent-light);border:1px solid var(--accent);border-radius:var(--radius);padding:8px 12px;margin-bottom:12px;font-size:12px;color:var(--accent-dark);text-align:center">Preview - this is what your profile will look like</div>' +
+        '<div class="profile-hero"><div class="avatar" style="width:60px;height:60px;font-size:20px">YN</div><div style="flex:1"><div style="font-size:20px;color:white;font-weight:600">Your Name</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px">Member</div></div><div style="text-align:right"><div style="font-size:28px;font-weight:800;color:var(--accent)">18.0</div><div style="font-size:10px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:.05em">Handicap</div></div></div>' +
+        makeStatCards([], 0) +
+        '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px"><div style="font-size:12px;font-weight:600;color:var(--text-2);margin-bottom:8px">Handicap history</div><div style="display:flex;align-items:center;justify-content:center;height:48px;color:var(--text-3);font-size:13px">Changes appear here after each round</div></div>' +
+        '<button class="btn danger full" onclick="doLogout()" style="margin-top:8px">Sign out</button>';
+    } else {
+      el.innerHTML = '<div class="empty"><div class="empty-icon">&#128100;</div><div class="empty-title">Profile not set up</div><div class="empty-sub">Ask your admin to add you as a player</div></div><button class="btn danger full" onclick="doLogout()" style="margin-top:16px">Sign out</button>';
+    }
     return;
   }
-  el.innerHTML = '<div class="profile-hero">'+avHtml(player,60,20)+'<div style="flex:1"><div style="font-family:DM Serif Display,serif;font-size:20px;color:white">'+player.name+'</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px">'+(isAdmin?'Admin - ':'')+'Member</div></div><div style="text-align:right"><div style="font-size:28px;font-weight:800;color:var(--accent)">'+parseFloat(player.handicap_index||0).toFixed(1)+'</div><div style="font-size:10px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:.05em">Handicap</div></div></div><button class="btn danger full" onclick="doLogout()">Sign out</button>';
+  // Real player stats
+  var pubEids = new Set(db.events.filter(function(e){ return e.published; }).map(function(e){ return e.id; }));
+  var myRounds = db.rounds.filter(function(r){ return r.player_id===player.id&&r.verified&&pubEids.has(r.event_id); });
+  var allSorted = db.players.map(function(p){ return { id:p.id, pts:db.rounds.filter(function(r){ return r.player_id===p.id&&r.verified&&pubEids.has(r.event_id); }).reduce(function(s,r){ return s+(r.league_points||0); },0) }; }).sort(function(a,b){ return b.pts-a.pts; });
+  var myRank = allSorted.findIndex(function(p){ return p.id===player.id; })+1;
+  el.innerHTML =
+    '<div class="profile-hero">'+avHtml(player,60,20)+'<div style="flex:1"><div style="font-size:20px;color:white;font-weight:600">'+player.name+'</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px">'+(isAdmin?'Admin - ':'')+'Member</div></div><div style="text-align:right"><div style="font-size:28px;font-weight:800;color:var(--accent)">'+parseFloat(player.handicap_index||0).toFixed(1)+'</div><div style="font-size:10px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:.05em">Handicap</div></div></div>' +
+    makeStatCards(myRounds, myRank) +
+    '<button class="btn danger full" onclick="doLogout()">Sign out</button>';
 }
 
 function renderSettings() {
@@ -920,7 +896,8 @@ function renderSettings() {
     '<div class="settings-section"><div class="settings-section-title">Events</div>' +
     '<div class="settings-row" onclick="openEventsModal()"><div class="settings-row-label">Manage events</div><div class="settings-row-value">'+db.events.length+' events &#8250;</div></div></div>' +
     '<div class="settings-section"><div class="settings-section-title">Display</div>' +
-    '<div class="settings-row"><div class="settings-row-label">Show preview data</div><div class="settings-row-value"><label class="toggle-switch"><input type="checkbox" id="toggle-preview" '+(s.show_preview !== false ? 'checked' : '')+' onchange="savePreviewToggle(this.checked)"><div class="toggle-slider"></div></label></div></div></div>' +
+    '<div class="settings-row"><div class="settings-row-label">Show preview data</div><div class="settings-row-value"><label class="toggle-switch"><input type="checkbox" '+(s.show_preview!==false?'checked':'')+' onchange="savePreviewToggle(this.checked)"><div class="toggle-slider"></div></label></div></div></div>' +
+    '<div class="settings-section"><div class="settings-section-title">Subscription</div>' +
     '<div class="settings-row" onclick="openBillingModal()"><div class="settings-row-label">Plan</div><div class="settings-row-value"><span class="sub-pill '+subClass+'">'+subLabel+'</span> &#8250;</div></div></div>' +
     '<div style="height:20px"></div>';
 }
@@ -949,7 +926,6 @@ async function savePreviewToggle(val) {
     renderAll();
   } catch(e) { toast('Error: ' + e.message, 'error'); }
 }
-
 
 async function saveBranding() {
   var sid = currentUser && currentUser.user_metadata ? currentUser.user_metadata.society_id : null;
