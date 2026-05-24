@@ -105,6 +105,10 @@ body { height: 100%; overflow: hidden; overscroll-behavior: none; position: rela
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   transition: opacity 0.4s;
   padding-top: env(safe-area-inset-top, 0px);
+  animation: autoHideSplash 0s 2s forwards;
+}
+@keyframes autoHideSplash {
+  to { display: none; opacity: 0; pointer-events: none; }
 }
 #splash.out { opacity: 0; pointer-events: none; }
 .splash-logo { width: 80px; height: 80px; border-radius: 20px; background: var(--accent); display: flex; align-items: center; justify-content: center; margin-bottom: 20px; overflow: hidden; }
@@ -119,11 +123,16 @@ body { height: 100%; overflow: hidden; overscroll-behavior: none; position: rela
 #auth-screen {
   position: fixed; inset: 0; z-index: 100;
   background: var(--primary);
-  display: none; flex-direction: column;
+  display: flex; flex-direction: column;
   overflow-y: auto;
   padding: calc(env(safe-area-inset-top, 0px) + 48px) 24px calc(env(safe-area-inset-bottom, 0px) + 32px);
+  opacity: 0;
+  animation: showAuth 0s 2.1s forwards;
 }
-#auth-screen.active { display: flex; }
+@keyframes showAuth {
+  to { opacity: 1; }
+}
+#auth-screen.active { display: flex; opacity: 1; animation: none; }
 .auth-logo { width: 72px; height: 72px; border-radius: 18px; background: var(--accent); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; overflow: hidden; }
 .auth-logo img { width: 100%; height: 100%; object-fit: cover; }
 .auth-logo-text { font-family: 'DM Serif Display', serif; font-size: 22px; font-weight: 700; color: var(--primary); }
