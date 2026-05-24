@@ -549,6 +549,7 @@ function updateBranding(s) {
 
 // Show app
 function showApp() {
+  _appReady = true;
   document.getElementById('auth-screen').style.display = 'none';
   document.getElementById('setup-wizard').style.display = 'none';
   document.getElementById('splash').style.display = 'none';
@@ -1152,6 +1153,7 @@ async function finishWizard() {
 
 // Toast
 var _toastTimer;
+var _appReady = false;
 function toast(msg, type) {
   var el = document.getElementById('toast');
   el.textContent = msg;
@@ -1186,13 +1188,12 @@ async function init() {
   if (!token && !refresh) { showAuth(); return; }
 
   // 6 second hard timeout
-  var bailed = false;
   var bailTimer = setTimeout(function() {
-    bailed = true;
+    if (_appReady) return;
     localStorage.removeItem('gs_token');
     localStorage.removeItem('gs_refresh');
     showAuth();
-  }, 6000);
+  }, 12000);
 
   try {
     var accessToken = token;
@@ -1217,7 +1218,7 @@ async function init() {
       }
     }
 
-    if (bailed) return;
+    if (_appReady) return;
     clearTimeout(bailTimer);
 
     if (!res.ok) {
@@ -1232,7 +1233,7 @@ async function init() {
     await afterLogin();
 
   } catch(e) {
-    if (bailed) return;
+    if (_appReady) return;
     clearTimeout(bailTimer);
     localStorage.removeItem('gs_token');
     localStorage.removeItem('gs_refresh');
