@@ -1779,13 +1779,14 @@ function renderScoreHole(holeIdx) {
   var par = se.pars[h];
   var score = se.scores[h];
   var holes = se.holes;
-  var courseHcp = Math.round(parseFloat(se.player.handicap_index||0) * (se.ev.slope_rating||113) / 113);
+  var slope = parseFloat(se.ev.slope_rating) || 113;
+  var courseHcp = Math.round(parseFloat(se.player.handicap_index||0) * slope / 113);
   var sis = se.sis || Array.from({length:holes},function(_,i){return i+1;});
   var strokesOnHole = courseHcp >= sis[h] ? 1 : 0;
   if (courseHcp > holes) strokesOnHole += (courseHcp - holes) >= sis[h] ? 1 : 0;
 
-  // Scratch = lowest score giving 0 pts
-  var scratchScore = par + strokesOnHole + 1;
+  // Scratch = net double bogey = 0 pts (score - par - strokes >= 2)
+  var scratchScore = par + strokesOnHole + 2;
 
   // Running total
   var runningPts = 0;
@@ -1947,7 +1948,7 @@ async function savePlayerScore(eid, pid, verify) {
   if (!hasScores) { toast('Enter at least one score', 'error'); return; }
 
   var totalPts = 0, totalGross = 0;
-  var courseHcp = Math.round(parseFloat(player.handicap_index||0) * (ev.slope_rating||113) / 113);
+  var courseHcp = Math.round(parseFloat(player.handicap_index||0) * (parseFloat(ev.slope_rating)||113) / 113);
   var sis = se ? (se.sis || Array.from({length:holes},function(_,i){return i+1;})) : Array.from({length:holes},function(_,i){return i+1;});
   for (var h = 0; h < holes; h++) {
     var sc = scores[h] || 0;
