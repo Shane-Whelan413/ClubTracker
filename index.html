@@ -1780,21 +1780,25 @@ function renderScoreHole(holeIdx) {
   var score = se.scores[h];
   var holes = se.holes;
   var courseHcp = Math.round(parseFloat(se.player.handicap_index||0) * (se.ev.slope_rating||113) / 113);
-  var sis = se.sis || Array.from({length:se.holes},function(_,i){return i+1;});
+  var sis = se.sis || Array.from({length:holes},function(_,i){return i+1;});
   var strokesOnHole = courseHcp >= sis[h] ? 1 : 0;
-  if (courseHcp > se.holes) strokesOnHole += (courseHcp - se.holes) >= sis[h] ? 1 : 0;
+  if (courseHcp > holes) strokesOnHole += (courseHcp - holes) >= sis[h] ? 1 : 0;
 
-  // Calculate running total
+  // Scratch = lowest score giving 0 pts
+  var scratchScore = par + strokesOnHole + 1;
+
+  // Running total
   var runningPts = 0;
   for (var i = 0; i < holes; i++) {
     if (se.scores[i] > 0) {
-      var s = se.scores[i], p = se.pars[i];
-      var strokes = Math.floor(courseHcp / holes) + (i < (courseHcp % holes) ? 1 : 0);
-      runningPts += Math.max(0, 2 - (s - p - strokes));
+      var s_i = se.scores[i], p_i = se.pars[i], si_i = sis[i];
+      var str_i = courseHcp >= si_i ? 1 : 0;
+      if (courseHcp > holes) str_i += (courseHcp - holes) >= si_i ? 1 : 0;
+      runningPts += Math.max(0, 2 - (s_i - p_i - str_i));
     }
   }
 
-  // Points this hole preview
+  // Points this hole
   var holePoints = score > 0 ? Math.max(0, 2 - (score - par - strokesOnHole)) : null;
   var ptColor = holePoints === null ? 'rgba(255,255,255,0.3)' : holePoints >= 3 ? '#16a34a' : holePoints === 2 ? 'var(--accent)' : holePoints === 1 ? 'rgba(255,255,255,0.7)' : '#dc2626';
   var ptLabel = holePoints === null ? '-' : holePoints === 0 ? '0' : '+' + holePoints;
@@ -1806,88 +1810,97 @@ function renderScoreHole(holeIdx) {
     dots += '<div style="width:'+(i===h?'20px':'8px')+';height:8px;border-radius:99px;background:'+dotColor+';transition:all 0.2s;flex-shrink:0"></div>';
   }
 
-  // Score buttons — big tap targets
+  // Score buttons
   var scoreButtons = '';
   for (var s = 1; s <= 10; s++) {
-    var isSelected = score === s;
+    var isSel = score === s;
     var pts = Math.max(0, 2 - (s - par - strokesOnHole));
-    var btnBg = isSelected ? 'var(--accent)' : 'var(--surface)';
-    var btnColor = isSelected ? 'var(--primary)' : 'var(--text)';
-    var ptsBadge = isSelected ? '<div style="font-size:10px;font-weight:700;color:'+(isSelected?'var(--primary)':'var(--text-3)')+'">'+pts+' pts</div>' : '';
-    scoreButtons += '<button onclick="selectScore('+s+')" style="background:'+btnBg+';color:'+btnColor+';border:2px solid '+(isSelected?'var(--accent)':'var(--border)')+';border-radius:12px;padding:14px 8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:20px;font-weight:800;font-family:DM Sans,sans-serif;cursor:pointer;min-height:64px;flex:1">' +
+    scoreButtons += '<button onclick="selectScore('+s+')" style="background:'+(isSel?'var(--accent)':'var(--surface)')+';color:'+(isSel?'var(--primary)':'var(--text)')+';border:2px solid '+(isSel?'var(--accent)':'var(--border)')+';border-radius:12px;padding:12px 6px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:20px;font-weight:800;font-family:DM Sans,sans-serif;cursor:pointer;min-height:60px;flex:1">' +
       '<div>'+s+'</div>' +
-      '<div style="font-size:10px;font-weight:600;color:'+(isSelected?'var(--primary)':'var(--text-3)')+'">'+(s===par?'Par':s<par?'-'+(par-s):'+' +(s-par))+'</div>' +
+      '<div style="font-size:9px;font-weight:600;color:'+(isSel?'var(--primary)':'var(--text-3)')+'">'+pts+'pt</div>' +
     '</button>';
   }
 
-  var allFilled = se.scores.filter(function(s){ return s > 0; }).length;
+  // Scorecard strip
+  var allFilled = se.scores.filter(function(x){ return x > 0; }).length;
+  var allComplete = allFilled === holes;
+  var scorecardCells = '';
+  for (var i = 0; i < holes; i++) {
+    var sc = se.scores[i], p = se.pars[i], si = sis[i];
+    var str = courseHcp >= si ? 1 : 0;
+    if (courseHcp > holes) str += (courseHcp - holes) >= si ? 1 : 0;
+    var cellPts = sc > 0 ? Math.max(0, 2 - (sc - p - str)) : null;
+    var isAct = i === h;
+    var scoreColor = cellPts === null ? 'var(--text-3)' : cellPts >= 3 ? '#16a34a' : cellPts === 2 ? 'var(--accent-dark)' : cellPts === 1 ? 'var(--text-2)' : '#dc2626';
+    scorecardCells += '<button onclick="renderScoreHole('+i+')" style="flex:1;min-width:0;padding:5px 2px;background:'+(isAct?'var(--primary)':sc>0?'var(--surface)':'var(--bg)')+';border:1.5px solid '+(isAct?'var(--accent)':'var(--border)')+';border-radius:6px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:1px">' +
+      '<div style="font-size:9px;font-weight:600;color:'+(isAct?'var(--accent)':'var(--text-3)')+'">'+( i+1)+'</div>' +
+      '<div style="font-size:13px;font-weight:800;color:'+(isAct&&!sc?'rgba(255,255,255,0.3)':sc?scoreColor:'var(--text-3)')+';">'+(sc||'·')+'</div>' +
+      '<div style="font-size:8px;color:'+(isAct?'rgba(255,255,255,0.4)':'var(--text-3)')+'">p'+p+'</div>' +
+    '</button>';
+  }
+
+  var missingHoles = [];
+  for (var i = 0; i < holes; i++) { if (!se.scores[i]) missingHoles.push(i+1); }
+  var canSubmit = missingHoles.length === 0;
+  var submitWarning = !canSubmit && allFilled > 0
+    ? '<div style="background:#fef3cd;border:1px solid #ffc107;border-radius:8px;padding:5px 10px;text-align:center;font-size:11px;color:#856404;margin-top:5px">Missing: hole '+(missingHoles.length > 3 ? missingHoles.slice(0,3).join(', ')+'...' : missingHoles.join(', '))+'</div>'
+    : '';
+
   var body = document.getElementById('score-screen-body');
-  if (!body) { document.getElementById('modal-body').innerHTML = ''; return; }
+  if (!body) return;
 
   body.innerHTML =
-    // Full screen header
     '<div style="background:var(--primary);padding:calc(env(safe-area-inset-top,0px) + 14px) 20px 14px;position:sticky;top:0;z-index:10">' +
       '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">' +
         '<button onclick="closeScoreScreen()" style="background:rgba(255,255,255,0.1);border:none;border-radius:8px;padding:6px 12px;color:white;font-size:13px;font-weight:600;cursor:pointer">&#x2715; Cancel</button>' +
         '<div style="font-size:15px;font-weight:700;color:white">'+se.player.name+'</div>' +
-        '<div style="background:rgba(255,255,255,0.12);border-radius:99px;padding:5px 14px;display:flex;align-items:center;gap:6px">' +
+        '<div style="background:rgba(255,255,255,0.12);border-radius:99px;padding:5px 14px;display:flex;align-items:center;gap:5px">' +
           '<div style="font-size:20px;font-weight:800;color:var(--accent)">'+runningPts+'</div>' +
           '<div style="font-size:11px;color:rgba(255,255,255,0.5)">pts</div>' +
         '</div>' +
       '</div>' +
       '<div style="display:flex;gap:4px;align-items:center;justify-content:center">'+dots+'</div>' +
     '</div>' +
-    // Main content area
-    '<div style="padding:20px 20px 0">' +
-      // Hole / Par / Stroke info — full width, prominent
-      '<div style="display:flex;align-items:stretch;gap:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:20px">' +
-        '<div style="flex:1;padding:18px 16px;text-align:center;border-right:1px solid var(--border)">' +
-          '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-3);margin-bottom:4px">Hole</div>' +
-          '<div style="font-size:52px;font-weight:800;color:var(--text);line-height:1">'+(h+1)+'</div>' +
-          '<div style="font-size:11px;color:var(--text-3);margin-top:4px">of '+holes+'</div>' +
+    '<div style="padding:14px 14px 0">' +
+      '<div style="display:flex;align-items:stretch;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:12px">' +
+        '<div style="flex:1;padding:12px 10px;text-align:center;border-right:1px solid var(--border)">' +
+          '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-3);margin-bottom:2px">Hole</div>' +
+          '<div style="font-size:44px;font-weight:800;color:var(--text);line-height:1">'+(h+1)+'</div>' +
+          '<div style="font-size:10px;color:var(--text-3);margin-top:2px">of '+holes+'</div>' +
         '</div>' +
-        '<div style="flex:1;padding:18px 16px;text-align:center;border-right:1px solid var(--border);background:var(--accent-light)">' +
-          '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--accent-dark);margin-bottom:4px">Par</div>' +
-          '<div style="font-size:52px;font-weight:800;color:var(--primary);line-height:1">'+par+'</div>' +
-          '<div style="font-size:11px;color:var(--accent-dark);margin-top:4px">SI '+sis[h]+'</div>' +
+        '<div style="flex:1;padding:12px 10px;text-align:center;border-right:1px solid var(--border);background:var(--accent-light)">' +
+          '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--accent-dark);margin-bottom:2px">Par</div>' +
+          '<div style="font-size:44px;font-weight:800;color:var(--primary);line-height:1">'+par+'</div>' +
+          '<div style="font-size:10px;color:var(--accent-dark);margin-top:2px">SI '+sis[h]+'</div>' +
         '</div>' +
-        '<div style="flex:1;padding:18px 16px;text-align:center">' +
-          '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-3);margin-bottom:4px">Points</div>' +
-          '<div style="font-size:52px;font-weight:800;color:'+ptColor+';line-height:1">'+ptLabel+'</div>' +
-          '<div style="font-size:11px;color:var(--text-3);margin-top:4px">'+(strokesOnHole>0?'+'+strokesOnHole+' stroke':'scratch')+'</div>' +
+        '<div style="flex:1;padding:12px 10px;text-align:center">' +
+          '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-3);margin-bottom:2px">Points</div>' +
+          '<div style="font-size:44px;font-weight:800;color:'+ptColor+';line-height:1">'+ptLabel+'</div>' +
+          '<div style="font-size:10px;color:var(--text-3);margin-top:2px">'+(strokesOnHole>0?'+'+strokesOnHole+' stroke':'scratch')+'</div>' +
         '</div>' +
       '</div>' +
-      // Score buttons — full width, bigger
-      '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:20px">'+scoreButtons+'</div>' +
+      '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-bottom:8px">'+scoreButtons+'</div>' +
+      '<button onclick="selectScore('+scratchScore+')" style="width:100%;padding:10px;border-radius:var(--radius);border:2px dashed '+(score===scratchScore?'var(--red)':'var(--border-strong)')+';background:'+(score===scratchScore?'#fee2e2':'var(--bg)')+';color:'+(score===scratchScore?'var(--red)':'var(--text-2)')+';font-size:13px;font-weight:700;cursor:pointer;font-family:DM Sans,sans-serif;margin-bottom:12px">' +
+        '&#9940; Scratch ('+scratchScore+') &mdash; 0 pts' +
+      '</button>' +
     '</div>' +
-    // Bottom nav — sticky
-    '<div style="padding:12px 20px calc(env(safe-area-inset-bottom,0px) + 12px);background:var(--surface);border-top:1px solid var(--border);position:sticky;bottom:0">' +
+    '<div style="padding:0 14px 10px">' +
+      '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);margin-bottom:5px">Scorecard &middot; '+allFilled+'/'+holes+' holes</div>' +
+      '<div style="display:flex;gap:3px">'+scorecardCells+'</div>' +
+      submitWarning +
+    '</div>' +
+    '<div style="padding:10px 14px calc(env(safe-area-inset-bottom,0px) + 10px);background:var(--surface);border-top:1px solid var(--border);position:sticky;bottom:0">' +
       '<div style="display:flex;gap:8px">' +
-        (h > 0 ? '<button onclick="renderScoreHole('+(h-1)+')" class="btn" style="padding:14px 20px;font-size:15px">&#8592;</button>' : '<div style="width:60px"></div>') +
+        (h > 0 ? '<button onclick="renderScoreHole('+(h-1)+')" class="btn" style="padding:13px 16px;font-size:15px">&#8592;</button>' : '<div style="width:44px"></div>') +
         (h < holes-1 ?
-          '<button onclick="nextHole()" class="btn primary" style="flex:1;padding:14px;font-size:15px;font-weight:700">Next hole &#8594;</button>' :
+          '<button onclick="nextHole()" class="btn primary" style="flex:1;padding:13px;font-size:15px;font-weight:700">Next &#8594;</button>' :
           '<div style="flex:1;display:flex;gap:8px">' +
-            '<button onclick="savePlayerScore(\''+se.eid+'\',\''+se.pid+'\')" class="btn primary" style="flex:1;padding:14px;font-size:15px">Save</button>' +
-            '<button onclick="savePlayerScore(\''+se.eid+'\',\''+se.pid+'\',true)" class="btn accent" style="flex:1;padding:14px;font-size:15px;font-weight:700">&#10003; Verify</button>' +
+            '<button onclick="savePlayerScore(\''+se.eid+'\',\''+se.pid+'\')" class="btn primary" style="flex:1;padding:13px;font-size:14px'+(canSubmit?'':';opacity:0.5;cursor:not-allowed')+'">Save</button>' +
+            '<button onclick="'+(canSubmit?'savePlayerScore(\''+se.eid+'\',\''+se.pid+'\',true)':'toast(\'Enter all '+holes+' holes first\',\'error\')')+'" class="btn accent" style="flex:1;padding:13px;font-size:13px;font-weight:700'+(canSubmit?'':';opacity:0.5')+'">'+(canSubmit?'&#10003; Verify':'&#9940; '+missingHoles.length+' missing')+'</button>' +
           '</div>'
         ) +
       '</div>' +
-      (allFilled > 0 ? '<div style="text-align:center;font-size:12px;color:var(--text-3);margin-top:8px">'+allFilled+'/'+holes+' holes &middot; '+runningPts+' pts total</div>' : '') +
     '</div>';
-    // Nav buttons
-    '<div style="display:flex;gap:8px">' +
-      '<button onclick="openScoreEntry(\''+se.eid+'\')" class="btn" style="padding:12px 16px">&#x2715;</button>' +
-      (h > 0 ? '<button onclick="renderScoreHole('+(h-1)+')" class="btn" style="padding:12px 16px">&#8592;</button>' : '') +
-      (h < holes-1 ?
-        '<button onclick="nextHole()" class="btn primary" style="flex:1;padding:12px">Next hole &#8594;</button>' :
-        '<div style="flex:1;display:flex;gap:6px">' +
-          '<button onclick="savePlayerScore(\''+se.eid+'\',\''+se.pid+'\')" class="btn primary" style="flex:1;padding:12px">Save</button>' +
-          '<button onclick="savePlayerScore(\''+se.eid+'\',\''+se.pid+'\',true)" class="btn accent" style="flex:1;padding:12px">&#10003; Verify</button>' +
-        '</div>'
-      ) +
-    '</div>' +
-    // Score summary if any entered
-    (allFilled > 0 ? '<div style="text-align:center;font-size:12px;color:var(--text-3);margin-top:12px">'+allFilled+'/'+holes+' holes entered &middot; '+runningPts+' pts total</div>' : '');
 }
 
 function closeScoreScreen() {
