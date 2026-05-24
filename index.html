@@ -1255,32 +1255,60 @@ function renderSettings() {
   var s = societySettings || {};
   var subClass = s.subscription_status==='active'?'sub-active':s.subscription_status==='trial'?'sub-trial':'sub-expired';
   var subLabel = s.subscription_status==='active'?'Active':s.subscription_status==='trial'?'Trial':'Expired';
-  el.innerHTML = '<div class="admin-banner"><span style="font-size:18px">&#9881;</span><div style="flex:1;font-size:12px;font-weight:600;color:var(--accent-dark)">Admin settings</div><span class="sub-pill '+subClass+'">'+subLabel+'</span></div>' +
-    '<div class="settings-section"><div class="settings-section-title">Branding</div>' +
-    '<div class="settings-row" onclick="openBrandingModal()"><div class="settings-row-label">Society name</div><div class="settings-row-value">'+(s.society_name||s.name||'--')+' &#8250;</div></div>' +
-    '<div class="settings-row" onclick="openLogoModal()"><div class="settings-row-label">Logo</div><div class="settings-row-value">'+(s.logo_url?'Uploaded':'Not set')+' &#8250;</div></div>' +
-    '<div class="settings-row" onclick="openThemeModal()"><div class="settings-row-label">Theme</div><div class="settings-row-value"><div class="colour-dot" style="background:'+(s.primary_colour||'#0a1628')+'"></div><div class="colour-dot" style="background:'+(s.secondary_colour||'#C9A84C')+'"></div> &#8250;</div></div></div>' +
-    '<div class="settings-section"><div class="settings-section-title">Handicap rules</div>' +
-    '<div class="settings-row" onclick="openHcpModal()"><div class="settings-row-label">Mode</div><div class="settings-row-value">'+(s.handicap_mode==='custom'?'Custom':s.handicap_mode==='gui'?'GUI standard':'Points-based')+' &#8250;</div></div>' +
-    '<div class="settings-row" onclick="openHcpModal()"><div class="settings-row-label">Podium cuts</div><div class="settings-row-value">1st '+(s.cut_1st||'-1.0')+' / 2nd '+(s.cut_2nd||'-0.5')+' / 3rd '+(s.cut_3rd||'-0.2')+' &#8250;</div></div>' +
-    '<div class="settings-row" onclick="openHcpModal()"><div class="settings-row-label">Non-podium addition</div><div class="settings-row-value">+'+(s.add_non_podium||'0.2')+' &#8250;</div></div></div>' +
-    '<div class="settings-section"><div class="settings-section-title">League points</div>' +
-    '<div class="settings-row" onclick="openLeaguePtsModal()"><div class="settings-row-label">Points table</div><div class="settings-row-value">'+(s.league_pts_mode==='custom'?'Custom':'BHGS style')+' &#8250;</div></div></div>' +
-    '<div class="settings-section"><div class="settings-section-title">Event defaults</div>' +
-    '<div class="settings-row" onclick="openEventDefaultsModal()"><div class="settings-row-label">Home course</div><div class="settings-row-value">'+(s.home_course||'Not set')+' &#8250;</div></div></div>' +
-    '<div class="settings-section"><div class="settings-section-title">Members</div>' +
-    '<div class="settings-row" onclick="openMembersModal()"><div class="settings-row-label">Manage members</div><div class="settings-row-value">'+db.players.length+' members &#8250;</div></div>' +
-    '<div class="settings-row" onclick="openInviteModal()"><div class="settings-row-label">Invite link</div><div class="settings-row-value">Share &#8250;</div></div></div>' +
-    '<div class="settings-section"><div class="settings-section-title">Events</div>' +
-    '<div class="settings-row" onclick="openEventsModal()"><div class="settings-row-label">Manage events</div><div class="settings-row-value">'+db.events.length+' events &#8250;</div></div></div>' +
-    '<div class="settings-section"><div class="settings-section-title">Extra prizes</div>' +
-    '<div class="settings-row" onclick="openExtraPrizesSettings()"><div class="settings-row-label">Extra prizes</div><div class="settings-row-value">'+(s.extra_prizes_enabled?'Enabled: '+(s.extra_prizes||[]).join(', '):'Disabled')+' &#8250;</div></div></div>' +
-    '<div class="settings-section"><div class="settings-section-title">Display</div>' +
-    '<div class="settings-row"><div class="settings-row-label">Show preview data</div><div class="settings-row-value"><label class="toggle-switch"><input type="checkbox" '+(s.show_preview!==false?'checked':'')+' onchange="savePreviewToggle(this.checked)"><div class="toggle-slider"></div></label></div></div></div>' +
-    '<div class="settings-section"><div class="settings-section-title">Subscription</div>' +
-    '<div class="settings-row" onclick="openBillingModal()"><div class="settings-row-label">Plan</div><div class="settings-row-value"><span class="sub-pill '+subClass+'">'+subLabel+'</span> &#8250;</div></div></div>' +
+  var pendingCount = db.players.filter(function(p){ return p.status === 'pending'; }).length;
+  var activeMemberCount = db.players.filter(function(p){ return p.status !== 'pending'; }).length;
+
+  function card(icon, title, subtitle, fn, badge) {
+    return '<div onclick="'+fn+'()" style="display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:8px;cursor:pointer">' +
+      '<div style="width:40px;height:40px;border-radius:10px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">'+icon+'</div>' +
+      '<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600;color:var(--text)">'+title+'</div>' +
+      '<div style="font-size:12px;color:var(--text-3);margin-top:1px">'+subtitle+'</div></div>' +
+      (badge ? '<div style="background:var(--red);color:white;border-radius:99px;padding:2px 8px;font-size:11px;font-weight:700;flex-shrink:0">'+badge+'</div>' : '') +
+      '<div style="color:var(--text-3);font-size:18px">&#8250;</div>' +
+    '</div>';
+  }
+
+  function sectionTitle(t) {
+    return '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-3);margin:16px 0 8px">'+t+'</div>';
+  }
+
+  el.innerHTML =
+    '<div style="display:flex;align-items:center;justify-content:space-between;background:var(--primary);border-radius:var(--radius);padding:12px 16px;margin-bottom:20px">' +
+      '<div style="font-size:13px;font-weight:600;color:white">'+(s.society_name||s.name||'My Society')+'</div>' +
+      '<span class="sub-pill '+subClass+'">'+subLabel+'</span>' +
+    '</div>' +
+    sectionTitle('Branding') +
+    card('\u{1F3A8}', 'Appearance', 'Logo, colours &amp; theme', 'openBrandingGroup') +
+    sectionTitle('Members') +
+    card('\u{1F465}', 'Manage members', activeMemberCount+' active members', 'openMembersModal', pendingCount > 0 ? pendingCount+' pending' : '') +
+    card('\u{1F517}', 'Invite members', 'Share join link &amp; code', 'openInviteModal') +
+    sectionTitle('Scoring') +
+    card('\u{1F3CC}', 'Handicap rules', (s.handicap_mode==='gui'?'GUI standard':s.handicap_mode==='custom'?'Custom':'Points-based'), 'openHcpModal') +
+    card('\u{1F3C6}', 'League points', (s.league_pts_mode==='custom'?'Custom table':'BHGS style'), 'openLeaguePtsModal') +
+    card('\u{1F381}', 'Extra prizes', (s.extra_prizes_enabled?'Enabled':'Disabled'), 'openExtraPrizesSettings') +
+    sectionTitle('Events') +
+    card('\u{1F4C5}', 'Manage events', db.events.length+' events', 'openEventsModal') +
+    sectionTitle('Display') +
+    '<div style="display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:8px">' +
+      '<div style="width:40px;height:40px;border-radius:10px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">\u{1F441}\u{FE0F}</div>' +
+      '<div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--text)">Preview data</div>' +
+      '<div style="font-size:12px;color:var(--text-3);margin-top:1px">Show example data for new societies</div></div>' +
+      '<label class="toggle-switch"><input type="checkbox" '+(s.show_preview!==false?'checked':'')+' onchange="savePreviewToggle(this.checked)"><div class="toggle-slider"></div></label>' +
+    '</div>' +
+    sectionTitle('Subscription') +
+    card('\u{1F4B3}', 'Plan &amp; billing', subLabel+' plan', 'openBillingModal') +
     '<div style="height:20px"></div>';
 }
+
+function openBrandingGroup() {
+  var s = societySettings || {};
+  openModal('Branding',
+    '<div class="settings-row" onclick="closeModal();setTimeout(openBrandingModal,150)"><div class="settings-row-label">Society name</div><div class="settings-row-value">'+(s.society_name||s.name||'--')+' &#8250;</div></div>' +
+    '<div class="settings-row" onclick="closeModal();setTimeout(openLogoModal,150)"><div class="settings-row-label">Logo</div><div class="settings-row-value">'+(s.logo_url?'Uploaded':'Not set')+' &#8250;</div></div>' +
+    '<div class="settings-row" onclick="closeModal();setTimeout(openThemeModal,150)"><div class="settings-row-label">Theme &amp; colours</div><div class="settings-row-value"><div class="colour-dot" style="background:'+(s.primary_colour||'#0a1628')+'"></div><div class="colour-dot" style="background:'+(s.secondary_colour||'#C9A84C')+'"></div> &#8250;</div></div>'
+  );
+}
+
 
 // Modal
 function openModal(title, html) {
@@ -1666,11 +1694,41 @@ async function saveEventDefaults() {
 }
 
 function openMembersModal() {
-  var rows = db.players.map(function(p) {
-    return '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border)">'+avHtml(p,36,12)+'<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:500">'+p.name+'</div><div style="font-size:11px;color:var(--text-3)">Hcp '+parseFloat(p.handicap_index||0).toFixed(1)+' - '+(p.role==='admin'?'Admin':'Member')+'</div></div><div style="display:flex;gap:6px"><button onclick="editPlayer(\''+p.id+'\')" class="btn sm">Edit</button><button onclick="removePlayer(\''+p.id+'\',\''+p.name.replace(/'/g,"\\'")+'\')" class="btn sm danger">X</button></div></div>';
+  var pending = db.players.filter(function(p){ return p.status === 'pending'; });
+  var active = db.players.filter(function(p){ return p.status !== 'pending'; });
+
+  var pendingSection = '';
+  if (pending.length) {
+    pendingSection = '<div style="background:#fff3cd;border:1px solid #ffc107;border-radius:var(--radius);padding:12px;margin-bottom:14px">' +
+      '<div style="font-size:12px;font-weight:700;color:#856404;margin-bottom:8px">Pending approval ('+pending.length+')</div>' +
+      pending.map(function(p) {
+        return '<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:0.5px solid #ffc107">' +
+          '<div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--text)">'+p.name+'</div>' +
+          '<div style="font-size:11px;color:#856404">'+( p.mobile||'No mobile')+'</div></div>' +
+          '<button onclick="approveMember(\''+p.id+'\')" style="background:#28a745;border:none;border-radius:6px;padding:5px 10px;color:white;font-size:12px;font-weight:700;cursor:pointer">Approve</button>' +
+          '<button onclick="rejectMember(\''+p.id+'\')" style="background:#dc3545;border:none;border-radius:6px;padding:5px 10px;color:white;font-size:12px;font-weight:700;cursor:pointer">Reject</button>' +
+        '</div>';
+      }).join('') +
+    '</div>';
+  }
+
+  var rows = active.map(function(p) {
+    return '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border)">'+avHtml(p,36,12)+
+      '<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:500">'+p.name+'</div>' +
+      '<div style="font-size:11px;color:var(--text-3)">Hcp '+parseFloat(p.handicap_index||0).toFixed(1)+' &middot; '+(p.role==='admin'?'Admin':'Member')+(p.pin?' &middot; PIN: '+p.pin:'')+'</div></div>' +
+      '<div style="display:flex;gap:6px">' +
+        '<button onclick="editPlayer(\''+p.id+'\')" class="btn sm">Edit</button>' +
+        '<button onclick="removePlayer(\''+p.id+'\',\''+p.name.replace(/'/g,"\\'")+'\')" class="btn sm danger">&#x2715;</button>' +
+      '</div></div>';
   }).join('');
-  openModal('Members', '<button class="btn accent full" onclick="openAddPlayerModal()" style="margin-bottom:14px">+ Add player</button>' + (rows || '<div class="empty" style="padding:1rem">No players yet</div>'));
+
+  openModal('Members',
+    '<button class="btn accent full" onclick="openAddPlayerModal()" style="margin-bottom:14px">+ Add player</button>' +
+    pendingSection +
+    (rows || '<div class="empty" style="padding:1rem">No active players yet</div>')
+  );
 }
+
 
 function openAddPlayerModal() {
   openModal('Add player', '<div class="field"><label>Full name</label><input type="text" id="ap-name"></div><div class="field"><label>Email (optional)</label><input type="email" id="ap-email"></div><div class="field"><label>Handicap index</label><input type="number" id="ap-hcp" value="18.0" step="0.1" min="0" max="54"></div><div class="field"><label>Role</label><select id="ap-role"><option value="member">Member</option><option value="admin">Admin</option></select></div><div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><label class="toggle-switch"><input type="checkbox" id="ap-prov"><div class="toggle-slider"></div></label><span style="font-size:13px;color:var(--text-2)">Provisional handicap</span></div><div style="display:flex;gap:8px"><button onclick="openMembersModal()" class="btn">Back</button><button onclick="saveNewPlayer()" class="btn accent" style="flex:1">Add player</button></div>');
@@ -1725,9 +1783,30 @@ async function removePlayer(pid, name) {
 function openInviteModal() {
   var code = (societySettings && societySettings.invite_code) || '--';
   var appBase = window.location.origin + window.location.pathname;
-  var signupUrl = appBase + '?invite=' + code;
-  openModal('Invite members', '<p style="font-size:13px;color:var(--text-2);margin-bottom:16px">Share this code with new members. They enter it when creating their account.</p><div style="background:var(--bg);border-radius:var(--radius);padding:16px;text-align:center;margin-bottom:14px"><div style="font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Invite code</div><div style="font-size:28px;font-weight:800;color:var(--primary);letter-spacing:.1em">'+code+'</div></div><button class="btn accent full" onclick="navigator.clipboard&&navigator.clipboard.writeText(\''+code+'\').then(function(){toast(\'Code copied!\',\'success\')})">Copy code</button>');
+  var joinUrl = appBase + '?invite=' + code;
+  var shareText = 'Join our golf society app!\n\nTap to join: ' + joinUrl + '\n\nOr enter invite code: ' + code;
+
+  openModal('Invite members',
+    '<p style="font-size:13px;color:var(--text-2);margin-bottom:14px">Share the link below with your members. They tap it to join — no typing needed.</p>' +
+
+    // Link box
+    '<div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:10px">' +
+      '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);margin-bottom:6px">Join link</div>' +
+      '<div style="font-size:12px;color:var(--text-2);word-break:break-all;margin-bottom:8px">'+joinUrl+'</div>' +
+      '<button onclick="navigator.clipboard&&navigator.clipboard.writeText(\''+joinUrl+'\').then(function(){toast(\'Link copied!\',\'success\')})" class="btn sm full">Copy link</button>' +
+    '</div>' +
+
+    // Code box
+    '<div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:14px;text-align:center">' +
+      '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);margin-bottom:6px">Invite code (if joining manually)</div>' +
+      '<div style="font-size:28px;font-weight:800;color:var(--primary);letter-spacing:.15em">'+code+'</div>' +
+    '</div>' +
+
+    // WhatsApp share
+    '<button onclick="window.open(\'https://wa.me/?text=\'+encodeURIComponent(\''+shareText.replace(/\n/g,'\\n')+'\'),\'_blank\')" style="width:100%;padding:13px;border-radius:var(--radius);border:none;background:#25D366;color:white;font-size:14px;font-weight:700;cursor:pointer;font-family:DM Sans,sans-serif">Share on WhatsApp</button>'
+  );
 }
+
 
 function openEventsModal() {
   var mo = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
