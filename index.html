@@ -455,6 +455,8 @@ input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px;
 const SUPABASE_URL = 'https://nljcncrvqjtuwycemutz.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5samNuY3J2cWp0dXd5Y2VtdXR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4OTQyNTksImV4cCI6MjA5MDQ3MDI1OX0.uum4x_Ajhc4Y9P1hzMQph9JvxlMpvWlXfFqOxNFKaiQ';
 
+const IRISH_COURSES = [{"name":"Portmarnock Golf Club","county":"Dublin","province":"Leinster","holes":18,"par":72,"slope":142,"rating":75.1},{"name":"Royal Dublin Golf Club","county":"Dublin","province":"Leinster","holes":18,"par":72,"slope":138,"rating":73.4},{"name":"The Island Golf Club","county":"Dublin","province":"Leinster","holes":18,"par":71,"slope":139,"rating":73.8},{"name":"Elm Park Golf Club","county":"Dublin","province":"Leinster","holes":18,"par":69,"slope":118,"rating":67.8},{"name":"Hermitage Golf Club","county":"Dublin","province":"Leinster","holes":18,"par":71,"slope":128,"rating":70.9},{"name":"Clontarf Golf Club","county":"Dublin","province":"Leinster","holes":18,"par":69,"slope":115,"rating":67.2},{"name":"Milltown Golf Club","county":"Dublin","province":"Leinster","holes":18,"par":71,"slope":121,"rating":69.4},{"name":"Castle Golf Club","county":"Dublin","province":"Leinster","holes":18,"par":70,"slope":119,"rating":68.5},{"name":"Carrickmines Golf Club","county":"Dublin","province":"Leinster","holes":18,"par":68,"slope":110,"rating":65.0},{"name":"Grange Golf Club","county":"Dublin","province":"Leinster","holes":18,"par":70,"slope":122,"rating":69.2},{"name":"Rathfarnham Golf Club","county":"Dublin","province":"Leinster","holes":9,"par":34,"slope":108,"rating":33.2},{"name":"Howth Golf Club","county":"Dublin","province":"Leinster","holes":18,"par":71,"slope":126,"rating":70.3},{"name":"Malahide Golf Club","county":"Dublin","province":"Leinster","holes":18,"par":71,"slope":120,"rating":68.9},{"name":"Swords Open Golf Course","county":"Dublin","province":"Leinster","holes":18,"par":71,"slope":117,"rating":68.0},{"name":"Rush Golf Club","county":"Dublin","province":"Leinster","holes":9,"par":35,"slope":111,"rating":34.0},{"name":"Skerries Golf Club","county":"Dublin","province":"Leinster","holes":18,"par":71,"slope":122,"rating":69.5},{"name":"Balbriggan Golf Club","county":"Dublin","province":"Leinster","holes":18,"par":71,"slope":119,"rating":68.8},{"name":"Corballis Golf Links","county":"Dublin","province":"Leinster","holes":18,"par":68,"slope":112,"rating":64.5},{"name":"Roganstown Golf Club","county":"Dublin","province":"Leinster","holes":18,"par":72,"slope":124,"rating":70.1},{"name":"Newlands Golf Club","county":"Dublin","province":"Leinster","holes":18,"par":70,"slope":116,"rating":67.5},{"name":"Lucan Golf Club","county":"Dublin","province":"Leinster","holes":18,"par":71,"slope":120,"rating":68.7},{"name":"Spawell Golf Centre","county":"Dublin","province":"Leinster","holes":9,"par":27,"slope":90,"rating":27.0},{"name":"Deer Park Golf Courses","county":"Dublin","province":"Leinster","holes":18,"par":72,"slope":121,"rating":69.0},{"name":"Coldwinters Golf Club","county":"Dublin","province":"Leinster","holes":18,"par":71,"slope":118,"rating":68.2},{"name":"Citywest Golf Resort","county":"Dublin","province":"Leinster","holes":18,"par":70,"slope":116,"rating":67.0},{"name":"Stackstown Golf Club","county":"Dublin","province":"Leinster","holes":18,"par":72,"slope":128,"rating":71.2},{"name":"Edmondstown Golf Club","county":"Dublin","province":"Leinster","holes":18,"par":71,"slope":122,"rating":69.6},{"name":"Leopardstown Golf Centre","county":"Dublin","province":"Leinster","holes":9,"par":29,"slope":95,"rating":28.5},{"name":"Dun Laoghaire Golf Club","county":"Dublin","province":"Leinster","holes":18,"par":70,"slope":118,"rating":67.8},{"name":"Foxrock Golf Club","county":"Dublin","province":"Leinster","holes":9,"par":35,"slope":116,"rating":34.5},{"name":"Druids Glen Golf Resort","county":"Wicklow","province":"Leinster","holes":18,"par":71,"slope":140,"rating":74.0},{"name":"Druids Heath Golf Course","county":"Wicklow","province":"Leinster","holes":18,"par":71,"slope":136,"rating":72.8},{"name":"Woodenbridge Golf Club","county":"Wicklow","province":"Leinster","holes":18,"par":71,"slope":126,"rating":70.4},{"name":"Blainroe Golf Club","county":"Wicklow","province":"Leinster","holes":18,"par":72,"slope":130,"rating":71.8},{"name":"Wicklow Golf Club","county":"Wicklow","province":"Leinster","holes":9,"par":68,"slope":118,"rating":67.0},{"name":"Arklow Golf Club","county":"Wicklow","province":"Leinster","holes":18,"par":68,"slope":115,"rating":65.8},{"name":"Bray Golf Club","county":"Wicklow","province":"Leinster","holes":9,"par":70,"slope":119,"rating":68.0},{"name":"Charlesland Golf Club","county":"Wicklow","province":"Leinster","holes":18,"par":72,"slope":127,"rating":70.8},{"name":"Old Conna Golf Club","county":"Wicklow","province":"Leinster","holes":18,"par":72,"slope":132,"rating":72.2},{"name":"Powerscourt Golf Club (East)","county":"Wicklow","province":"Leinster","holes":18,"par":72,"slope":138,"rating":73.5},{"name":"Powerscourt Golf Club (West)","county":"Wicklow","province":"Leinster","holes":18,"par":72,"slope":133,"rating":72.0},{"name":"Baltinglass Golf Club","county":"Wicklow","province":"Leinster","holes":9,"par":35,"slope":109,"rating":33.8},{"name":"Tulfarris Hotel & Golf Resort","county":"Wicklow","province":"Leinster","holes":18,"par":72,"slope":135,"rating":72.5},{"name":"Rathsallagh Golf Club","county":"Wicklow","province":"Leinster","holes":18,"par":72,"slope":128,"rating":71.0},{"name":"The K Club (Palmer)","county":"Kildare","province":"Leinster","holes":18,"par":72,"slope":148,"rating":77.2},{"name":"The K Club (Smurfit)","county":"Kildare","province":"Leinster","holes":18,"par":72,"slope":143,"rating":75.0},{"name":"Naas Golf Club","county":"Kildare","province":"Leinster","holes":18,"par":71,"slope":122,"rating":69.5},{"name":"Curragh Golf Club","county":"Kildare","province":"Leinster","holes":18,"par":72,"slope":124,"rating":70.2},{"name":"Kilkea Castle Golf Club","county":"Kildare","province":"Leinster","holes":18,"par":71,"slope":126,"rating":70.0},{"name":"Bodenstown Golf Club","county":"Kildare","province":"Leinster","holes":18,"par":71,"slope":118,"rating":68.0},{"name":"Castlewarden Golf Club","county":"Kildare","province":"Leinster","holes":18,"par":72,"slope":123,"rating":69.8},{"name":"Craddockstown Golf Club","county":"Kildare","province":"Leinster","holes":18,"par":72,"slope":120,"rating":69.0},{"name":"Killeen Castle Golf Club","county":"Kildare","province":"Leinster","holes":18,"par":72,"slope":138,"rating":74.0},{"name":"Knockanally Golf Club","county":"Kildare","province":"Leinster","holes":18,"par":72,"slope":126,"rating":70.5},{"name":"Millicent Golf Club","county":"Kildare","province":"Leinster","holes":18,"par":71,"slope":119,"rating":68.5},{"name":"Royal Tara Golf Club","county":"Meath","province":"Leinster","holes":18,"par":72,"slope":126,"rating":70.8},{"name":"County Meath Golf Club (Trim)","county":"Meath","province":"Leinster","holes":18,"par":73,"slope":124,"rating":70.5},{"name":"Headfort Golf Club (Old)","county":"Meath","province":"Leinster","holes":18,"par":72,"slope":128,"rating":71.2},{"name":"Headfort Golf Club (New)","county":"Meath","province":"Leinster","holes":18,"par":72,"slope":132,"rating":72.0},{"name":"Laytown & Bettystown Golf Club","county":"Meath","province":"Leinster","holes":18,"par":71,"slope":122,"rating":69.2},{"name":"Black Bush Golf Club","county":"Meath","province":"Leinster","holes":18,"par":72,"slope":121,"rating":69.0},{"name":"Moor Park Golf Club","county":"Meath","province":"Leinster","holes":9,"par":35,"slope":112,"rating":34.2},{"name":"Navan Golf Club","county":"Meath","province":"Leinster","holes":9,"par":35,"slope":110,"rating":33.5},{"name":"Dundalk Golf Club","county":"Louth","province":"Leinster","holes":18,"par":72,"slope":131,"rating":71.8},{"name":"County Louth Golf Club (Baltray)","county":"Louth","province":"Leinster","holes":18,"par":73,"slope":142,"rating":75.5},{"name":"Greenore Golf Club","county":"Louth","province":"Leinster","holes":18,"par":71,"slope":124,"rating":70.0},{"name":"Ardee Golf Club","county":"Louth","province":"Leinster","holes":18,"par":69,"slope":116,"rating":66.8},{"name":"Killinbeg Golf Club","county":"Louth","province":"Leinster","holes":18,"par":70,"slope":115,"rating":66.5},{"name":"Rosslare Golf Club","county":"Wexford","province":"Leinster","holes":18,"par":72,"slope":130,"rating":71.5},{"name":"St Helens Bay Golf Club","county":"Wexford","province":"Leinster","holes":18,"par":72,"slope":126,"rating":70.2},{"name":"New Ross Golf Club","county":"Wexford","province":"Leinster","holes":18,"par":71,"slope":120,"rating":68.5},{"name":"Enniscorthy Golf Club","county":"Wexford","province":"Leinster","holes":18,"par":72,"slope":124,"rating":70.0},{"name":"Wexford Golf Club","county":"Wexford","province":"Leinster","holes":18,"par":70,"slope":119,"rating":68.2},{"name":"Courtown Golf Club","county":"Wexford","province":"Leinster","holes":18,"par":71,"slope":122,"rating":69.0},{"name":"Carlow Golf Club (Mount Wolseley)","county":"Carlow","province":"Leinster","holes":18,"par":72,"slope":136,"rating":73.0},{"name":"Carlow Golf Club","county":"Carlow","province":"Leinster","holes":18,"par":70,"slope":122,"rating":69.0},{"name":"Bunclody Golf Club","county":"Carlow","province":"Leinster","holes":18,"par":72,"slope":126,"rating":70.5},{"name":"Kilkenny Golf Club","county":"Kilkenny","province":"Leinster","holes":18,"par":71,"slope":124,"rating":69.8},{"name":"Mount Juliet Golf Club","county":"Kilkenny","province":"Leinster","holes":18,"par":72,"slope":142,"rating":75.0},{"name":"Castlecomer Golf Club","county":"Kilkenny","province":"Leinster","holes":18,"par":71,"slope":118,"rating":68.0},{"name":"Portlaoise Golf Club (The Heath)","county":"Laois","province":"Leinster","holes":18,"par":71,"slope":120,"rating":68.5},{"name":"Abbeyleix Golf Club","county":"Laois","province":"Leinster","holes":18,"par":71,"slope":117,"rating":67.5},{"name":"Mountrath Golf Club","county":"Laois","province":"Leinster","holes":9,"par":35,"slope":108,"rating":33.0},{"name":"Tullamore Golf Club","county":"Offaly","province":"Leinster","holes":18,"par":71,"slope":122,"rating":69.2},{"name":"Birr Golf Club","county":"Offaly","province":"Leinster","holes":18,"par":70,"slope":118,"rating":67.8},{"name":"Esker Hills Golf Club","county":"Offaly","province":"Leinster","holes":18,"par":71,"slope":124,"rating":69.5},{"name":"Athlone Golf Club","county":"Westmeath","province":"Leinster","holes":18,"par":71,"slope":119,"rating":68.2},{"name":"Mullingar Golf Club","county":"Westmeath","province":"Leinster","holes":18,"par":72,"slope":126,"rating":70.5},{"name":"Glasson Golf Club","county":"Westmeath","province":"Leinster","holes":18,"par":72,"slope":130,"rating":71.5},{"name":"Moate Golf Club","county":"Westmeath","province":"Leinster","holes":18,"par":72,"slope":118,"rating":68.0},{"name":"County Longford Golf Club","county":"Longford","province":"Leinster","holes":18,"par":72,"slope":120,"rating":69.0},{"name":"Cork Golf Club (Little Island)","county":"Cork","province":"Munster","holes":18,"par":72,"slope":135,"rating":72.5},{"name":"Fota Island Golf Club (Deerpark)","county":"Cork","province":"Munster","holes":18,"par":71,"slope":138,"rating":73.2},{"name":"Fota Island Golf Club (Belvelly)","county":"Cork","province":"Munster","holes":18,"par":72,"slope":132,"rating":71.8},{"name":"Old Head Golf Links","county":"Cork","province":"Munster","holes":18,"par":72,"slope":145,"rating":76.5},{"name":"Ballybunion Golf Club (Old)","county":"Kerry","province":"Munster","holes":18,"par":71,"slope":147,"rating":76.2},{"name":"Ballybunion Golf Club (Cashen)","county":"Kerry","province":"Munster","holes":18,"par":72,"slope":139,"rating":73.8},{"name":"Muskerry Golf Club","county":"Cork","province":"Munster","holes":18,"par":71,"slope":124,"rating":69.8},{"name":"Monkstown Golf Club","county":"Cork","province":"Munster","holes":18,"par":70,"slope":120,"rating":68.5},{"name":"Mahon Golf Club","county":"Cork","province":"Munster","holes":18,"par":68,"slope":112,"rating":65.0},{"name":"Douglas Golf Club","county":"Cork","province":"Munster","holes":18,"par":71,"slope":122,"rating":69.2},{"name":"East Cork Golf Club","county":"Cork","province":"Munster","holes":18,"par":71,"slope":119,"rating":68.0},{"name":"Cobh Golf Club","county":"Cork","province":"Munster","holes":18,"par":70,"slope":116,"rating":67.0},{"name":"Doneraile Golf Club","county":"Cork","province":"Munster","holes":9,"par":35,"slope":108,"rating":33.5},{"name":"Fermoy Golf Club","county":"Cork","province":"Munster","holes":18,"par":70,"slope":118,"rating":67.8},{"name":"Kanturk Golf Club","county":"Cork","province":"Munster","holes":9,"par":36,"slope":112,"rating":35.0},{"name":"Kinsale Golf Club (Farrangalway)","county":"Cork","province":"Munster","holes":18,"par":71,"slope":122,"rating":69.0},{"name":"Lee Valley Golf Club","county":"Cork","province":"Munster","holes":18,"par":71,"slope":126,"rating":70.2},{"name":"Macroom Golf Club","county":"Cork","province":"Munster","holes":18,"par":72,"slope":124,"rating":69.8},{"name":"Mitchelstown Golf Club","county":"Cork","province":"Munster","holes":18,"par":71,"slope":118,"rating":68.0},{"name":"Skibbereen & West Carbery Golf Club","county":"Cork","province":"Munster","holes":18,"par":71,"slope":119,"rating":68.2},{"name":"Bandon Golf Club","county":"Cork","province":"Munster","holes":18,"par":69,"slope":116,"rating":66.5},{"name":"Charleville Golf Club","county":"Cork","province":"Munster","holes":18,"par":72,"slope":122,"rating":69.5},{"name":"Youghal Golf Club","county":"Cork","province":"Munster","holes":18,"par":70,"slope":118,"rating":67.5},{"name":"Harbour Point Golf Club","county":"Cork","province":"Munster","holes":18,"par":72,"slope":128,"rating":71.0},{"name":"Blarney Golf Resort","county":"Cork","province":"Munster","holes":18,"par":71,"slope":124,"rating":69.8},{"name":"Killarney Golf Club (Mahony's Point)","county":"Kerry","province":"Munster","holes":18,"par":72,"slope":138,"rating":73.5},{"name":"Killarney Golf Club (Killeen)","county":"Kerry","province":"Munster","holes":18,"par":72,"slope":140,"rating":74.0},{"name":"Killarney Golf Club (Lackabane)","county":"Kerry","province":"Munster","holes":18,"par":72,"slope":132,"rating":71.8},{"name":"Tralee Golf Club","county":"Kerry","province":"Munster","holes":18,"par":71,"slope":142,"rating":74.8},{"name":"Waterville Golf Links","county":"Kerry","province":"Munster","holes":18,"par":72,"slope":146,"rating":76.0},{"name":"Dooks Golf Club","county":"Kerry","province":"Munster","holes":18,"par":70,"slope":130,"rating":71.2},{"name":"Kenmare Golf Club","county":"Kerry","province":"Munster","holes":18,"par":71,"slope":124,"rating":69.8},{"name":"Ceann Sibeal Golf Club (Dingle)","county":"Kerry","province":"Munster","holes":18,"par":72,"slope":134,"rating":72.2},{"name":"Ring of Kerry Golf Club","county":"Kerry","province":"Munster","holes":18,"par":72,"slope":130,"rating":71.5},{"name":"Castlegregory Golf Club","county":"Kerry","province":"Munster","holes":9,"par":34,"slope":110,"rating":33.0},{"name":"Listowel Golf Club","county":"Kerry","province":"Munster","holes":9,"par":35,"slope":109,"rating":33.5},{"name":"Adare Manor Golf Club","county":"Limerick","province":"Munster","holes":18,"par":72,"slope":148,"rating":77.5},{"name":"Limerick Golf Club","county":"Limerick","province":"Munster","holes":18,"par":71,"slope":124,"rating":69.8},{"name":"Limerick County Golf Club","county":"Limerick","province":"Munster","holes":18,"par":72,"slope":126,"rating":70.5},{"name":"Castletroy Golf Club","county":"Limerick","province":"Munster","holes":18,"par":71,"slope":122,"rating":69.2},{"name":"Newcastle West Golf Club","county":"Limerick","province":"Munster","holes":18,"par":72,"slope":120,"rating":69.0},{"name":"Rathbane Golf Club","county":"Limerick","province":"Munster","holes":18,"par":71,"slope":118,"rating":68.0},{"name":"Clonmel Golf Club","county":"Tipperary","province":"Munster","holes":18,"par":72,"slope":126,"rating":70.5},{"name":"Thurles Golf Club","county":"Tipperary","province":"Munster","holes":18,"par":72,"slope":122,"rating":69.5},{"name":"Nenagh Golf Club","county":"Tipperary","province":"Munster","holes":18,"par":69,"slope":118,"rating":67.5},{"name":"Tipperary Golf Club","county":"Tipperary","province":"Munster","holes":18,"par":71,"slope":120,"rating":68.5},{"name":"Cahir Park Golf Club","county":"Tipperary","province":"Munster","holes":18,"par":71,"slope":119,"rating":68.2},{"name":"Roscrea Golf Club","county":"Tipperary","province":"Munster","holes":18,"par":70,"slope":116,"rating":67.0},{"name":"Templemore Golf Club","county":"Tipperary","province":"Munster","holes":9,"par":35,"slope":108,"rating":33.0},{"name":"Waterford Golf Club","county":"Waterford","province":"Munster","holes":18,"par":71,"slope":124,"rating":69.8},{"name":"Waterford Castle Golf Club","county":"Waterford","province":"Munster","holes":18,"par":71,"slope":126,"rating":70.2},{"name":"Tramore Golf Club","county":"Waterford","province":"Munster","holes":18,"par":72,"slope":128,"rating":71.0},{"name":"Dunmore East Golf Club","county":"Waterford","province":"Munster","holes":18,"par":72,"slope":122,"rating":69.5},{"name":"Gold Coast Golf Club","county":"Waterford","province":"Munster","holes":18,"par":72,"slope":124,"rating":70.0},{"name":"Lismore Golf Club","county":"Waterford","province":"Munster","holes":9,"par":35,"slope":108,"rating":33.2},{"name":"Lahinch Golf Club (Old)","county":"Clare","province":"Munster","holes":18,"par":72,"slope":144,"rating":75.8},{"name":"Lahinch Golf Club (Castle)","county":"Clare","province":"Munster","holes":18,"par":70,"slope":128,"rating":70.5},{"name":"Dromoland Castle Golf Club","county":"Clare","province":"Munster","holes":18,"par":71,"slope":130,"rating":71.5},{"name":"Ennis Golf Club","county":"Clare","province":"Munster","holes":18,"par":70,"slope":118,"rating":67.8},{"name":"Shannon Golf Club","county":"Clare","province":"Munster","holes":18,"par":72,"slope":124,"rating":70.0},{"name":"Kilrush Golf Club","county":"Clare","province":"Munster","holes":9,"par":35,"slope":108,"rating":33.5},{"name":"Spanish Point Golf Club","county":"Clare","province":"Munster","holes":9,"par":34,"slope":106,"rating":32.5},{"name":"East Clare Golf Club","county":"Clare","province":"Munster","holes":18,"par":71,"slope":119,"rating":68.2},{"name":"Galway Golf Club","county":"Galway","province":"Connacht","holes":18,"par":70,"slope":122,"rating":69.0},{"name":"Galway Bay Golf Resort","county":"Galway","province":"Connacht","holes":18,"par":72,"slope":132,"rating":72.0},{"name":"Athenry Golf Club","county":"Galway","province":"Connacht","holes":18,"par":70,"slope":118,"rating":67.5},{"name":"Ballinasloe Golf Club","county":"Galway","province":"Connacht","holes":18,"par":72,"slope":120,"rating":69.0},{"name":"Bearna Golf Club","county":"Galway","province":"Connacht","holes":18,"par":71,"slope":124,"rating":69.8},{"name":"Connemara Golf Club","county":"Galway","province":"Connacht","holes":18,"par":72,"slope":138,"rating":73.5},{"name":"Connemara Isles Golf Club","county":"Galway","province":"Connacht","holes":9,"par":35,"slope":112,"rating":34.0},{"name":"Gort Golf Club","county":"Galway","province":"Connacht","holes":18,"par":71,"slope":118,"rating":67.8},{"name":"Loughrea Golf Club","county":"Galway","province":"Connacht","holes":18,"par":71,"slope":119,"rating":68.0},{"name":"Mountbellew Golf Club","county":"Galway","province":"Connacht","holes":9,"par":35,"slope":108,"rating":33.0},{"name":"Oughterard Golf Club","county":"Galway","province":"Connacht","holes":18,"par":70,"slope":116,"rating":67.0},{"name":"Portumna Golf Club","county":"Galway","province":"Connacht","holes":18,"par":71,"slope":119,"rating":68.0},{"name":"Tuam Golf Club","county":"Galway","province":"Connacht","holes":18,"par":72,"slope":122,"rating":69.5},{"name":"Ballina Golf Club","county":"Mayo","province":"Connacht","holes":18,"par":71,"slope":120,"rating":68.5},{"name":"Ballinrobe Golf Club","county":"Mayo","province":"Connacht","holes":18,"par":73,"slope":122,"rating":69.8},{"name":"Ballyhaunis Golf Club","county":"Mayo","province":"Connacht","holes":9,"par":35,"slope":108,"rating":33.0},{"name":"Belmullet Golf Club (Carne)","county":"Mayo","province":"Connacht","holes":18,"par":73,"slope":140,"rating":74.5},{"name":"Castlebar Golf Club","county":"Mayo","province":"Connacht","holes":18,"par":71,"slope":118,"rating":68.0},{"name":"Claremorris Golf Club","county":"Mayo","province":"Connacht","holes":9,"par":35,"slope":109,"rating":33.5},{"name":"Mulranny Golf Club","county":"Mayo","province":"Connacht","holes":9,"par":35,"slope":110,"rating":33.8},{"name":"Swinford Golf Club","county":"Mayo","province":"Connacht","holes":9,"par":35,"slope":107,"rating":32.8},{"name":"Westport Golf Club","county":"Mayo","province":"Connacht","holes":18,"par":73,"slope":130,"rating":71.5},{"name":"County Sligo Golf Club (Rosses Point)","county":"Sligo","province":"Connacht","holes":18,"par":71,"slope":140,"rating":74.2},{"name":"Strandhill Golf Club","county":"Sligo","province":"Connacht","holes":18,"par":69,"slope":122,"rating":68.5},{"name":"Enniscrone Golf Club","county":"Sligo","province":"Connacht","holes":18,"par":73,"slope":138,"rating":73.8},{"name":"Tubbercurry Golf Club","county":"Sligo","province":"Connacht","holes":9,"par":35,"slope":108,"rating":33.0},{"name":"Roscommon Golf Club","county":"Roscommon","province":"Connacht","holes":18,"par":72,"slope":120,"rating":69.0},{"name":"Athlone Golf Club","county":"Roscommon","province":"Connacht","holes":18,"par":71,"slope":119,"rating":68.2},{"name":"Boyle Golf Club","county":"Roscommon","province":"Connacht","holes":9,"par":35,"slope":107,"rating":32.5},{"name":"Strokestown Golf Club","county":"Roscommon","province":"Connacht","holes":9,"par":35,"slope":106,"rating":32.2},{"name":"Ballinamore Golf Club","county":"Leitrim","province":"Connacht","holes":9,"par":35,"slope":106,"rating":32.0},{"name":"Carrick-on-Shannon Golf Club","county":"Leitrim","province":"Connacht","holes":18,"par":70,"slope":116,"rating":67.0},{"name":"Ballyliffin Golf Club (Glashedy)","county":"Donegal","province":"Ulster","holes":18,"par":71,"slope":144,"rating":75.5},{"name":"Ballyliffin Golf Club (Old Links)","county":"Donegal","province":"Ulster","holes":18,"par":71,"slope":136,"rating":72.8},{"name":"Bundoran Golf Club","county":"Donegal","province":"Ulster","holes":18,"par":70,"slope":128,"rating":70.5},{"name":"Donegal Golf Club (Murvagh)","county":"Donegal","province":"Ulster","holes":18,"par":73,"slope":138,"rating":73.5},{"name":"Letterkenny Golf Club","county":"Donegal","province":"Ulster","holes":18,"par":70,"slope":120,"rating":68.5},{"name":"Narin & Portnoo Golf Club","county":"Donegal","province":"Ulster","holes":18,"par":69,"slope":124,"rating":68.8},{"name":"North West Golf Club (Buncrana)","county":"Donegal","province":"Ulster","holes":18,"par":70,"slope":122,"rating":68.5},{"name":"Portsalon Golf Club","county":"Donegal","province":"Ulster","holes":18,"par":69,"slope":130,"rating":70.8},{"name":"Rosapenna Golf Resort (Sandy Hills)","county":"Donegal","province":"Ulster","holes":18,"par":71,"slope":142,"rating":74.8},{"name":"Rosapenna Golf Resort (Old Tom Morris)","county":"Donegal","province":"Ulster","holes":18,"par":70,"slope":132,"rating":71.5},{"name":"Dunfanaghy Golf Club","county":"Donegal","province":"Ulster","holes":18,"par":68,"slope":116,"rating":65.5},{"name":"County Cavan Golf Club","county":"Cavan","province":"Ulster","holes":18,"par":70,"slope":119,"rating":68.2},{"name":"Belturbet Golf Club","county":"Cavan","province":"Ulster","holes":9,"par":35,"slope":107,"rating":32.5},{"name":"Virginia Golf Club","county":"Cavan","province":"Ulster","holes":9,"par":35,"slope":108,"rating":33.0},{"name":"Nuremore Hotel & Golf Club","county":"Monaghan","province":"Ulster","holes":18,"par":71,"slope":122,"rating":69.2},{"name":"Rossmore Golf Club","county":"Monaghan","province":"Ulster","holes":18,"par":70,"slope":118,"rating":67.8},{"name":"Castleblayney Golf Club","county":"Monaghan","province":"Ulster","holes":9,"par":35,"slope":107,"rating":32.5},{"name":"Royal Portrush Golf Club (Dunluce)","county":"Antrim","province":"Ulster","holes":18,"par":72,"slope":148,"rating":77.0},{"name":"Royal Portrush Golf Club (Valley)","county":"Antrim","province":"Ulster","holes":18,"par":70,"slope":128,"rating":70.5},{"name":"Royal County Down Golf Club (Championship)","county":"Down","province":"Ulster","holes":18,"par":71,"slope":149,"rating":77.5},{"name":"Royal County Down Golf Club (Annesley)","county":"Down","province":"Ulster","holes":18,"par":66,"slope":112,"rating":63.5},{"name":"Portstewart Golf Club (Strand)","county":"Derry","province":"Ulster","holes":18,"par":72,"slope":142,"rating":74.8},{"name":"Castlerock Golf Club","county":"Derry","province":"Ulster","holes":18,"par":73,"slope":138,"rating":73.5},{"name":"Ballycastle Golf Club","county":"Antrim","province":"Ulster","holes":18,"par":71,"slope":128,"rating":70.8},{"name":"Massereene Golf Club","county":"Antrim","province":"Ulster","holes":18,"par":71,"slope":124,"rating":69.5},{"name":"Galgorm Castle Golf Club","county":"Antrim","province":"Ulster","holes":18,"par":72,"slope":136,"rating":72.8},{"name":"Cushendall Golf Club","county":"Antrim","province":"Ulster","holes":9,"par":34,"slope":108,"rating":32.8},{"name":"Whitehead Golf Club","county":"Antrim","province":"Ulster","holes":18,"par":71,"slope":120,"rating":68.5},{"name":"Larne Golf Club","county":"Antrim","province":"Ulster","holes":18,"par":70,"slope":116,"rating":67.0},{"name":"Ardglass Golf Club","county":"Down","province":"Ulster","holes":18,"par":70,"slope":130,"rating":71.0},{"name":"Kilkeel Golf Club","county":"Down","province":"Ulster","holes":18,"par":72,"slope":126,"rating":70.5},{"name":"Warrenpoint Golf Club","county":"Down","province":"Ulster","holes":18,"par":71,"slope":124,"rating":69.8},{"name":"Kirkistown Castle Golf Club","county":"Down","province":"Ulster","holes":18,"par":69,"slope":122,"rating":68.5},{"name":"Donaghadee Golf Club","county":"Down","province":"Ulster","holes":18,"par":71,"slope":119,"rating":68.0},{"name":"Bangor Golf Club","county":"Down","province":"Ulster","holes":18,"par":71,"slope":120,"rating":68.5},{"name":"Mahee Island Golf Club","county":"Down","province":"Ulster","holes":9,"par":35,"slope":107,"rating":32.5},{"name":"Bright Castle Golf Club","county":"Down","province":"Ulster","holes":18,"par":72,"slope":122,"rating":69.5},{"name":"City of Derry Golf Club","county":"Derry","province":"Ulster","holes":18,"par":71,"slope":122,"rating":69.2},{"name":"Foyle Golf Centre","county":"Derry","province":"Ulster","holes":18,"par":71,"slope":118,"rating":68.0},{"name":"Brown Trout Golf Club","county":"Derry","province":"Ulster","holes":9,"par":34,"slope":106,"rating":32.0},{"name":"Enniskillen Golf Club","county":"Fermanagh","province":"Ulster","holes":18,"par":71,"slope":120,"rating":68.5},{"name":"Castle Hume Golf Club","county":"Fermanagh","province":"Ulster","holes":18,"par":72,"slope":124,"rating":70.0},{"name":"Omagh Golf Club","county":"Tyrone","province":"Ulster","holes":18,"par":71,"slope":119,"rating":68.2},{"name":"Dungannon Golf Club","county":"Tyrone","province":"Ulster","holes":18,"par":71,"slope":118,"rating":67.8},{"name":"Strabane Golf Club","county":"Tyrone","province":"Ulster","holes":18,"par":70,"slope":116,"rating":67.0},{"name":"Killymoon Golf Club","county":"Tyrone","province":"Ulster","holes":18,"par":70,"slope":118,"rating":67.5},{"name":"County Armagh Golf Club","county":"Armagh","province":"Ulster","holes":18,"par":70,"slope":120,"rating":68.2},{"name":"Lurgan Golf Club","county":"Armagh","province":"Ulster","holes":18,"par":71,"slope":119,"rating":68.0},{"name":"Portadown Golf Club","county":"Armagh","province":"Ulster","holes":18,"par":70,"slope":118,"rating":67.5},{"name":"Tandragee Golf Club","county":"Armagh","province":"Ulster","holes":18,"par":71,"slope":120,"rating":68.5}];
+
 const THEMES = [
   { id:'navy-gold',   name:'Navy & Gold',   primary:'#0a1628', accent:'#C9A84C' },
   { id:'forest-gold', name:'Forest & Gold', primary:'#1a3320', accent:'#d4a847' },
@@ -1342,20 +1344,68 @@ function openEventsModal() {
 function openCreateEventModal() {
   var s = societySettings || {};
   var today = new Date().toISOString().slice(0,10);
-  openModal('Create event', '<div class="field"><label>Date</label><input type="date" id="ce-date" value="'+today+'"></div><div class="field"><label>Course name</label><input type="text" id="ce-course" value="'+(s.home_course||'')+'"></div><div class="field"><label>Event type</label><select id="ce-type"><option value="sunday_9">Sunday (9 holes)</option><option value="outing_18">Outing (18 holes)</option></select></div><div class="field"><label>Slope rating</label><input type="number" id="ce-slope" value="'+(s.home_course_slope||113)+'"></div><div class="field"><label>Course rating</label><input type="number" step="0.1" id="ce-cr" value="'+(s.home_course_cr||69.0)+'"></div><div class="field"><label>Par</label><input type="number" id="ce-par" value="'+(s.home_course_par||70)+'"></div><div style="display:flex;gap:8px"><button onclick="openEventsModal()" class="btn">Back</button><button onclick="saveNewEvent()" class="btn accent" style="flex:1">Create</button></div>');
+  openModal('Create event',
+    '<div class="field"><label>Date</label><input type="date" id="ce-date" value="'+today+'"></div>' +
+    '<div class="field"><label>Event type</label><select id="ce-type"><option value="sunday_9">Sunday (9 holes)</option><option value="outing_18">Outing (18 holes)</option></select></div>' +
+    '<div class="field"><label>Search course</label>' +
+      '<input type="text" id="ce-course-search" placeholder="Type course name..." oninput="filterCourses()" autocomplete="off" style="margin-bottom:4px">' +
+      '<div id="ce-course-results" style="max-height:180px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);display:none"></div>' +
+      '<input type="hidden" id="ce-course-name">' +
+    '</div>' +
+    '<div id="ce-course-details" style="background:var(--bg);border-radius:var(--radius);padding:10px 12px;margin-bottom:10px;display:none">' +
+      '<div style="font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Course details</div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">' +
+        '<div class="field" style="margin:0"><label>Par</label><input type="number" id="ce-par" value="'+(s.home_course_par||70)+'"></div>' +
+        '<div class="field" style="margin:0"><label>Slope</label><input type="number" id="ce-slope" value="'+(s.home_course_slope||113)+'"></div>' +
+        '<div class="field" style="margin:0"><label>Rating</label><input type="number" step="0.1" id="ce-cr" value="'+(s.home_course_cr||70.0)+'"></div>' +
+      '</div>' +
+    '</div>' +
+    '<div style="display:flex;gap:8px"><button onclick="openEventsModal()" class="btn">Back</button><button onclick="saveNewEvent()" class="btn accent" style="flex:1">Create event</button></div>'
+  );
+}
+
+function filterCourses() {
+  var q = document.getElementById('ce-course-search').value.trim().toLowerCase();
+  var results = document.getElementById('ce-course-results');
+  if (q.length < 2) { results.style.display = 'none'; return; }
+  var matches = IRISH_COURSES.filter(function(c){
+    return c.name.toLowerCase().indexOf(q) > -1 || c.county.toLowerCase().indexOf(q) > -1;
+  }).slice(0, 8);
+  if (!matches.length) { results.style.display = 'none'; return; }
+  results.innerHTML = matches.map(function(c) {
+    return '<div onclick="selectCourse(\''+c.name.replace(/'/g,"\\'")+'\')" style="padding:10px 12px;cursor:pointer;border-bottom:0.5px solid var(--border);font-size:13px" onmouseover="this.style.background=\'var(--bg)\'" onmouseout="this.style.background=\'\'">' +
+      '<div style="font-weight:600;color:var(--text)">'+c.name+'</div>' +
+      '<div style="font-size:11px;color:var(--text-3);margin-top:2px">'+c.county+' &middot; Par '+c.par+' &middot; Slope '+c.slope+' &middot; Rating '+c.rating+'</div>' +
+    '</div>';
+  }).join('');
+  results.style.display = 'block';
+}
+
+function selectCourse(name) {
+  var course = IRISH_COURSES.filter(function(c){ return c.name === name; })[0];
+  if (!course) return;
+  document.getElementById('ce-course-search').value = course.name;
+  document.getElementById('ce-course-name').value = course.name;
+  document.getElementById('ce-course-results').style.display = 'none';
+  document.getElementById('ce-par').value = course.par;
+  document.getElementById('ce-slope').value = course.slope;
+  document.getElementById('ce-cr').value = course.rating;
+  document.getElementById('ce-course-details').style.display = 'block';
 }
 
 async function saveNewEvent() {
   var sid = currentUser && currentUser.user_metadata ? currentUser.user_metadata.society_id : null;
   var date = document.getElementById('ce-date').value;
-  var course = document.getElementById('ce-course').value.trim();
+  var courseName = document.getElementById('ce-course-name') ? document.getElementById('ce-course-name').value : '';
+  if (!courseName) courseName = document.getElementById('ce-course-search') ? document.getElementById('ce-course-search').value.trim() : '';
   var type = document.getElementById('ce-type').value;
   var slope = parseFloat(document.getElementById('ce-slope').value||113);
   var cr = parseFloat(document.getElementById('ce-cr').value||69);
   var par = parseInt(document.getElementById('ce-par').value||70);
   if (!date) { toast('Pick a date', 'error'); return; }
+  if (!courseName) { toast('Select a course', 'error'); return; }
   try {
-    var res = await apiPost('events', { society_id: sid, event_date: date, course_name: course||'TBD', event_type: type, holes: type==='outing_18'?18:9, slope_rating: slope, course_rating: cr, par: par, published: false });
+    var res = await apiPost('events', { society_id: sid, event_date: date, course_name: courseName, event_type: type, holes: type==='outing_18'?18:9, slope_rating: slope, course_rating: cr, par: par, published: false });
     db.events.push(res[0]); toast('Event created!', 'success'); openEventsModal(); renderAll();
   } catch(e) { toast('Error: ' + e.message, 'error'); }
 }
@@ -1456,79 +1506,192 @@ function openPlayerScoreEntry(eid, pid) {
   var ev = db.events.filter(function(e){ return e.id === eid; })[0];
   var player = db.players.filter(function(p){ return p.id === pid; })[0];
   if (!ev || !player) return;
+
   var holes = ev.holes || 9;
   var existing = db.rounds.filter(function(r){ return r.event_id===eid && r.player_id===pid; })[0];
-  var existingScores = existing && existing.hole_scores ? (typeof existing.hole_scores === 'string' ? JSON.parse(existing.hole_scores) : existing.hole_scores) : [];
-  var existingPars = existing && existing.par_values ? (typeof existing.par_values === 'string' ? JSON.parse(existing.par_values) : existing.par_values) : [];
-  var defaultPar = Math.round((ev.par || (holes === 9 ? 35 : 70)) / (holes === 9 ? 1 : 2));
+  var existingScores = existing && existing.hole_scores ? (typeof existing.hole_scores==='string'?JSON.parse(existing.hole_scores):existing.hole_scores) : [];
+  var existingPars = existing && existing.par_values ? (typeof existing.par_values==='string'?JSON.parse(existing.par_values):existing.par_values) : [];
 
-  var holeInputs = '';
+  // Default pars — distribute evenly (par 4s, with some 3s and 5s)
+  function defaultParForHole(h, totalHoles, totalPar) {
+    // Simple distribution: assign par 4 to most, spread 3s and 5s
+    var par4s = totalPar - totalHoles * 3;
+    var par5s = Math.round(par4s / 2);
+    var par3s = totalHoles - par4s - par5s;
+    if (h < par3s) return 3;
+    if (h < par3s + par5s) return 5;
+    return 4;
+  }
+  var totalPar = ev.par || (holes === 9 ? 35 : 70);
+
+  // Build scores array
+  window._scoreEntry = {
+    eid: eid, pid: pid,
+    ev: ev, player: player,
+    holes: holes,
+    currentHole: 0,
+    scores: [],
+    pars: []
+  };
   for (var h = 0; h < holes; h++) {
-    var sc = existingScores[h] || '';
-    var par = existingPars[h] || defaultPar;
-    holeInputs += '<div style="display:grid;grid-template-columns:32px 1fr 1fr;align-items:center;gap:8px;padding:8px 0;border-bottom:0.5px solid var(--border)">' +
-      '<div style="font-size:12px;font-weight:600;color:var(--text-3);text-align:center">'+(h+1)+'</div>' +
-      '<div style="display:flex;align-items:center;gap:4px"><span style="font-size:11px;color:var(--text-3)">Par</span><input type="number" id="par-'+(h)+'" value="'+par+'" min="3" max="6" style="width:48px;padding:6px 8px;border-radius:6px;border:1px solid var(--border-strong);background:var(--bg);font-size:13px;text-align:center"></div>' +
-      '<div style="display:flex;align-items:center;gap:4px"><span style="font-size:11px;color:var(--text-3)">Score</span><input type="number" id="sc-'+(h)+'" value="'+sc+'" min="1" max="15" placeholder="-" style="width:52px;padding:6px 8px;border-radius:6px;border:1px solid var(--border-strong);background:var(--bg);font-size:13px;text-align:center"></div>' +
-    '</div>';
+    window._scoreEntry.scores.push(existingScores[h] || 0);
+    window._scoreEntry.pars.push(existingPars[h] || defaultParForHole(h, holes, totalPar));
   }
 
-  document.getElementById('modal-title').textContent = player.name + ' - Score entry';
-  document.getElementById('modal-body').innerHTML =
-    '<div style="background:var(--primary);border-radius:var(--radius);padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between">' +
-      '<div style="color:white;font-size:13px;font-weight:600">' + (ev.course_name||'Event') + '</div>' +
-      '<div style="color:var(--accent);font-size:12px">Hcp ' + parseFloat(player.handicap_index||0).toFixed(1) + '</div>' +
-    '</div>' +
-    '<div style="font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Enter gross score per hole</div>' +
-    holeInputs +
-    '<div style="display:flex;gap:8px;margin-top:14px">' +
-      '<button onclick="openScoreEntry(\''+eid+'\')" class="btn" style="flex-shrink:0">&#8592; Back</button>' +
-      '<button onclick="savePlayerScore(\''+eid+'\',\''+pid+'\')" class="btn primary" style="flex:1">Save score</button>' +
-      '<button onclick="savePlayerScore(\''+eid+'\',\''+pid+'\',true)" class="btn accent" style="flex-shrink:0">Save &amp; verify</button>' +
-    '</div>';
+  document.getElementById('modal-title').textContent = player.name;
+  renderScoreHole(0);
   document.getElementById('modal-overlay').classList.add('open');
 }
 
+function renderScoreHole(holeIdx) {
+  var se = window._scoreEntry;
+  if (!se) return;
+  var h = holeIdx;
+  se.currentHole = h;
+  var par = se.pars[h];
+  var score = se.scores[h];
+  var holes = se.holes;
+  var courseHcp = Math.round(parseFloat(se.player.handicap_index||0) * (se.ev.slope_rating||113) / 113);
+  var strokesOnHole = Math.floor(courseHcp / holes) + (h < (courseHcp % holes) ? 1 : 0);
+
+  // Calculate running total
+  var runningPts = 0;
+  for (var i = 0; i < holes; i++) {
+    if (se.scores[i] > 0) {
+      var s = se.scores[i], p = se.pars[i];
+      var strokes = Math.floor(courseHcp / holes) + (i < (courseHcp % holes) ? 1 : 0);
+      runningPts += Math.max(0, 2 - (s - p - strokes));
+    }
+  }
+
+  // Points this hole preview
+  var holePoints = score > 0 ? Math.max(0, 2 - (score - par - strokesOnHole)) : null;
+  var ptColor = holePoints === null ? 'rgba(255,255,255,0.3)' : holePoints >= 3 ? '#16a34a' : holePoints === 2 ? 'var(--accent)' : holePoints === 1 ? 'rgba(255,255,255,0.7)' : '#dc2626';
+  var ptLabel = holePoints === null ? '-' : holePoints === 0 ? '0' : '+' + holePoints;
+
+  // Progress dots
+  var dots = '';
+  for (var i = 0; i < holes; i++) {
+    var dotColor = i === h ? 'var(--accent)' : se.scores[i] > 0 ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.2)';
+    dots += '<div style="width:'+(i===h?'20px':'8px')+';height:8px;border-radius:99px;background:'+dotColor+';transition:all 0.2s;flex-shrink:0"></div>';
+  }
+
+  // Score buttons — big tap targets
+  var scoreButtons = '';
+  for (var s = 1; s <= 10; s++) {
+    var isSelected = score === s;
+    var pts = Math.max(0, 2 - (s - par - strokesOnHole));
+    var btnBg = isSelected ? 'var(--accent)' : 'var(--surface)';
+    var btnColor = isSelected ? 'var(--primary)' : 'var(--text)';
+    var ptsBadge = isSelected ? '<div style="font-size:10px;font-weight:700;color:'+(isSelected?'var(--primary)':'var(--text-3)')+'">'+pts+' pts</div>' : '';
+    scoreButtons += '<button onclick="selectScore('+s+')" style="background:'+btnBg+';color:'+btnColor+';border:2px solid '+(isSelected?'var(--accent)':'var(--border)')+';border-radius:12px;padding:14px 8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:20px;font-weight:800;font-family:DM Sans,sans-serif;cursor:pointer;min-height:64px;flex:1">' +
+      '<div>'+s+'</div>' +
+      '<div style="font-size:10px;font-weight:600;color:'+(isSelected?'var(--primary)':'var(--text-3)')+'">'+(s===par?'Par':s<par?'-'+(par-s):'+' +(s-par))+'</div>' +
+    '</button>';
+  }
+
+  var isComplete = se.scores.every(function(s){ return s > 0; });
+  var allFilled = se.scores.filter(function(s){ return s > 0; }).length;
+
+  document.getElementById('modal-body').innerHTML =
+    // Header strip
+    '<div style="background:var(--primary);margin:-16px -20px 16px;padding:14px 20px 12px">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">' +
+        '<div style="font-size:12px;color:rgba(255,255,255,0.5)">'+(se.ev.course_name||'Event')+'</div>' +
+        '<div style="font-size:12px;color:rgba(255,255,255,0.5)">Hcp '+parseFloat(se.player.handicap_index||0).toFixed(1)+(strokesOnHole>0?' (+'+strokesOnHole+'&#9651;)':'')+'</div>' +
+      '</div>' +
+      '<div style="display:flex;gap:4px;align-items:center;justify-content:center">'+dots+'</div>' +
+    '</div>' +
+    // Hole header
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">' +
+      '<div>' +
+        '<div style="font-size:32px;font-weight:800;color:var(--text);line-height:1">Hole '+(h+1)+'</div>' +
+        '<div style="font-size:14px;color:var(--text-3);margin-top:2px">Par '+par+(strokesOnHole>0?' &middot; '+strokesOnHole+' stroke'+(strokesOnHole>1?'s':''):' &middot; scratch')+'</div>' +
+      '</div>' +
+      '<div style="text-align:right">' +
+        '<div style="font-size:32px;font-weight:800;color:'+ptColor+';line-height:1">'+ptLabel+'</div>' +
+        '<div style="font-size:11px;color:var(--text-3);margin-top:2px">Running: '+runningPts+' pts</div>' +
+      '</div>' +
+    '</div>' +
+    // Score grid
+    '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:16px">'+scoreButtons+'</div>' +
+    // Par input
+    '<div style="display:flex;align-items:center;justify-content:space-between;background:var(--bg);border-radius:var(--radius);padding:10px 14px;margin-bottom:16px">' +
+      '<div style="font-size:13px;color:var(--text-2)">Change par for this hole</div>' +
+      '<div style="display:flex;gap:6px">' +
+        [3,4,5,6].map(function(p){ return '<button onclick="setPar('+p+')" style="width:36px;height:36px;border-radius:8px;border:2px solid '+(par===p?'var(--accent)':'var(--border)')+';background:'+(par===p?'var(--accent)':'var(--surface)')+';color:'+(par===p?'var(--primary)':'var(--text)')+';font-size:14px;font-weight:700;font-family:DM Sans,sans-serif;cursor:pointer">'+p+'</button>'; }).join('') +
+      '</div>' +
+    '</div>' +
+    // Nav buttons
+    '<div style="display:flex;gap:8px">' +
+      '<button onclick="openScoreEntry(\''+se.eid+'\')" class="btn" style="padding:12px 16px">&#x2715;</button>' +
+      (h > 0 ? '<button onclick="renderScoreHole('+(h-1)+')" class="btn" style="padding:12px 16px">&#8592;</button>' : '') +
+      (h < holes-1 ?
+        '<button onclick="nextHole()" class="btn primary" style="flex:1;padding:12px">Next hole &#8594;</button>' :
+        '<div style="flex:1;display:flex;gap:6px">' +
+          '<button onclick="savePlayerScore(\''+se.eid+'\',\''+se.pid+'\')" class="btn primary" style="flex:1;padding:12px">Save</button>' +
+          '<button onclick="savePlayerScore(\''+se.eid+'\',\''+se.pid+'\',true)" class="btn accent" style="flex:1;padding:12px">&#10003; Verify</button>' +
+        '</div>'
+      ) +
+    '</div>' +
+    // Score summary if any entered
+    (allFilled > 0 ? '<div style="text-align:center;font-size:12px;color:var(--text-3);margin-top:12px">'+allFilled+'/'+holes+' holes entered &middot; '+runningPts+' pts total</div>' : '');
+}
+
+function selectScore(s) {
+  var se = window._scoreEntry;
+  if (!se) return;
+  se.scores[se.currentHole] = s;
+  renderScoreHole(se.currentHole);
+}
+
+function setPar(p) {
+  var se = window._scoreEntry;
+  if (!se) return;
+  se.pars[se.currentHole] = p;
+  renderScoreHole(se.currentHole);
+}
+
+function nextHole() {
+  var se = window._scoreEntry;
+  if (!se) return;
+  if (se.scores[se.currentHole] === 0) {
+    toast('Enter a score first', 'error');
+    return;
+  }
+  renderScoreHole(se.currentHole + 1);
+}
+
 async function savePlayerScore(eid, pid, verify) {
+  var se = window._scoreEntry;
   var ev = db.events.filter(function(e){ return e.id === eid; })[0];
   var player = db.players.filter(function(p){ return p.id === pid; })[0];
   if (!ev || !player) return;
   var holes = ev.holes || 9;
   var sid = currentUser && currentUser.user_metadata ? currentUser.user_metadata.society_id : null;
 
-  var scores = [], pars = [], totalPts = 0, totalGross = 0;
-  var hasScores = false;
+  var scores = se ? se.scores : [];
+  var pars = se ? se.pars : [];
+  var hasScores = scores.some(function(s){ return s > 0; });
+  if (!hasScores) { toast('Enter at least one score', 'error'); return; }
+
+  var totalPts = 0, totalGross = 0;
+  var courseHcp = Math.round(parseFloat(player.handicap_index||0) * (ev.slope_rating||113) / 113);
   for (var h = 0; h < holes; h++) {
-    var scEl = document.getElementById('sc-'+h);
-    var parEl = document.getElementById('par-'+h);
-    var sc = scEl ? parseInt(scEl.value) : 0;
-    var par = parEl ? parseInt(parEl.value) : 4;
-    scores.push(sc || 0);
-    pars.push(par || 4);
+    var sc = scores[h] || 0;
+    var par = pars[h] || 4;
     if (sc > 0) {
-      hasScores = true;
       totalGross += sc;
-      // Calculate stableford with handicap strokes
-      var courseHcp = Math.round(parseFloat(player.handicap_index||0) * (ev.slope_rating||113) / 113);
       var strokesOnHole = Math.floor(courseHcp / holes) + (h < (courseHcp % holes) ? 1 : 0);
-      var net = sc - par - strokesOnHole;
-      totalPts += Math.max(0, 2 - net);
+      totalPts += Math.max(0, 2 - (sc - par - strokesOnHole));
     }
   }
 
-  if (!hasScores) { toast('Enter at least one score', 'error'); return; }
-
   var existing = db.rounds.filter(function(r){ return r.event_id===eid && r.player_id===pid; })[0];
-  var courseHcp = Math.round(parseFloat(player.handicap_index||0) * (ev.slope_rating||113) / 113);
-
   var payload = {
-    society_id: sid,
-    event_id: eid,
-    player_id: pid,
-    hole_scores: scores,
-    par_values: pars,
-    stableford_points: totalPts,
-    gross_score: totalGross,
+    society_id: sid, event_id: eid, player_id: pid,
+    hole_scores: scores, par_values: pars,
+    stableford_points: totalPts, gross_score: totalGross,
     course_handicap: courseHcp,
     handicap_before: parseFloat(player.handicap_index||0),
     verified: verify ? true : false
@@ -1538,17 +1701,19 @@ async function savePlayerScore(eid, pid, verify) {
     var res;
     if (existing) {
       res = await apiPatch('rounds?id=eq.'+existing.id, payload);
-      var idx = db.rounds.findIndex(function(r){ return r.id === existing.id; });
-      if (idx >= 0) db.rounds[idx] = Object.assign({}, db.rounds[idx], payload, { id: existing.id });
+      var idx = db.rounds.findIndex(function(r){ return r.id===existing.id; });
+      if (idx >= 0) db.rounds[idx] = Object.assign({}, db.rounds[idx], payload, {id:existing.id});
     } else {
       res = await apiPost('rounds', payload);
       db.rounds.push(res[0]);
     }
-    toast(verify ? player.name+' verified - '+totalPts+' pts' : 'Score saved', 'success');
+    toast(verify ? '&#10003; '+player.name+' verified — '+totalPts+' pts' : 'Score saved', 'success');
+    window._scoreEntry = null;
     openScoreEntry(eid);
     renderAll();
   } catch(e) { toast('Error: '+e.message, 'error'); }
 }
+
 
 async function publishEvent(eid) {
   var ev = db.events.filter(function(e){ return e.id === eid; })[0];
