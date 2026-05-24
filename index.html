@@ -1092,7 +1092,6 @@ async function saveBranding() {
 }
 
 function openThemeModal() {
-function openBillingModal() {
   var s = societySettings || {};
   var presets = THEMES.map(function(t) {
     return '<div class="theme-opt" onclick="applyThemePreset(\''+t.id+'\')" id="to-'+t.id+'"><div class="theme-preview"><div style="flex:2;background:'+t.primary+'"></div><div style="flex:1;background:'+t.accent+'"></div></div><div class="theme-label">'+t.name+'</div></div>';
@@ -1175,7 +1174,6 @@ function openHcpModal() {
   );
 }
 
-}
 
 async function saveHcp() {
   var sid = currentUser && currentUser.user_metadata ? currentUser.user_metadata.society_id : null;
@@ -1370,12 +1368,51 @@ function openScoreEntry(eid) {
   }).join('');
 
   var verifiedCount = db.rounds.filter(function(r){ return r.event_id===eid && r.verified; }).length;
+  var totalEntered = db.rounds.filter(function(r){ return r.event_id===eid; }).length;
+
+  // Build live leaderboard preview using tiebreaker
+  var liveBoard = '';
+  if (totalEntered > 0) {
+    var eventRounds = db.rounds.filter(function(r){ return r.event_id===eid && r.stableford_points != null; });
+    var tb = (societySettings && societySettings.tiebreaker) || 'back3';
+    var sorted = eventRounds.slice().sort(function(a,b){
+      if ((b.stableford_points||0) !== (a.stableford_points||0)) return (b.stableford_points||0)-(a.stableford_points||0);
+      var aS = a.hole_scores?(typeof a.hole_scores==='string'?JSON.parse(a.hole_scores):a.hole_scores):[];
+      var bS = b.hole_scores?(typeof b.hole_scores==='string'?JSON.parse(b.hole_scores):b.hole_scores):[];
+      var aP = a.par_values?(typeof a.par_values==='string'?JSON.parse(a.par_values):a.par_values):[];
+      var bP = b.par_values?(typeof b.par_values==='string'?JSON.parse(b.par_values):b.par_values):[];
+      var h = aS.length||9;
+      var startBack = tb==='back3'?3:tb==='back9'?9:h;
+      for (var back=startBack;back<=h;back++){
+        var aB=0,bB=0;
+        for(var x=h-back;x<h;x++){aB+=Math.max(0,2-(parseInt(aS[x])||0)+(parseInt(aP[x])||4));bB+=Math.max(0,2-(parseInt(bS[x])||0)+(parseInt(bP[x])||4));}
+        if(bB!==aB)return bB-aB;
+      }
+      return 0;
+    });
+    var medals = ['🥇','🥈','🥉'];
+    liveBoard = '<div style="background:var(--primary);border-radius:var(--radius);padding:10px 12px;margin-bottom:12px">' +
+      '<div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Live leaderboard</div>' +
+      sorted.slice(0,5).map(function(r,i){
+        var p = db.players.filter(function(x){return x.id===r.player_id;})[0];
+        var isVerified = r.verified;
+        return '<div style="display:flex;align-items:center;gap:8px;padding:4px 0">' +
+          '<div style="font-size:14px;width:20px;text-align:center">'+(medals[i]||i+1+'.')+'</div>' +
+          '<div style="flex:1;font-size:13px;color:'+(isVerified?'white':'rgba(255,255,255,0.5)')+'">'+( p?p.name:'?')+'</div>' +
+          '<div style="font-size:13px;font-weight:700;color:'+(isVerified?'var(--accent)':'rgba(255,255,255,0.4)')+'">'+( r.stableford_points||0)+'<span style="font-size:10px;font-weight:400;color:rgba(255,255,255,0.3)"> pts</span></div>' +
+          (isVerified?'':'<span style="font-size:9px;color:rgba(255,255,255,0.3);margin-left:2px">unverified</span>') +
+        '</div>';
+      }).join('') +
+    '</div>';
+  }
+
   document.getElementById('modal-title').textContent = (ev.course_name||'Event') + ' - Scores';
   document.getElementById('modal-body').innerHTML =
     '<div style="background:var(--bg);border-radius:var(--radius);padding:10px 12px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between">' +
       '<div style="font-size:12px;color:var(--text-2)">'+holes+' holes &middot; '+players.length+' players</div>' +
       '<div style="font-size:12px;color:var(--text-2)">'+verifiedCount+'/'+players.length+' verified</div>' +
     '</div>' +
+    liveBoard +
     rows +
     (verifiedCount > 0 ?
       '<button onclick="publishEvent(\''+eid+'\')" class="btn accent full" style="margin-top:14px">&#10003; Publish results</button>' : '') +
