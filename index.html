@@ -1335,7 +1335,7 @@ function openEventResults(eid) {
 
   openModal(ev.course_name+' — '+fmtDate(ev.event_date),
     '<div style="padding:4px 0">'+rows+'</div>' +
-    '<button onclick="window.open(\'https://wa.me/?text=\'+encodeURIComponent(\''+shareMsg.replace(/'/g,"\\'").replace(/\n/g,'\\n')+'\'),\'_blank\')" style="width:100%;margin-top:14px;padding:12px;border-radius:var(--radius);border:none;background:#25D366;color:white;font-size:13px;font-weight:700;cursor:pointer;font-family:DM Sans,sans-serif">Share results on WhatsApp</button>'
+    '<button onclick="window.location.href=\'https://wa.me/?text=\'+encodeURIComponent(\''+shareMsg.replace(/'/g,"\\'").replace(/\n/g,'\\n')+'\')" style="width:100%;margin-top:14px;padding:12px;border-radius:var(--radius);border:none;background:#25D366;color:white;font-size:13px;font-weight:700;cursor:pointer;font-family:DM Sans,sans-serif">Share results on WhatsApp</button>'
   );
 }
 
@@ -1792,10 +1792,10 @@ function shareResult(postId) {
   var text = (window._shareTexts && window._shareTexts[postId]) || 'Check out our golf results!';
   if (navigator.share) {
     navigator.share({ title: 'Golf Results', text: text }).catch(function(){
-      window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+      window.location.href = 'https://wa.me/?text=' + encodeURIComponent(text);
     });
   } else {
-    window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+    window.location.href = 'https://wa.me/?text=' + encodeURIComponent(text);
   }
 }
 
@@ -1805,7 +1805,7 @@ var text = window._inviteShareText || '';
 if (navigator.share) {
 navigator.share({ title: 'Join our golf society', text: text }).catch(function(){});
 } else {
-window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+window.location.href = 'https://wa.me/?text=' + encodeURIComponent(text);
 }
 }
 
@@ -1839,7 +1839,7 @@ renderAll();
 
 function sharePin(name, pin) {
 var text = 'Hi ' + name + '! You\'ve been approved for the golf society app.\n\nYour PIN is: ' + pin + '\n\nTo sign in:\n1. Open the app\n2. Select Member\n3. Enter your mobile number and PIN';
-window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+window.location.href = 'https://wa.me/?text=' + encodeURIComponent(text);
 }
 
 async function rejectMember(pid) {
@@ -2151,7 +2151,7 @@ openModal('Invite members',
 '</div>' +
 
 // WhatsApp share
-'<button onclick="window.open(\'https://wa.me/?text=\'+encodeURIComponent(\''+shareText.replace(/\n/g,'\\n')+'\'),\'_blank\')" style="width:100%;padding:13px;border-radius:var(--radius);border:none;background:#25D366;color:white;font-size:14px;font-weight:700;cursor:pointer;font-family:DM Sans,sans-serif">Share on WhatsApp</button>'
+'<button onclick="window.location.href=\'https://wa.me/?text=\'+encodeURIComponent(\''+shareText.replace(/\n/g,'\\n')+'\')" style="width:100%;padding:13px;border-radius:var(--radius);border:none;background:#25D366;color:white;font-size:14px;font-weight:700;cursor:pointer;font-family:DM Sans,sans-serif">Share on WhatsApp</button>'
 );
 }
 
@@ -3202,7 +3202,7 @@ resultRows + extraRows +
 function shareResults(encodedText) {
 var text = decodeURIComponent(encodedText);
 var waUrl = 'https://wa.me/?text=' + encodeURIComponent(text);
-window.open(waUrl, '_blank');
+window.location.href = waUrl;
 }
 
 
