@@ -1580,25 +1580,25 @@ el.innerHTML =
 '<span class="sub-pill '+subClass+'">'+subLabel+'</span>' +
 '</div>' +
 sectionTitle('Branding') +
-card('\u{1F3A8}', 'Appearance', 'Logo, colours &amp; theme', 'openBrandingGroup') +
+card('🎨', 'Appearance', 'Logo, colours &amp; theme', 'openBrandingGroup') +
 sectionTitle('Members') +
-card('\u{1F465}', 'Manage members', activeMemberCount+' active members', 'openMembersModal', pendingCount > 0 ? pendingCount+' pending' : '') +
-card('\u{1F517}', 'Invite members', 'Share join link &amp; code', 'openInviteModal') +
+card('👥', 'Manage members', activeMemberCount+' active members', 'openMembersModal', pendingCount > 0 ? pendingCount+' pending' : '') +
+card('🔗', 'Invite members', 'Share join link &amp; code', 'openInviteModal') +
 sectionTitle('Scoring') +
-card('\u{1F3CC}', 'Handicap rules', (s.handicap_mode==='gui'?'GUI standard':s.handicap_mode==='custom'?'Custom':'Points-based'), 'openHcpModal') +
-card('\u{1F3C6}', 'League points', (s.league_pts_mode==='custom'?'Custom table':'BHGS style'), 'openLeaguePtsModal') +
-card('\u{1F381}', 'Extra prizes', (s.extra_prizes_enabled?'Enabled':'Disabled'), 'openExtraPrizesSettings') +
+card('🏌', 'Handicap rules', (s.handicap_mode==='gui'?'GUI standard':s.handicap_mode==='custom'?'Custom':'Points-based'), 'openHcpModal') +
+card('🏆', 'League points', (s.league_pts_mode==='custom'?'Custom table':'BHGS style'), 'openLeaguePtsModal') +
+card('🎁', 'Extra prizes', (s.extra_prizes_enabled?'Enabled':'Disabled'), 'openExtraPrizesSettings') +
 sectionTitle('Events') +
-card('\u{1F4C5}', 'Manage events', db.events.length+' events', 'openEventsModal') +
+card('📅', 'Manage events', db.events.length+' events', 'openEventsModal') +
 sectionTitle('Display') +
 '<div style="display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:8px">' +
-'<div style="width:40px;height:40px;border-radius:10px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">\u{1F441}\u{FE0F}</div>' +
+'<div style="width:40px;height:40px;border-radius:10px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">👁️</div>' +
 '<div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--text)">Preview data</div>' +
 '<div style="font-size:12px;color:var(--text-3);margin-top:1px">Show example data for new societies</div></div>' +
 '<label class="toggle-switch"><input type="checkbox" '+(s.show_preview!==false?'checked':'')+' onchange="savePreviewToggle(this.checked)"><div class="toggle-slider"></div></label>' +
 '</div>' +
 sectionTitle('Subscription') +
-card('\u{1F4B3}', 'Plan &amp; billing', subLabel+' plan', 'openBillingModal') +
+card('💳', 'Plan &amp; billing', subLabel+' plan', 'openBillingModal') +
 '<div style="height:20px"></div>';
 }
 
