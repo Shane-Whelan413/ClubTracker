@@ -1133,61 +1133,6 @@ if (db.noticeboard.length) {
 var visiblePosts = db.noticeboard.slice(0,2);
 var hiddenPosts = db.noticeboard.slice(2);
 result = visiblePosts.map(function(post) { return buildResultCard(post); }).join('');
-var ev = db.events.filter(function(e){ return e.id === post.event_id; })[0];
-      // Parse extra_data - handle both string and object
-var extra = {};
-      try { extra = post.extra_data ? (typeof post.extra_data==='string'?JSON.parse(post.extra_data):post.extra_data) : {}; } catch(e2){}
-      try {
-        if (post.extra_data) {
-          extra = typeof post.extra_data === 'string' ? JSON.parse(post.extra_data) : post.extra_data;
-        }
-      } catch(e2){}
-var top = extra.topPlayers || [];
-var prizes = extra.extraPrizes || {};
-      // If no topPlayers in extra_data, build from rounds
-      if (!top.length && ev) {
-        var evRounds = db.rounds.filter(function(r){ return r.event_id === ev.id && r.verified && r.stableford_points > 0; });
-        evRounds.sort(function(a,b){ return (b.stableford_points||0)-(a.stableford_points||0); });
-        top = evRounds.slice(0,3).map(function(r){
-          var pl = db.players.filter(function(p){ return p.id === r.player_id; })[0];
-          return { name: pl ? pl.name : '?', pts: r.stableford_points || 0 };
-        });
-      }
-var medals = ['1st','2nd','3rd'];
-var medalColors = ['#B8860B','#888','#8B4513'];
-var rows = top.map(function(p,i){
-return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--border)">' +
-'<div style="width:28px;height:28px;border-radius:50%;background:'+medalColors[i]+';color:white;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+medals[i]+'</div>' +
-'<div style="flex:1;font-size:13px;font-weight:600;color:var(--text)">'+p.name+'</div>' +
-'<div style="font-size:15px;font-weight:800;color:'+medalColors[i]+'">'+p.pts+'<span style="font-size:10px;font-weight:400;color:var(--text-3)"> pts</span></div>' +
-'</div>';
-}).join('') || '<div style="padding:8px 0;font-size:13px;color:var(--text-3)">Results posted</div>';
-var prizeRows = Object.keys(prizes).map(function(pr){
-return '<div style="display:flex;padding:5px 0;border-bottom:0.5px solid var(--border)">' +
-'<div style="flex:1;font-size:11px;color:var(--text-3)">'+pr+'</div>' +
-'<div style="font-size:12px;font-weight:600;color:var(--accent-dark)">'+prizes[pr]+'</div></div>';
-}).join('');
-      var shareLines = top.map(function(p,i){return medals[i]+' '+p.name+' - '+p.pts+' pts';}).join('\n');
-      Object.keys(prizes).forEach(function(pr){shareLines += '\n'+pr+': '+prizes[pr];});
-      
-      // Build share text cleanly
-      var shareParts = ['⛳ '+(ev?ev.course_name:'Golf')+' Results', ''];
-      top.forEach(function(p,i){ shareParts.push(medals[i]+' '+p.name+' - '+p.pts+' pts'); });
-      Object.keys(prizes).forEach(function(pr){ shareParts.push(''); shareParts.push(pr+': '+prizes[pr]); });
-      shareParts.push(''); shareParts.push('Posted via GolfSoc');
-      var shareMsg = shareParts.join('\n');
-      var postId = post.id || ev && ev.id || '';
-      // Store share text globally indexed by post
-      window._shareTexts = window._shareTexts || {};
-      window._shareTexts[postId] = shareMsg;
-return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,0.06)">' +
-'<div style="background:var(--primary);padding:14px 16px;position:relative">' +
-'<div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent-dark),var(--accent),var(--accent-dark))"></div>' +
-'<div style="display:flex;align-items:center;justify-content:space-between">' +
-'<div><div style="font-size:15px;font-weight:700;color:white;letter-spacing:-0.01em">'+(ev?ev.course_name:'Event')+'</div>' +
-'<div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:3px">&#127942; Results &middot; '+(ev?fmtDate(ev.event_date):'')+'</div></div>' +
-'<button onclick="shareResult(this.getAttribute(\'data-post\'))" data-post="'+postId+'" style="background:#25D366;border:none;border-radius:8px;padding:7px 14px;color:white;font-size:12px;font-weight:700;cursor:pointer">Share</button>' +
-'</div>' +
 (hiddenPosts.length ?
 '<div id="more-results" style="display:none">' + hiddenPosts.map(function(post){ return buildResultCard(post); }).join('') + '</div>' +
 '<button onclick="var m=document.getElementById(this.dataset.t);m.style.display=m.style.display===\'none\'?\'block\':\'none\';this.textContent=m.style.display===\'none\'?\'See more results\':\'See less\'" data-t="more-results" id="see-more-btn" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);font-size:13px;font-weight:600;color:var(--text-2);cursor:pointer;margin-top:4px;font-family:DM Sans,sans-serif">See more results</button>'
