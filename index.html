@@ -1071,7 +1071,7 @@ if (currentUser && currentUser.isMemberSession) {
       adminCard = '<div style="background:var(--primary);border-radius:var(--radius-lg);padding:14px 16px;margin-bottom:10px">' +
         '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--accent);margin-bottom:6px">This week</div>' +
         '<div style="font-size:15px;font-weight:700;color:white;margin-bottom:12px">'+(activeEv.course_name||'Event')+' &middot; '+fmtDate(activeEv.event_date)+'</div>' +
-        '<button '+btnLabel+'onclick="openMemberScoreEntry()" class="btn accent full" style="padding:12px;font-size:14px;font-weight:700">'+btnLabel+'</button>' +
+        '<button onclick="openMemberScoreEntry()" class="btn accent full" style="padding:12px;font-size:14px;font-weight:700">'+btnLabel+'</button>' +
         '</div>' + adminCard;
     }
   }
