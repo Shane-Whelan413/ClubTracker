@@ -1259,6 +1259,8 @@ el.innerHTML = adminBtn + '<div class="empty"><div class="empty-icon">&#128197;<
 return;
 }
 function evRow(ev, isPast) {
+    var p = ev.event_date.split('-');
+    var isOuting = ev.event_type === 'outing_18';
     var today = new Date().toISOString().slice(0,10);
     var evDate = ev.event_date;
     // Show handicap breakdown in the week of the event (3 days before to 3 days after)
