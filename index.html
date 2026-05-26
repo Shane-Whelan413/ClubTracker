@@ -991,43 +991,75 @@ function toggleMoreResults(btn) {
 }
 
 function buildResultCard(post) {
+  var isAdmin = currentUser && currentUser.user_metadata && currentUser.user_metadata.role === 'admin';
   var ev = db.events.filter(function(e){ return e.id === post.event_id; })[0];
   var extra = {}; try { extra = post.extra_data ? (typeof post.extra_data==='string'?JSON.parse(post.extra_data):post.extra_data) : {}; } catch(e2){}
   var top = extra.topPlayers || [];
   if (!top.length && ev) {
     var evR = db.rounds.filter(function(r){ return r.event_id===ev.id&&r.verified&&r.stableford_points>0; }).sort(function(a,b){return (b.stableford_points||0)-(a.stableford_points||0);});
-    top = evR.slice(0,3).map(function(r){ var pl=db.players.filter(function(p){return p.id===r.player_id;})[0]; return {name:pl?pl.name:'?',pts:r.stableford_points||0}; });
+    top = evR.slice(0,3).map(function(r){
+      var pl=db.players.filter(function(p){return p.id===r.player_id;})[0];
+      return {name:pl?pl.name:'?',pts:r.stableford_points||0,hcp:pl?parseFloat(pl.handicap_index||0).toFixed(1):'?'};
+    });
   }
   var medals=['1st','2nd','3rd']; var medalColors=['#B8860B','#888','#8B4513'];
   var rows=top.map(function(p,i){
-    return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--border)">' +
-      '<div style="width:28px;height:28px;border-radius:50%;background:'+medalColors[i]+';color:white;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+medals[i]+'</div>' +
-      '<div style="flex:1;font-size:13px;font-weight:600;color:var(--text)">'+p.name+'</div>' +
-      '<div style="font-size:15px;font-weight:800;color:'+medalColors[i]+'">'+p.pts+'<span style="font-size:10px;font-weight:400;color:var(--text-3)"> pts</span></div></div>';
-  }).join('');
+    return '<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:0.5px solid var(--border)">' +
+      '<div style="width:30px;height:30px;border-radius:50%;background:'+medalColors[i]+';color:white;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+medals[i]+'</div>' +
+      '<div style="flex:1;min-width:0">' +
+        '<div style="font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+p.name+'</div>' +
+        (p.hcp ? '<div style="font-size:11px;color:var(--text-3)">Hcp '+p.hcp+'</div>' : '') +
+      '</div>' +
+      '<div style="text-align:right;flex-shrink:0">' +
+        '<div style="font-size:18px;font-weight:700;color:'+(i===0?medalColors[i]:'var(--text-2)')+'">'+p.pts+'</div>' +
+        '<div style="font-size:10px;color:var(--text-3)">pts</div>' +
+      '</div>' +
+    '</div>';
+  }).join('') || '<div style="padding:10px 0;font-size:13px;color:var(--text-3)">Results posted</div>';
   var prizes=extra.extraPrizes||{};
   var prizeRows=Object.keys(prizes).map(function(pr){
-    return '<div style="display:flex;padding:5px 0;border-bottom:0.5px solid var(--border)">' +
-      '<div style="flex:1;font-size:11px;color:var(--text-3)">'+pr+'</div>' +
-      '<div style="font-size:12px;font-weight:600;color:var(--accent-dark)">'+prizes[pr]+'</div></div>';
+    return '<div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0">' +
+      '<span style="color:var(--text-2)">'+pr+'</span>' +
+      '<span style="font-weight:600;color:var(--text)">'+prizes[pr]+'</span></div>';
   }).join('');
   var postId=post.id||(ev&&ev.id)||'';
+  var evType = ev ? (ev.event_type==='outing_18'?'18 hole outing':'9 hole stableford') : '';
   var shareParts=['⛳ '+(ev?ev.course_name:'Golf')+' Results',''];
   top.forEach(function(p,i){ shareParts.push(medals[i]+' '+p.name+' - '+p.pts+' pts'); });
   Object.keys(prizes).forEach(function(pr){ shareParts.push(''); shareParts.push(pr+': '+prizes[pr]); });
   shareParts.push(''); shareParts.push('Posted via GolfSoc');
   window._shareTexts = window._shareTexts||{}; window._shareTexts[postId] = shareParts.join('\n');
-  return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,0.06)">' +
-    '<div style="background:var(--primary);padding:14px 16px;position:relative">' +
-    '<div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent-dark),var(--accent),var(--accent-dark))"></div>' +
-    '<div style="display:flex;align-items:center;justify-content:space-between">' +
-    '<div><div style="font-size:15px;font-weight:700;color:white;letter-spacing:-0.01em">'+(ev?ev.course_name:'Event')+'</div>' +
-    '<div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:3px">🏆 Results &middot; '+(ev?fmtDate(ev.event_date):'')+'</div></div>' +
-    '<button onclick="shareResult(this.getAttribute(\'data-post\'))" data-post="'+postId+'" style="background:#25D366;border:none;border-radius:8px;padding:7px 14px;color:white;font-size:12px;font-weight:700;cursor:pointer">Share</button>' +
-    '</div></div>' +
-    '<div style="padding:6px 16px 4px">'+rows+'</div>' +
-    (prizeRows ? '<div style="background:var(--bg);padding:8px 16px;border-top:1px solid var(--border)"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);margin-bottom:6px">Extra prizes</div>'+prizeRows+'</div>' : '') +
+  return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:10px;border-left:3px solid var(--accent)">' +
+    '<div style="padding:12px 14px 12px 13px;border-bottom:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between">' +
+      '<div style="flex:1;min-width:0">' +
+        '<div style="font-size:15px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(ev?ev.course_name:'Event')+'</div>' +
+        '<div style="font-size:11px;color:var(--text-3);margin-top:2px">'+(ev?fmtDate(ev.event_date):'')+(evType?' &middot; '+evType:'')+'</div>' +
+      '</div>' +
+      '<div style="display:flex;align-items:center;gap:6px;flex-shrink:0;margin-left:8px">' +
+        (isAdmin ? '<button onclick="deletePost(\''+postId+'\',\''+post.id+'\')" style="background:none;border:none;padding:6px;cursor:pointer;color:var(--text-3);line-height:1" title="Delete post">&#128465;</button>' : '') +
+        '<button onclick="shareResult(this.getAttribute(\'data-post\'))" data-post="'+postId+'" style="background:#25D366;border:none;border-radius:8px;padding:6px 12px;color:white;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px">Share</button>' +
+      '</div>' +
+    '</div>' +
+    '<div style="padding:4px 16px 4px 13px">'+rows+'</div>' +
+    (prizeRows ? '<div style="padding:8px 14px 10px 13px;border-top:0.5px solid var(--border);background:var(--bg)">' +
+      '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-3);margin-bottom:6px">Extra prizes</div>' +
+      prizeRows+'</div>' : '') +
     '</div>';
+}
+
+async function deletePost(postId, dbId) {
+  if (!confirm('Delete this result post? The event and scores will remain.')) return;
+  try {
+    var h = apiHeaders(); h['Prefer'] = 'return=minimal';
+    if (dbId && dbId !== postId) {
+      await fetch(SUPABASE_URL + '/rest/v1/noticeboard?id=eq.' + dbId, { method: 'DELETE', headers: h });
+    } else {
+      await fetch(SUPABASE_URL + '/rest/v1/noticeboard?event_id=eq.' + postId, { method: 'DELETE', headers: h });
+    }
+    db.noticeboard = db.noticeboard.filter(function(p){ return p.id !== dbId && p.event_id !== postId; });
+    renderHome();
+    toast('Post deleted', 'success');
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
 }
 
 function renderHome() {
@@ -3168,11 +3200,22 @@ if (ei >= 0) db.events[ei].published = true;
 var extraWinners = window._extraPrizeWinners || {};
 window._extraPrizeWinners = null;
 
-await apiPost('noticeboard', {
-society_id: sid, event_id: eid,
-post_type: 'result', published: true,
-extra_data: JSON.stringify({ topPlayers: topPlayers, extraPrizes: extraWinners })
-});
+var existingCheck = await fetch(SUPABASE_URL + '/rest/v1/noticeboard?event_id=eq.' + eid + '&select=id', { headers: apiHeaders() });
+var existingPosts = existingCheck.ok ? await existingCheck.json() : [];
+if (existingPosts.length) {
+  var ph = apiHeaders(); ph['Prefer'] = 'return=minimal';
+  await fetch(SUPABASE_URL + '/rest/v1/noticeboard?event_id=eq.' + eid, {
+    method: 'PATCH', headers: ph,
+    body: JSON.stringify({ extra_data: JSON.stringify({ topPlayers: topPlayers, extraPrizes: extraWinners }), published: true })
+  });
+  db.noticeboard = db.noticeboard.filter(function(p){ return p.event_id !== eid; });
+} else {
+  await apiPost('noticeboard', {
+    society_id: sid, event_id: eid,
+    post_type: 'result', published: true,
+    extra_data: JSON.stringify({ topPlayers: topPlayers, extraPrizes: extraWinners })
+  });
+}
 
 await loadAll();
 renderAll();
