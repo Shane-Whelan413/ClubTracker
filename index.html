@@ -1137,15 +1137,15 @@ return '<div style="display:flex;padding:5px 0;border-bottom:0.5px solid var(--b
 '<div style="flex:1;font-size:11px;color:var(--text-3)">'+pr+'</div>' +
 '<div style="font-size:12px;font-weight:600;color:var(--accent-dark)">'+prizes[pr]+'</div></div>';
 }).join('');
-      var shareLines = top.map(function(p,i){return medals[i]+' '+p.name+' - '+p.pts+' pts';}).join('\\n');
-      Object.keys(prizes).forEach(function(pr){shareLines += '\\n'+pr+': '+prizes[pr];});
-      var shareText = encodeURIComponent('\u26f3 '+(ev?ev.course_name:'Golf')+' Results\n\n'+shareLines+'\n\nPosted via GolfSoc');
+      var shareLines = top.map(function(p,i){return medals[i]+' '+p.name+' - '+p.pts+' pts';}).join('\n');
+      Object.keys(prizes).forEach(function(pr){shareLines += '\n'+pr+': '+prizes[pr];});
+      
       // Build share text cleanly
       var shareParts = ['⛳ '+(ev?ev.course_name:'Golf')+' Results', ''];
       top.forEach(function(p,i){ shareParts.push(medals[i]+' '+p.name+' - '+p.pts+' pts'); });
       Object.keys(prizes).forEach(function(pr){ shareParts.push(''); shareParts.push(pr+': '+prizes[pr]); });
       shareParts.push(''); shareParts.push('Posted via GolfSoc');
-      var shareMsg = shareParts.join('\\n');
+      var shareMsg = shareParts.join('\n');
       var postId = post.id || ev && ev.id || '';
       // Store share text globally indexed by post
       window._shareTexts = window._shareTexts || {};
@@ -1259,9 +1259,6 @@ el.innerHTML = adminBtn + '<div class="empty"><div class="empty-icon">&#128197;<
 return;
 }
 function evRow(ev, isPast) {
-var p = ev.event_date.split('-');
-var isOuting = ev.event_type === 'outing_18';
-    return '<div class="event-card" style="'+(isPast?'opacity:0.6':'')+'"><div style="display:flex;align-items:center;gap:12px;padding:12px 14px"><div class="ev-date"><div class="ev-day">'+parseInt(p[2])+'</div><div class="ev-month">'+mo[parseInt(p[1])-1]+'</div></div><div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(ev.course_name||'TBD')+'</div><div style="font-size:11px;color:var(--text-3);margin-top:2px">'+(isOuting?'Outing - 18 holes':'Sunday - 9 holes')+(ev.published?' - Results posted':'')+'</div></div></div></div>';
     var today = new Date().toISOString().slice(0,10);
     var evDate = ev.event_date;
     // Show handicap breakdown in the week of the event (3 days before to 3 days after)
@@ -1287,7 +1284,7 @@ var isOuting = ev.event_type === 'outing_18';
     }
     var actionBtn = '';
     if (ev.published) {
-      actionBtn = '<button onclick="openEventResults(\''+ev.id+'\')" style="margin:0 14px 10px;width:calc(100% - 28px);padding:8px;border-radius:var(--radius);border:none;background:var(--primary);color:var(--accent);font-size:12px;font-weight:700;cursor:pointer;font-family:DM Sans,sans-serif">View results</button>';
+      actionBtn = '<button onclick="openEventResults(\''+ev.id+'\')" style="margin:0 14px 10px;width:calc(100% - 28px);padding:8px;border-radius:var(--radius);border:none;background:var(--primary);color:var(--accent);font-size:12px;font-weight:700;cursor:pointer;font-family:DM Sans,sans-serif">&#9654; View results</button>';
     }
     return '<div class="event-card" style="'+(isPast?'opacity:0.7':'')+'">' +
       '<div style="display:flex;align-items:center;gap:12px;padding:12px 14px">' +
@@ -1332,7 +1329,7 @@ function openEventResults(eid) {
     shareParts.push(medals[i]+' '+(pl?pl.name:'?')+' - '+r.stableford_points+' pts');
   });
   shareParts.push(''); shareParts.push('Posted via GolfSoc');
-  var shareMsg = shareParts.join('\\n');
+  var shareMsg = shareParts.join('\n');
 
   openModal(ev.course_name+' — '+fmtDate(ev.event_date),
     '<div style="padding:4px 0">'+rows+'</div>' +
