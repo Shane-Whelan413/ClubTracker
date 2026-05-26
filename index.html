@@ -267,11 +267,11 @@ transition: opacity 0.4s;
 input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; background: none; }
 
 /* ── Modal ── */
-#modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 300; display: none; align-items: flex-end; }
+#modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 300; display: none; align-items: center; justify-content: center; padding: 16px; }
 #modal-overlay.open { display: flex; }
-.modal { background: var(--surface); border-radius: 20px 20px 0 0; width: 100%; max-height: 88vh; display: flex; flex-direction: column; animation: slideUp 0.25s cubic-bezier(0.34,1.1,0.64,1); }
+.modal { background: var(--surface); border-radius: 20px; width: 100%; max-width: 520px; max-height: 88vh; display: flex; flex-direction: column; animation: slideUp 0.25s cubic-bezier(0.34,1.1,0.64,1); }
 @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-.modal-handle { width: 36px; height: 4px; background: var(--border-strong); border-radius: 99px; margin: 10px auto 0; flex-shrink: 0; }
+.modal-handle { display: none; }
 .modal-header { padding: 14px 20px 12px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); flex-shrink: 0; }
 .modal-title { font-size: 16px; font-weight: 700; color: var(--text); }
 .modal-close { background: var(--bg); border: none; border-radius: 99px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; color: var(--text-3); }
@@ -2619,9 +2619,11 @@ document.getElementById('modal-body').innerHTML =
 '</div>' +
 liveBoard +
 rows +
-(verifiedCount > 0 ?
-'<button onclick="publishEvent(\''+eid+'\')" class="btn accent full" style="margin-top:14px">&#10003; Publish results</button>' : '') +
-'<button onclick="openEventsModal()" class="btn full" style="margin-top:8px">&#8592; Back to events</button>';
+'<div style="display:flex;gap:8px;margin-top:14px">' +
+'<button onclick="openEventsModal()" class="btn" style="padding:12px 16px">&#8592; Back</button>' +
+'<button onclick="verifyAllScores(\''+eid+'\')" class="btn primary" style="flex:1;padding:12px">Verify all players</button>' +
+(verifiedCount > 0 ? '<button onclick="openReviewPublish(\''+eid+'\')" class="btn accent" style="flex:1;padding:12px">Review &amp; Publish</button>' : '') +
+'</div>';
 document.getElementById('modal-overlay').classList.add('open');
 }
 
@@ -2799,8 +2801,7 @@ submitWarning +
 (h < holes-1 ?
 '<button onclick="nextHole()" class="btn primary" style="flex:1;padding:13px;font-size:15px;font-weight:700">Next &#8594;</button>' :
 '<div style="flex:1;display:flex;gap:8px">' +
-'<button onclick="savePlayerScore(\''+se.eid+'\',\''+se.pid+'\')" class="btn primary" style="flex:1;padding:13px;font-size:14px'+(canSubmit?'':';opacity:0.5;cursor:not-allowed')+'">Save</button>' +
-'<button onclick="'+(canSubmit?'savePlayerScore(\''+se.eid+'\',\''+se.pid+'\',true)':'toast(\'Enter all '+holes+' holes first\',\'error\')')+'" class="btn accent" style="flex:1;padding:13px;font-size:13px;font-weight:700'+(canSubmit?'':';opacity:0.5')+'">'+(canSubmit?'&#10003; Verify':'&#9940; '+missingHoles.length+' missing')+'</button>' +
+'<button onclick="'+(canSubmit?'savePlayerScore(\''+se.eid+'\',\''+se.pid+'\')':'toast(\'Enter all '+holes+' holes first\',\'error\')')+'" class="btn accent" style="flex:1;padding:13px;font-size:14px;font-weight:700'+(canSubmit?'':';opacity:0.5;cursor:not-allowed')+'">'+( canSubmit?'&#10003; Save score':'&#9940; '+missingHoles.length+' missing')+'</button>' +
 '</div>'
 ) +
 '</div>' +
@@ -2837,7 +2838,23 @@ return;
 renderScoreHole(se.currentHole + 1);
 }
 
-async function savePlayerScore(eid, pid, verify) {
+async function verifyAllScores(eid) {
+  var unverified = db.rounds.filter(function(r){ return r.event_id === eid && !r.verified; });
+  if (!unverified.length) { toast('All scores already verified', 'success'); openScoreEntry(eid); return; }
+  if (!confirm('Verify all ' + unverified.length + ' entered scores?')) return;
+  try {
+    var h = apiHeaders(); h['Prefer'] = 'return=minimal';
+    await fetch(SUPABASE_URL + '/rest/v1/rounds?event_id=eq.' + eid + '&verified=eq.false', {
+      method: 'PATCH', headers: h,
+      body: JSON.stringify({ verified: true })
+    });
+    db.rounds.forEach(function(r){ if (r.event_id === eid) r.verified = true; });
+    toast('All scores verified', 'success');
+    openScoreEntry(eid);
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function savePlayerScore(eid, pid) {
 var se = window._scoreEntry;
 var ev = db.events.filter(function(e){ return e.id === eid; })[0];
 var player = db.players.filter(function(p){ return p.id === pid; })[0];
@@ -2871,7 +2888,7 @@ hole_scores: scores, par_values: pars,
 stableford_points: totalPts, gross_score: totalGross,
 course_handicap: courseHcp,
 handicap_before: parseFloat(player.handicap_index||0),
-verified: verify ? true : false
+verified: false
 };
 
 try {
@@ -3068,9 +3085,7 @@ return '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;bord
 }).join('');
 
 var hasExtras = s.extra_prizes_enabled;
-var nextBtn = hasExtras
-? '<button onclick="openExtraPrizes(\''+eid+'\')" class="btn accent full" style="margin-top:14px">Next: Extra prizes &#8594;</button>'
-: '<button onclick="verifyAllAndPublish(\''+eid+'\')" class="btn accent full" style="margin-top:14px">&#10003; Verify all &amp; publish</button>';
+var nextBtn = '<button onclick="openExtraPrizes(\''+eid+'\')" class="btn accent full" style="margin-top:14px">Next: Honours &amp; prizes &#8594;</button>';
 
 document.getElementById('modal-title').textContent = 'Review results';
 document.getElementById('modal-body').innerHTML =
@@ -3087,41 +3102,73 @@ document.getElementById('modal-overlay').classList.add('open');
 
 function openExtraPrizes(eid) {
 var s = societySettings || {};
-var prizes = s.extra_prizes || [];
-var playerOpts = db.players.map(function(p){
-return '<option value="'+p.id+'">'+p.name+'</option>';
+var ev = db.events.filter(function(e){ return e.id === eid; })[0];
+var holes = ev ? (ev.holes || 9) : 9;
+var configuredPrizes = s.extra_prizes || [];
+var playerOpts = '<option value="">— None —</option>' + db.players.map(function(p){
+  return '<option value="'+p.id+'">'+p.name+'</option>';
 }).join('');
 
-var prizeFields = prizes.map(function(prize, i) {
-return '<div style="background:var(--bg);border-radius:var(--radius);padding:12px;margin-bottom:8px">' +
-'<div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px">'+prize+'</div>' +
-'<select id="ep-'+i+'" style="width:100%;padding:10px;border-radius:var(--radius);border:1px solid var(--border-strong);background:var(--surface);font-size:13px;font-family:DM Sans,sans-serif">' +
-'<option value="">— Select winner —</option>' + playerOpts +
-'</select>' +
-'</div>';
+// Always show front/back 9 for 18 hole events, closest to pin, long drive + any configured extras
+var standardPrizes = [];
+if (holes === 18) {
+  standardPrizes.push({ id: 'front9', label: 'Best front 9' });
+  standardPrizes.push({ id: 'back9', label: 'Best back 9' });
+}
+standardPrizes.push({ id: 'closest', label: 'Closest to pin' });
+standardPrizes.push({ id: 'longdrive', label: 'Long drive' });
+standardPrizes.push({ id: 'bestgross', label: 'Best gross' });
+configuredPrizes.forEach(function(p){ standardPrizes.push({ id: 'custom_'+p, label: p }); });
+
+// Restore any previously set winners
+var prev = window._extraPrizeWinners || {};
+var prevById = window._extraPrizeWinnersById || {};
+
+var prizeFields = standardPrizes.map(function(prize) {
+  var prevVal = prevById[prize.id] || '';
+  return '<div style="background:var(--bg);border-radius:var(--radius);padding:12px;margin-bottom:8px">' +
+    '<div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px">'+prize.label+'</div>' +
+    '<select id="ep-'+prize.id+'" style="width:100%;padding:10px;border-radius:var(--radius);border:1px solid var(--border-strong);background:var(--surface);font-size:13px;font-family:DM Sans,sans-serif">' +
+    playerOpts.replace('value="'+prevVal+'"', 'value="'+prevVal+'" selected') +
+    '</select>' +
+    '</div>';
 }).join('');
 
-document.getElementById('modal-title').textContent = 'Extra prizes';
+document.getElementById('modal-title').textContent = 'Honours & prizes';
 document.getElementById('modal-body').innerHTML =
-'<p style="font-size:13px;color:var(--text-2);margin-bottom:14px">Select the winner for each extra prize. These will appear on the result post.</p>' +
-prizeFields +
-'<button onclick="saveExtraPrizesAndPublish(\''+eid+'\')" class="btn accent full" style="margin-top:14px">&#10003; Save &amp; publish</button>' +
-'<button onclick="openReviewPublish(\''+eid+'\')" class="btn full" style="margin-top:8px">&#8592; Back</button>';
+  '<p style="font-size:13px;color:var(--text-2);margin-bottom:14px">Assign winners for each prize. Leave blank to skip. These appear on the result post.</p>' +
+  prizeFields +
+  '<button onclick="saveExtraPrizesAndPublish(\''+eid+'\')" class="btn accent full" style="margin-top:14px">&#10003; Save &amp; publish</button>' +
+  '<button onclick="openReviewPublish(\''+eid+'\')" class="btn full" style="margin-top:8px">&#8592; Back</button>';
 document.getElementById('modal-overlay').classList.add('open');
 }
 
 async function saveExtraPrizesAndPublish(eid) {
 var s = societySettings || {};
-var prizes = s.extra_prizes || [];
-var winners = {};
-prizes.forEach(function(prize, i) {
-var sel = document.getElementById('ep-'+i);
-if (sel && sel.value) {
-var p = db.players.filter(function(x){ return x.id === sel.value; })[0];
-if (p) winners[prize] = p.name;
+var ev = db.events.filter(function(e){ return e.id === eid; })[0];
+var holes = ev ? (ev.holes || 9) : 9;
+var configuredPrizes = s.extra_prizes || [];
+var standardPrizes = [];
+if (holes === 18) {
+  standardPrizes.push({ id: 'front9', label: 'Best front 9' });
+  standardPrizes.push({ id: 'back9', label: 'Best back 9' });
 }
+standardPrizes.push({ id: 'closest', label: 'Closest to pin' });
+standardPrizes.push({ id: 'longdrive', label: 'Long drive' });
+standardPrizes.push({ id: 'bestgross', label: 'Best gross' });
+configuredPrizes.forEach(function(p){ standardPrizes.push({ id: 'custom_'+p, label: p }); });
+
+var winners = {};
+var winnersById = {};
+standardPrizes.forEach(function(prize) {
+  var sel = document.getElementById('ep-'+prize.id);
+  if (sel && sel.value) {
+    var p = db.players.filter(function(x){ return x.id === sel.value; })[0];
+    if (p) { winners[prize.label] = p.name; winnersById[prize.id] = sel.value; }
+  }
 });
 window._extraPrizeWinners = winners;
+window._extraPrizeWinnersById = winnersById;
 await verifyAllAndPublish(eid);
 }
 
