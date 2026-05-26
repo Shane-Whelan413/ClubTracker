@@ -1,56 +1,35 @@
-// GolfSoc Service Worker
-// iOS PWA: never cache HTML, always fetch fresh
-const VERSION = 'v1.0.5';
-const CACHE = 'golfsoc-assets-' + VERSION;
+const CACHE_VERSION = 'golfsoc-v1.0.7';
 
-self.addEventListener('install', function(e) {
+self.addEventListener('install', e => {
   self.skipWaiting();
 });
 
-self.addEventListener('activate', function(e) {
+self.addEventListener('activate', e => {
   e.waitUntil(
-    caches.keys().then(function(keys) {
-      return Promise.all(
-        keys.filter(function(k) { return k !== CACHE; }).map(function(k) {
-          return caches.delete(k);
-        })
-      );
-    }).then(function() {
-      return self.clients.claim();
-    })
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== CACHE_VERSION).map(k => caches.delete(k)))
+    ).then(() => clients.claim())
   );
 });
 
-self.addEventListener('fetch', function(e) {
-  var url = e.request.url;
-
-  // NEVER cache HTML or navigation requests - always go to network
-  if (e.request.mode === 'navigate' ||
-      url.endsWith('.html') ||
-      url.endsWith('/') ||
-      url.indexOf('index') > -1) {
-    e.respondWith(
-      fetch(e.request, { cache: 'no-store' }).catch(function() {
-        return caches.match(e.request);
-      })
-    );
+self.addEventListener('fetch', e => {
+  // Never cache HTML — always fetch fresh
+  if (e.request.mode === 'navigate') {
+    e.respondWith(fetch(e.request, { cache: 'no-store' }));
     return;
   }
-
   // Cache fonts only
-  if (url.indexOf('fonts.googleapis.com') > -1 || url.indexOf('fonts.gstatic.com') > -1) {
+  if (e.request.url.includes('fonts.googleapis') || e.request.url.includes('fonts.gstatic')) {
     e.respondWith(
-      caches.match(e.request).then(function(cached) {
-        return cached || fetch(e.request).then(function(response) {
-          var clone = response.clone();
-          caches.open(CACHE).then(function(c) { c.put(e.request, clone); });
-          return response;
-        });
-      })
+      caches.open(CACHE_VERSION).then(cache =>
+        cache.match(e.request).then(r => r || fetch(e.request).then(res => { cache.put(e.request, res.clone()); return res; }))
+      )
     );
     return;
   }
-
-  // Everything else - network only
   e.respondWith(fetch(e.request));
+});
+
+self.addEventListener('message', e => {
+  if (e.data === 'skipWaiting') self.skipWaiting();
 });
