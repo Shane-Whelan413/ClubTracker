@@ -2,6 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" id="theme-color-meta" content="#0a1628">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -979,6 +982,14 @@ renderProfile();
 if (currentUser && currentUser.user_metadata && currentUser.user_metadata.role === 'admin') renderSettings();
 }
 
+function toggleMoreResults(btn) {
+  var m = document.getElementById('more-results');
+  if (!m) return;
+  var isOpen = m.style.display !== 'none';
+  m.style.display = isOpen ? 'none' : 'block';
+  btn.textContent = isOpen ? 'See more results' : 'See less';
+}
+
 function buildResultCard(post) {
   var ev = db.events.filter(function(e){ return e.id === post.event_id; })[0];
   var extra = {}; try { extra = post.extra_data ? (typeof post.extra_data==='string'?JSON.parse(post.extra_data):post.extra_data) : {}; } catch(e2){}
@@ -1020,139 +1031,177 @@ function buildResultCard(post) {
 }
 
 function renderHome() {
-var feed = document.getElementById('home-feed');
-var pid = currentUser ? currentUser.id : null;
-var player = db.players.filter(function(p){ return p.user_id === pid || (currentUser && currentUser.isMemberSession && p.id === pid); })[0];
-var isAdmin = currentUser && currentUser.user_metadata && currentUser.user_metadata.role === 'admin';
-var pubEids = new Set(db.events.filter(function(e){ return e.published; }).map(function(e){ return e.id; }));
+  var feed = document.getElementById('home-feed');
+  var pid = currentUser ? currentUser.id : null;
+  var player = db.players.filter(function(p){ return p.user_id === pid || (currentUser && currentUser.isMemberSession && p.id === pid); })[0];
+  var isAdmin = currentUser && currentUser.user_metadata && currentUser.user_metadata.role === 'admin';
+  var pubEids = new Set(db.events.filter(function(e){ return e.published; }).map(function(e){ return e.id; }));
+  var today = new Date().toISOString().slice(0,10);
 
-// ── Admin pending approvals card ──
-var pendingCard = '';
-if (isAdmin) {
-var pendingMembers = db.players.filter(function(p){ return p.status === 'pending'; });
-if (pendingMembers.length) {
-pendingCard = '<div style="background:#fff3cd;border:2px solid #ffc107;border-radius:var(--radius-lg);padding:14px 16px;margin-bottom:10px">' +
-'<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">' +
-'<div style="font-size:22px">&#128276;</div>' +
-'<div><div style="font-size:14px;font-weight:700;color:#856404">'+pendingMembers.length+' member'+(pendingMembers.length>1?'s':'')+' awaiting approval</div>' +
-'<div style="font-size:11px;color:#856404;margin-top:2px">Tap to review and assign PINs</div></div>' +
-'</div>' +
-pendingMembers.map(function(p){
-return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-top:0.5px solid #ffc107">' +
-'<div style="flex:1"><div style="font-size:13px;font-weight:600;color:#1a1510">'+p.name+'</div>' +
-'<div style="font-size:11px;color:#856404">'+p.mobile+'</div></div>' +
-'<button onclick="approveMember(\''+p.id+'\')" style="background:#28a745;border:none;border-radius:8px;padding:6px 12px;color:white;font-size:12px;font-weight:700;cursor:pointer">Approve</button>' +
-'<button onclick="rejectMember(\''+p.id+'\')" style="background:#dc3545;border:none;border-radius:8px;padding:6px 12px;color:white;font-size:12px;font-weight:700;cursor:pointer">Reject</button>' +
-'</div>';
-}).join('') +
-'</div>';
-}
-}
-var adminCard = '';
-// Set up invite share text for settings
-if (isAdmin && societySettings && societySettings.invite_code) {
-var code = societySettings.invite_code;
-var appUrl = window.location.origin + window.location.pathname + '?invite=' + code;
-window._inviteShareText = 'Join our golf society app!\n\nTap to join: ' + appUrl + '\n\nOr use invite code: ' + code;
-}
-if (isAdmin) {
-var today = new Date().toISOString().slice(0,10);
-var sevenDaysAgo = new Date(Date.now() - 7*86400000).toISOString().slice(0,10);
-// Events in last 7 days or today that aren't published yet
-var needsScores = db.events.filter(function(e){
-return !e.published && e.event_date <= today && e.event_date >= sevenDaysAgo;
-}).sort(function(a,b){ return b.event_date.localeCompare(a.event_date); });
+  // ── Set up invite share text ──
+  if (isAdmin && societySettings && societySettings.invite_code) {
+    var code = societySettings.invite_code;
+    var appUrl = window.location.origin + window.location.pathname + '?invite=' + code;
+    window._inviteShareText = 'Join our golf society app!\n\nTap to join: ' + appUrl + '\n\nOr use invite code: ' + code;
+  }
 
-if (needsScores.length) {
-adminCard = needsScores.map(function(ev) {
-var verifiedCount = db.rounds.filter(function(r){ return r.event_id===ev.id && r.verified; }).length;
-var totalCount = db.rounds.filter(function(r){ return r.event_id===ev.id; }).length;
-var statusText = verifiedCount > 0 ? verifiedCount+' verified, '+totalCount+' entered' : 'No scores yet';
-var isReady = verifiedCount > 0;
-return '<div style="background:var(--accent-light);border:2px solid var(--accent);border-radius:var(--radius-lg);padding:14px 16px;margin-bottom:10px">' +
-'<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">' +
-'<div style="width:36px;height:36px;border-radius:50%;background:var(--accent);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">&#9998;</div>' +
-'<div style="flex:1"><div style="font-size:14px;font-weight:700;color:var(--primary)">'+(ev.course_name||'Event')+'</div>' +
-'<div style="font-size:11px;color:var(--accent-dark);margin-top:2px">'+fmtDate(ev.event_date)+' &middot; '+statusText+'</div></div>' +
-'</div>' +
-'<div style="display:flex;gap:8px">' +
-'<button onclick="openScoreEntry(\''+ev.id+'\')" class="btn primary" style="flex:1;padding:10px">Enter scores</button>' +
-(isReady ? '<button onclick="publishEvent(\''+ev.id+'\')" class="btn accent" style="flex:1;padding:10px">&#10003; Publish</button>' : '') +
-'</div>' +
-'</div>';
-}).join('');
-}
-}
-var statsBar = '';
-// Member score entry card — show when there's an active event and member can enter
-if (currentUser && currentUser.isMemberSession) {
-  var activeEvts = db.events.filter(function(e){ return !e.published; })
-    .sort(function(a,b){ return a.event_date.localeCompare(b.event_date); });
-  if (activeEvts.length) {
-    var activeEv = activeEvts[0];
-    var me = getMemberPlayer();
-    var myRound = me ? db.rounds.filter(function(r){ return r.event_id === activeEv.id && r.player_id === me.id; })[0] : null;
-    var isSubAdmin = canCurrentUserEnterScores();
-    var btnLabel = myRound && myRound.verified ? 'Score verified ✓' : myRound ? 'Edit my score' : isSubAdmin ? 'Enter scores' : 'Enter my score';
-    var btnDisabled = (myRound && myRound.verified && !isSubAdmin) ? 'disabled style="opacity:0.5;cursor:not-allowed"' : 'onclick="openMemberScoreEntry()"';
-    if (!myRound || !myRound.verified || isSubAdmin) {
-      adminCard = '<div style="background:var(--primary);border-radius:var(--radius-lg);padding:14px 16px;margin-bottom:10px">' +
-        '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--accent);margin-bottom:6px">This week</div>' +
-        '<div style="font-size:15px;font-weight:700;color:white;margin-bottom:12px">'+(activeEv.course_name||'Event')+' &middot; '+fmtDate(activeEv.event_date)+'</div>' +
-        '<button onclick="openMemberScoreEntry()" class="btn accent full" style="padding:12px;font-size:14px;font-weight:700">'+btnLabel+'</button>' +
-        '</div>' + adminCard;
+  // ── 1. PENDING APPROVALS ──
+  var pendingCard = '';
+  if (isAdmin) {
+    var pendingMembers = db.players.filter(function(p){ return p.status === 'pending'; });
+    if (pendingMembers.length) {
+      pendingCard =
+        '<div style="background:#fff3cd;border:2px solid #ffc107;border-radius:var(--radius-lg);padding:14px 16px;margin-bottom:12px">' +
+        '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">' +
+        '<div style="width:36px;height:36px;border-radius:50%;background:#ffc107;color:#856404;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">&#128276;</div>' +
+        '<div><div style="font-size:14px;font-weight:700;color:#856404">'+pendingMembers.length+' member'+(pendingMembers.length>1?'s':'')+' awaiting approval</div>' +
+        '<div style="font-size:11px;color:#856404;opacity:0.8;margin-top:2px">Assign a PIN to give them access</div></div></div>' +
+        pendingMembers.map(function(p){
+          return '<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid rgba(255,193,7,0.4)">' +
+            '<div style="flex:1"><div style="font-size:13px;font-weight:600;color:#1a1510">'+p.name+'</div>' +
+            '<div style="font-size:11px;color:#856404">'+p.mobile+'</div></div>' +
+            '<button onclick="approveMember(\''+p.id+'\')" style="background:#1a3320;border:none;border-radius:8px;padding:7px 14px;color:#C9A84C;font-size:12px;font-weight:700;cursor:pointer">Approve</button>' +
+            '<button onclick="rejectMember(\''+p.id+'\')" style="background:none;border:1px solid rgba(220,53,69,0.4);border-radius:8px;padding:7px 10px;color:#dc3545;font-size:12px;font-weight:700;cursor:pointer">Reject</button>' +
+            '</div>';
+        }).join('') +
+        '</div>';
     }
   }
-}
-if (player) {
-var sorted = db.players.map(function(p) {
-return { id: p.id, pts: db.rounds.filter(function(r){ return r.player_id === p.id && r.verified && pubEids.has(r.event_id); }).reduce(function(s,r){ return s + (r.league_points||0); }, 0) };
-}).sort(function(a,b){ return b.pts - a.pts; });
-var myIdx = sorted.findIndex(function(p){ return p.id === player.id; });
-var myPos = myIdx + 1;
-var myPts = sorted[myIdx] ? sorted[myIdx].pts : 0;
-var myRounds = db.rounds.filter(function(r){ return r.player_id === player.id && r.verified && pubEids.has(r.event_id); }).length;
-var posLabel = myPos===1?'1st':myPos===2?'2nd':myPos===3?'3rd':myPos>0?myPos+'th':'--';
-var rankCls = myPos===1?'rank-1':myPos===2?'rank-2':myPos===3?'rank-3':'';
-statsBar = '<div class="stat-grid"><div class="stat-tile '+rankCls+'"><div class="stat-label">Rank</div><div class="stat-val">'+posLabel+'</div></div><div class="stat-tile"><div class="stat-label">Pts</div><div class="stat-val">'+myPts+'</div></div><div class="stat-tile"><div class="stat-label">Hcp</div><div class="stat-val">'+parseFloat(player.handicap_index||0).toFixed(1)+'</div></div><div class="stat-tile"><div class="stat-label">Rounds</div><div class="stat-val">'+myRounds+'</div></div></div>';
-}
-var today = new Date().toISOString().slice(0,10);
-var upcoming = db.events.filter(function(e){ return e.event_date > today; }).sort(function(a,b){ return a.event_date.localeCompare(b.event_date); });
-var next = upcoming[0];
-var countdown = '';
-if (next) {
-var parts = next.event_date.split('-').map(Number);
-var diff = Math.round((new Date(parts[0],parts[1]-1,parts[2]) - new Date(new Date().toDateString())) / 86400000);
-var label = diff===0?'Today!':diff===1?'Tomorrow':diff+' days';
-countdown = '<div style="background:var(--primary);border-radius:var(--radius-lg);padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;position:relative;overflow:hidden"><div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent-dark),var(--accent),var(--accent),var(--accent-dark))"></div><div><div style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px">Next event</div><div style="font-size:15px;font-weight:600;color:white">'+(next.course_name||fmtDate(next.event_date))+'</div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px">'+fmtDate(next.event_date)+'</div></div><div style="background:var(--accent);color:var(--primary);font-size:14px;font-weight:800;padding:7px 16px;border-radius:99px;flex-shrink:0">'+label+'</div></div>';
-}
-var previewOn = !societySettings || societySettings.show_preview !== false;
-var noResults = !db.noticeboard.length && !db.rounds.filter(function(r){return r.verified;}).length;
-var result = '';
-if (db.noticeboard.length) {
-var visiblePosts = db.noticeboard.slice(0,2);
-var hiddenPosts = db.noticeboard.slice(2);
-result = visiblePosts.map(function(post) { return buildResultCard(post); }).join('');
-(hiddenPosts.length ?
-'<div id="more-results" style="display:none">' + hiddenPosts.map(function(post){ return buildResultCard(post); }).join('') + '</div>' +
-'<button onclick="var m=document.getElementById(this.dataset.t);m.style.display=m.style.display===\'none\'?\'block\':\'none\';this.textContent=m.style.display===\'none\'?\'See more results\':\'See less\'" data-t="more-results" id="see-more-btn" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);font-size:13px;font-weight:600;color:var(--text-2);cursor:pointer;margin-top:4px;font-family:DM Sans,sans-serif">See more results</button>'
-: '');
-} else if (noResults && previewOn) {
-result = '<div style="background:white;border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden">' +
-'<div style="background:var(--primary);padding:14px 16px;position:relative"><div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent-dark),var(--accent),var(--accent),var(--accent-dark))"></div>' +
-'<div style="font-size:16px;font-weight:600;color:white">Example Result Card</div>' +
-'<div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px">This is how results appear after each event</div></div>' +
-'<div style="padding:4px 16px 0">' +
-'<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border)"><div style="width:26px;height:26px;border-radius:50%;background:#B8860B;color:white;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center">1st</div><div style="flex:1;font-size:13px;font-weight:600;color:var(--text)">Jamie Murphy</div><div style="font-size:15px;font-weight:800;color:#B8860B">34 pts</div></div>' +
-'<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border)"><div style="width:26px;height:26px;border-radius:50%;background:#888;color:white;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center">2nd</div><div style="flex:1;font-size:13px;color:var(--text)">Ciara Walsh</div><div style="font-size:15px;font-weight:800;color:#666">31 pts</div></div>' +
-'<div style="display:flex;align-items:center;gap:10px;padding:10px 0"><div style="width:26px;height:26px;border-radius:50%;background:#8B4513;color:white;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center">3rd</div><div style="flex:1;font-size:13px;color:var(--text)">Declan Byrne</div><div style="font-size:15px;font-weight:800;color:#8B4513">29 pts</div></div>' +
-'</div><div style="padding:10px 16px;border-top:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between">' +
-'<div style="font-size:11px;color:var(--text-3)">Add players and events to get started</div>' +
-'<button onclick="showTab(\'settings\')" class="btn sm accent">Settings</button></div></div>';
-} else {
-result = '<div class="empty"><div class="empty-icon">&#9971;</div><div class="empty-title">No results yet</div><div class="empty-sub">Results appear here after your first event</div></div>';
-}
-feed.innerHTML = pendingCard + adminCard + statsBar + countdown + result;
+
+  // ── 2. ADMIN ACTION CARD (events needing scores) ──
+  var adminCard = '';
+  if (isAdmin) {
+    var sevenDaysAgo = new Date(Date.now() - 7*86400000).toISOString().slice(0,10);
+    var needsScores = db.events.filter(function(e){
+      return !e.published && e.event_date <= today && e.event_date >= sevenDaysAgo;
+    }).sort(function(a,b){ return b.event_date.localeCompare(a.event_date); });
+    if (needsScores.length) {
+      adminCard = needsScores.map(function(ev) {
+        var verifiedCount = db.rounds.filter(function(r){ return r.event_id===ev.id && r.verified; }).length;
+        var totalCount = db.rounds.filter(function(r){ return r.event_id===ev.id; }).length;
+        var statusText = totalCount > 0 ? verifiedCount+' verified &middot; '+totalCount+' entered' : 'No scores entered yet';
+        var isReady = verifiedCount > 0;
+        return '<div style="background:var(--primary);border-radius:var(--radius-lg);padding:14px 16px;margin-bottom:12px;position:relative;overflow:hidden">' +
+          '<div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent-dark),var(--accent),var(--accent-dark))"></div>' +
+          '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">' +
+          '<div style="width:38px;height:38px;border-radius:10px;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.3);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">&#9968;</div>' +
+          '<div style="flex:1"><div style="font-size:15px;font-weight:700;color:white">'+(ev.course_name||'Event')+'</div>' +
+          '<div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:2px">'+fmtDate(ev.event_date)+' &middot; '+statusText+'</div></div></div>' +
+          '<div style="display:flex;gap:8px">' +
+          '<button onclick="openScoreEntry(\''+ev.id+'\')" style="flex:1;padding:11px;border-radius:var(--radius);border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:white;font-size:13px;font-weight:700;cursor:pointer;font-family:DM Sans,sans-serif">Enter scores</button>' +
+          (isReady ? '<button onclick="openReviewPublish(\''+ev.id+'\')" style="flex:1;padding:11px;border-radius:var(--radius);border:none;background:var(--accent);color:var(--primary);font-size:13px;font-weight:700;cursor:pointer;font-family:DM Sans,sans-serif">Review &amp; Publish</button>' : '') +
+          '</div></div>';
+      }).join('');
+    }
+  }
+
+  // ── 3. MEMBER SCORE ENTRY CARD ──
+  var memberCard = '';
+  if (currentUser && currentUser.isMemberSession) {
+    var activeEvts = db.events.filter(function(e){ return !e.published; })
+      .sort(function(a,b){ return a.event_date.localeCompare(b.event_date); });
+    if (activeEvts.length) {
+      var activeEv = activeEvts[0];
+      var me = getMemberPlayer();
+      var myRound = me ? db.rounds.filter(function(r){ return r.event_id===activeEv.id && r.player_id===me.id; })[0] : null;
+      var isSubAdmin = canCurrentUserEnterScores();
+      var btnLabel = myRound && myRound.verified ? 'Score verified ✓' : myRound ? 'Edit my score' : isSubAdmin ? 'Enter scores' : 'Enter my score';
+      var btnDisabled = (myRound && myRound.verified && !isSubAdmin);
+      memberCard =
+        '<div style="background:var(--primary);border-radius:var(--radius-lg);padding:14px 16px;margin-bottom:12px;position:relative;overflow:hidden">' +
+        '<div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent-dark),var(--accent),var(--accent-dark))"></div>' +
+        '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin-bottom:6px">This week</div>' +
+        '<div style="font-size:15px;font-weight:700;color:white;margin-bottom:12px">'+(activeEv.course_name||'Event')+' &middot; '+fmtDate(activeEv.event_date)+'</div>' +
+        '<button '+(btnDisabled?'disabled style="opacity:0.5;cursor:not-allowed"':'onclick="openMemberScoreEntry()"')+' style="width:100%;padding:12px;border-radius:var(--radius);border:none;background:var(--accent);color:var(--primary);font-size:14px;font-weight:700;cursor:pointer;font-family:DM Sans,sans-serif">'+btnLabel+'</button>' +
+        '</div>';
+    }
+  }
+
+  // ── 4. STATS BAR ──
+  var statsBar = '';
+  if (player) {
+    var sorted = db.players.map(function(p){
+      return { id:p.id, pts:db.rounds.filter(function(r){ return r.player_id===p.id&&r.verified&&pubEids.has(r.event_id); }).reduce(function(s,r){ return s+(r.league_points||0); },0) };
+    }).sort(function(a,b){ return b.pts-a.pts; });
+    var myIdx = sorted.findIndex(function(p){ return p.id===player.id; });
+    var myPos = myIdx+1;
+    var myPts = sorted[myIdx] ? sorted[myIdx].pts : 0;
+    var myRoundsCount = db.rounds.filter(function(r){ return r.player_id===player.id&&r.verified&&pubEids.has(r.event_id); }).length;
+    var posLabel = myPos===1?'1st':myPos===2?'2nd':myPos===3?'3rd':myPos>0?myPos+'th':'--';
+    var rankCls = myPos===1?'rank-1':myPos===2?'rank-2':myPos===3?'rank-3':'';
+    statsBar =
+      '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px;margin-bottom:12px">' +
+      '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin-bottom:10px">Your season</div>' +
+      '<div class="stat-grid" style="margin:0">' +
+      '<div class="stat-tile '+rankCls+'"><div class="stat-label">Rank</div><div class="stat-val">'+posLabel+'</div></div>' +
+      '<div class="stat-tile"><div class="stat-label">Points</div><div class="stat-val">'+myPts+'</div></div>' +
+      '<div class="stat-tile"><div class="stat-label">Handicap</div><div class="stat-val">'+parseFloat(player.handicap_index||0).toFixed(1)+'</div></div>' +
+      '<div class="stat-tile"><div class="stat-label">Rounds</div><div class="stat-val">'+myRoundsCount+'</div></div>' +
+      '</div></div>';
+  }
+
+  // ── 5. NEXT EVENT COUNTDOWN ──
+  var countdown = '';
+  var upcoming = db.events.filter(function(e){ return e.event_date >= today && !e.published; })
+    .sort(function(a,b){ return a.event_date.localeCompare(b.event_date); });
+  var next = upcoming[0];
+  if (next) {
+    var parts = next.event_date.split('-').map(Number);
+    var diff = Math.round((new Date(parts[0],parts[1]-1,parts[2]) - new Date(new Date().toDateString())) / 86400000);
+    var diffLabel = diff===0?'Today!':diff===1?'Tomorrow':diff+' days';
+    countdown =
+      '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between">' +
+      '<div><div style="font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">Next event</div>' +
+      '<div style="font-size:15px;font-weight:700;color:var(--text)">'+(next.course_name||fmtDate(next.event_date))+'</div>' +
+      '<div style="font-size:12px;color:var(--text-3);margin-top:2px">'+fmtDate(next.event_date)+'</div></div>' +
+      '<div style="background:var(--primary);color:var(--accent);font-size:14px;font-weight:800;padding:8px 16px;border-radius:99px;flex-shrink:0">'+diffLabel+'</div>' +
+      '</div>';
+  }
+
+  // ── 6. RESULTS ──
+  var previewOn = !societySettings || societySettings.show_preview !== false;
+  var noResults = !db.noticeboard.length;
+  var result = '';
+
+  if (db.noticeboard.length) {
+    var allPosts = db.noticeboard.slice();
+    var visiblePosts = allPosts.slice(0,2);
+    var hiddenPosts = allPosts.slice(2);
+    var resultCards = visiblePosts.map(function(post){ return buildResultCard(post); }).join('');
+    var moreSection = '';
+    if (hiddenPosts.length) {
+      moreSection =
+        '<div id="more-results" style="display:none">' +
+        hiddenPosts.map(function(post){ return buildResultCard(post); }).join('') +
+        '</div>' +
+        '<button id="see-more-btn" onclick="toggleMoreResults(this)" style="width:100%;padding:11px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);font-size:13px;font-weight:600;color:var(--text-2);cursor:pointer;margin-top:4px;font-family:DM Sans,sans-serif">See more results</button>';
+    }
+    result =
+      '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin-bottom:8px">Recent results</div>' +
+      resultCards + moreSection;
+
+  } else if (noResults && previewOn) {
+    result =
+      '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin-bottom:8px">Recent results</div>' +
+      '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden">' +
+      '<div style="background:var(--primary);padding:14px 16px;position:relative">' +
+      '<div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent-dark),var(--accent),var(--accent-dark))"></div>' +
+      '<div style="display:flex;align-items:center;justify-content:space-between">' +
+      '<div><div style="font-size:15px;font-weight:700;color:white">Example Result Card</div>' +
+      '<div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px">This is how results appear after publishing</div></div></div></div>' +
+      '<div style="padding:6px 16px 4px">' +
+      '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:0.5px solid var(--border)"><div style="width:28px;height:28px;border-radius:50%;background:#B8860B;color:white;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">1st</div><div style="flex:1;font-size:13px;font-weight:600;color:var(--text)">Jamie Murphy</div><div style="font-size:15px;font-weight:800;color:#B8860B">34 pts</div></div>' +
+      '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:0.5px solid var(--border)"><div style="width:28px;height:28px;border-radius:50%;background:#888;color:white;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">2nd</div><div style="flex:1;font-size:13px;color:var(--text)">Ciara Walsh</div><div style="font-size:15px;font-weight:800;color:#888">31 pts</div></div>' +
+      '<div style="display:flex;align-items:center;gap:10px;padding:9px 0"><div style="width:28px;height:28px;border-radius:50%;background:#8B4513;color:white;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">3rd</div><div style="flex:1;font-size:13px;color:var(--text)">Declan Byrne</div><div style="font-size:15px;font-weight:800;color:#8B4513">29 pts</div></div>' +
+      '</div>' +
+      '<div style="padding:10px 16px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">' +
+      '<div style="font-size:11px;color:var(--text-3)">Results appear here after each event</div>' +
+      '<button onclick="showTab(\'settings\')" style="padding:6px 14px;border-radius:8px;border:none;background:var(--primary);color:var(--accent);font-size:12px;font-weight:700;cursor:pointer;font-family:DM Sans,sans-serif">Settings</button></div></div>';
+  } else {
+    result = '<div class="empty"><div class="empty-icon">&#9971;</div><div class="empty-title">No results yet</div><div class="empty-sub">Results appear here after your first event</div></div>';
+  }
+
+  feed.innerHTML = pendingCard + adminCard + memberCard + statsBar + countdown + result;
 }
 
 function renderLeaderboard() {
@@ -3290,6 +3339,15 @@ history.replaceState({}, '', location.pathname);
 }
 
 // Register service worker for PWA updates
+// Unregister any old service workers then register fresh
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(function(regs) {
+    regs.forEach(function(r) { r.unregister(); });
+  });
+  navigator.serviceWorker.addEventListener('message', function(e) {
+    if (e.data === 'reload') window.location.reload(true);
+  });
+}
 if ('serviceWorker' in navigator) {
 var swPath = location.pathname.replace(/\/[^/]*$/, '/') + 'sw.js';
 navigator.serviceWorker.register(swPath, { scope: location.pathname.replace(/\/[^/]*$/, '/') }).then(function(reg) {
