@@ -1156,7 +1156,6 @@ return '<div style="background:var(--surface);border:1px solid var(--border);bor
 '<div style="display:flex;align-items:center;justify-content:space-between">' +
 '<div><div style="font-size:14px;font-weight:700;color:white">'+(ev?ev.course_name:'Event')+'</div>' +
 '<div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:1px">'+(ev?fmtDate(ev.event_date):'')+'</div></div>' +
-            '<button onclick="window.open(\'https://wa.me/?text=\'+encodeURIComponent(shareLines)+\'\',\'_blank\')">Share</button>' +
             '<button onclick="shareResult(this.getAttribute(\'data-post\'))" data-post="'+postId+'" style="background:#25D366;border:none;border-radius:8px;padding:5px 10px;color:white;font-size:11px;font-weight:700;cursor:pointer">Share</button>' +
 '</div>' +
 '</div>' +
@@ -1225,7 +1224,7 @@ var cls = pos===1?'lb-card-gold':pos===2?'lb-card-silver':pos===3?'lb-card-bronz
 var bg = pos===1?'#B8860B':pos===2?'#888':pos===3?'#8B4513':'var(--primary)';
 var pc = pos===1?'#B8860B':pos===2?'#666':pos===3?'#8B4513':'var(--green)';
     return '<div class="lb-wrap"><div class="lb-card '+cls+'"><div style="width:34px;height:34px;border-radius:50%;background:'+bg+';color:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:700">'+lbl+'</div>'+avHtml(p,34,12)+'<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+p.name+'</div><div style="font-size:11px;color:var(--text-3)">Hcp '+parseFloat(p.handicap_index||0).toFixed(1)+'</div></div><div style="font-size:20px;font-weight:700;color:'+pc+';flex-shrink:0">'+p.pts+'<span style="font-size:11px;font-weight:400;color:var(--text-3)"> pts</span></div></div></div>';
-    return '<div class="lb-wrap" onclick="openPlayerProfile(\''+p.id+'\')"><div class="lb-card '+cls+'"><div style="width:34px;height:34px;border-radius:50%;background:'+bg+';color:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:700">'+lbl+'</div>'+avHtml(p,34,12)+'<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+p.name+'</div><div style="font-size:11px;color:var(--text-3)">Hcp '+parseFloat(p.handicap_index||0).toFixed(1)+'</div></div><div style="font-size:20px;font-weight:700;color:'+pc+';flex-shrink:0">'+p.pts+'<span style="font-size:11px;font-weight:400;color:var(--text-3)"> pts</span></div></div></div>';
+    return '<div class="lb-wrap" onclick="openPlayerProfile(\''+p.id+'\')" style="cursor:pointer"><div class="lb-card '+cls+'"><div style="width:34px;height:34px;border-radius:50%;background:'+bg+';color:white;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:700">'+lbl+'</div>'+avHtml(p,34,12)+'<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+p.name+'</div><div style="font-size:11px;color:var(--text-3)">Hcp '+parseFloat(p.handicap_index||0).toFixed(1)+'</div></div><div style="font-size:20px;font-weight:700;color:'+pc+';flex-shrink:0">'+p.pts+'<span style="font-size:11px;font-weight:400;color:var(--text-3)"> pts</span></div></div></div>';
 }).join('');
 }
 
@@ -1345,28 +1344,168 @@ function openPlayerProfile(pid) {
   var player = db.players.filter(function(p){ return p.id === pid; })[0];
   if (!player) return;
   var pubEids = new Set(db.events.filter(function(e){ return e.published; }).map(function(e){ return e.id; }));
-  var myRounds = db.rounds.filter(function(r){ return r.player_id === pid && r.verified && pubEids.has(r.event_id); });
+  var myRounds = db.rounds.filter(function(r){ return r.player_id === pid && r.verified && pubEids.has(r.event_id); })
+    .sort(function(a,b){ return b.event_date < a.event_date ? -1 : 1; });
   var myPts = myRounds.reduce(function(s,r){ return s+(r.league_points||0); }, 0);
   var best = myRounds.length ? Math.max.apply(null, myRounds.map(function(r){ return r.stableford_points||0; })) : null;
-  var allSorted = db.players.map(function(p){ return { id:p.id, pts:db.rounds.filter(function(r){ return r.player_id===p.id&&r.verified&&pubEids.has(r.event_id); }).reduce(function(s,r){ return s+(r.league_points||0); },0) }; }).sort(function(a,b){ return b.pts-a.pts; });
+  var allSorted = db.players.map(function(p){
+    return { id:p.id, pts:db.rounds.filter(function(r){ return r.player_id===p.id&&r.verified&&pubEids.has(r.event_id); }).reduce(function(s,r){ return s+(r.league_points||0); },0) };
+  }).sort(function(a,b){ return b.pts-a.pts; });
   var rank = allSorted.findIndex(function(p){ return p.id===pid; })+1;
   var rankLabel = rank===1?'1st':rank===2?'2nd':rank===3?'3rd':rank>0?rank+'th':'--';
-  openModal(player.name,
-    '<div style="background:var(--primary);border-radius:var(--radius-lg);padding:16px;margin-bottom:14px;display:flex;align-items:center;gap:14px">' +
-      avHtml(player,52,18) +
-      '<div style="flex:1"><div style="font-size:18px;font-weight:700;color:white">'+player.name+'</div>' +
-      '<div style="font-size:12px;color:rgba(255,255,255,0.45);margin-top:2px">'+(player.role==='admin'?'Admin':'Member')+'</div></div>' +
-      '<div style="text-align:right"><div style="font-size:28px;font-weight:800;color:var(--accent)">'+parseFloat(player.handicap_index||0).toFixed(1)+'</div>' +
-      '<div style="font-size:10px;color:rgba(255,255,255,0.45)">Handicap</div></div>' +
+  var avg = myRounds.length ? (myRounds.reduce(function(s,r){ return s+(r.stableford_points||0); },0)/myRounds.length).toFixed(1) : '--';
+  var hcpChanges = myRounds.filter(function(r){ return r.handicap_before != null && r.handicap_after != null; });
+
+  // Hero header
+  var hero = '<div style="background:var(--primary);border-radius:var(--radius-lg);padding:16px;margin-bottom:14px;display:flex;align-items:center;gap:14px">' +
+    avHtml(player,52,18) +
+    '<div style="flex:1"><div style="font-size:18px;font-weight:700;color:white">'+player.name+'</div>' +
+    '<div style="font-size:12px;color:rgba(255,255,255,0.45);margin-top:2px">'+(player.role==='admin'?'Admin':'Member')+'</div></div>' +
+    '<div style="text-align:right"><div style="font-size:28px;font-weight:800;color:var(--accent)">'+parseFloat(player.handicap_index||0).toFixed(1)+'</div>' +
+    '<div style="font-size:10px;color:rgba(255,255,255,0.45)">Handicap</div></div>' +
+    '</div>';
+
+  // Tab IDs unique per player
+  var tid = 'pp_' + pid.slice(0,6);
+
+  // ── TAB 1: OVERVIEW ──
+  var overview =
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">' +
+    _statTile('Rank', rankLabel) + _statTile('Points', myPts||0) +
+    _statTile('Rounds', myRounds.length) + _statTile('Best round', best !== null ? best+' pts' : '--') +
     '</div>' +
-    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:4px">' +
-      '<div style="background:var(--bg);border-radius:var(--radius);padding:12px;text-align:center"><div style="font-size:10px;color:var(--text-3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em">Rank</div><div style="font-size:22px;font-weight:800;color:var(--text)">'+rankLabel+'</div></div>' +
-      '<div style="background:var(--bg);border-radius:var(--radius);padding:12px;text-align:center"><div style="font-size:10px;color:var(--text-3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em">Points</div><div style="font-size:22px;font-weight:800;color:var(--text)">'+(myPts||0)+'</div></div>' +
-      '<div style="background:var(--bg);border-radius:var(--radius);padding:12px;text-align:center"><div style="font-size:10px;color:var(--text-3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em">Rounds</div><div style="font-size:22px;font-weight:800;color:var(--text)">'+myRounds.length+'</div></div>' +
+    '<div style="background:var(--bg);border-radius:var(--radius);padding:12px;margin-bottom:8px">' +
+    '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);margin-bottom:8px">Handicap history</div>' +
+    (hcpChanges.length ?
+      hcpChanges.slice(0,5).map(function(r){
+        var ev = db.events.filter(function(e){ return e.id===r.event_id; })[0];
+        var diff = parseFloat(r.handicap_after) - parseFloat(r.handicap_before);
+        var col = diff < 0 ? 'var(--green)' : diff > 0 ? '#e07b00' : 'var(--text-3)';
+        var arrow = diff < 0 ? '▼' : diff > 0 ? '▲' : '—';
+        return '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:0.5px solid var(--border)">' +
+          '<div style="flex:1;font-size:12px;color:var(--text-2)">'+(ev?ev.course_name:'Event')+'</div>' +
+          '<div style="font-size:12px;color:var(--text-3)">'+parseFloat(r.handicap_before).toFixed(1)+' → '+parseFloat(r.handicap_after).toFixed(1)+'</div>' +
+          '<div style="font-size:12px;font-weight:700;color:'+col+'">'+arrow+' '+Math.abs(diff).toFixed(1)+'</div></div>';
+      }).join('') :
+      '<div style="font-size:12px;color:var(--text-3);text-align:center;padding:8px 0">No rounds yet</div>'
+    ) + '</div>';
+
+  // ── TAB 2: PRIZES ──
+  var prizeRounds = myRounds.filter(function(r){
+    var extras = r.extra_prizes ? (typeof r.extra_prizes==='string'?JSON.parse(r.extra_prizes):r.extra_prizes) : {};
+    return Object.keys(extras).length > 0;
+  });
+  // Also check noticeboard extra_data for prizes won
+  var prizesWon = [];
+  db.noticeboard.forEach(function(post){
+    var extra = {};
+    try { extra = post.extra_data ? (typeof post.extra_data==='string'?JSON.parse(post.extra_data):post.extra_data) : {}; } catch(e){}
+    var prizes = extra.extraPrizes || {};
+    Object.keys(prizes).forEach(function(pr){
+      if (prizes[pr] === player.name) {
+        var ev = db.events.filter(function(e){ return e.id===post.event_id; })[0];
+        prizesWon.push({ prize: pr, event: ev ? ev.course_name : 'Event', date: ev ? ev.event_date : '' });
+      }
+    });
+    // Check top positions
+    var top = extra.topPlayers || [];
+    var pos = top.findIndex(function(p){ return p.name === player.name; });
+    if (pos >= 0) {
+      var medals = ['1st place', '2nd place', '3rd place'];
+      var ev = db.events.filter(function(e){ return e.id===post.event_id; })[0];
+      prizesWon.push({ prize: medals[pos] || (pos+1)+'th place', event: ev ? ev.course_name : 'Event', date: ev ? ev.event_date : '', medal: pos });
+    }
+  });
+  var medalColors = ['#B8860B','#888','#8B4513'];
+  var prizes = prizesWon.length ?
+    '<div style="display:flex;flex-direction:column;gap:8px">' +
+    prizesWon.map(function(pw){
+      var col = pw.medal !== undefined ? medalColors[pw.medal] || 'var(--primary)' : 'var(--primary)';
+      return '<div style="display:flex;align-items:center;gap:12px;background:var(--bg);border-radius:var(--radius);padding:12px">' +
+        '<div style="width:36px;height:36px;border-radius:50%;background:'+col+';color:white;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">'+pw.prize.slice(0,3)+'</div>' +
+        '<div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--text)">'+pw.prize+'</div>' +
+        '<div style="font-size:11px;color:var(--text-3)">'+pw.event+(pw.date?' · '+fmtDate(pw.date):'')+'</div></div></div>';
+    }).join('') + '</div>' :
+    '<div style="text-align:center;padding:24px;color:var(--text-3);font-size:13px">No prizes yet</div>';
+
+  // ── TAB 3: ROUNDS ──
+  var rounds = myRounds.length ?
+    '<div style="display:flex;flex-direction:column;gap:6px">' +
+    myRounds.map(function(r){
+      var ev = db.events.filter(function(e){ return e.id===r.event_id; })[0];
+      var pts = r.stableford_points || 0;
+      var isBest = best !== null && pts === best;
+      return '<div style="display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:var(--radius);padding:10px 12px;'+(isBest?'border:1.5px solid var(--accent)':'')+'">' +
+        '<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(ev?ev.course_name:'Event')+'</div>' +
+        '<div style="font-size:11px;color:var(--text-3)">'+(ev?fmtDate(ev.event_date):'')+(isBest?' · Best round':'')+'</div></div>' +
+        '<div style="text-align:right;flex-shrink:0"><div style="font-size:16px;font-weight:800;color:var(--text)">'+pts+'</div>' +
+        '<div style="font-size:10px;color:var(--text-3)">pts</div></div></div>';
+    }).join('') + '</div>' :
+    '<div style="text-align:center;padding:24px;color:var(--text-3);font-size:13px">No rounds yet</div>';
+
+  // ── TAB 4: STATS ──
+  var totalPar = 0, totalGross = 0, roundsWithScores = 0;
+  myRounds.forEach(function(r){
+    if (r.gross_score) { totalGross += r.gross_score; roundsWithScores++; }
+  });
+  var avgGross = roundsWithScores ? (totalGross/roundsWithScores).toFixed(1) : '--';
+  var consistency = myRounds.length > 1 ? (function(){
+    var scores = myRounds.map(function(r){ return r.stableford_points||0; });
+    var mean = scores.reduce(function(a,b){return a+b;},0)/scores.length;
+    var variance = scores.reduce(function(s,x){return s+Math.pow(x-mean,2);},0)/scores.length;
+    return Math.sqrt(variance).toFixed(1);
+  })() : '--';
+
+  var stats =
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">' +
+    _statTile('Average pts', avg) + _statTile('Avg gross', avgGross) +
+    _statTile('Consistency', consistency !== '--' ? '±'+consistency : '--') + _statTile('Total pts', myPts||0) +
     '</div>' +
-    (best !== null ? '<div style="background:var(--bg);border-radius:var(--radius);padding:12px;text-align:center;margin-bottom:4px"><div style="font-size:10px;color:var(--text-3);margin-bottom:2px;text-transform:uppercase;letter-spacing:.05em">Best round</div><div style="font-size:22px;font-weight:800;color:var(--text)">'+best+' pts</div></div>' : '')
-  );
+    '<div style="background:var(--bg);border-radius:var(--radius);padding:12px">' +
+    '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);margin-bottom:8px">Points by round</div>' +
+    (myRounds.length ?
+      myRounds.slice(0,8).map(function(r,i){
+        var ev = db.events.filter(function(e){ return e.id===r.event_id; })[0];
+        var pts = r.stableford_points || 0;
+        var maxPts = best || 1;
+        var pct = Math.round((pts/maxPts)*100);
+        return '<div style="margin-bottom:6px"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-3);margin-bottom:2px">' +
+          '<span>'+(ev?ev.course_name.split(' ')[0]:'Rnd '+(i+1))+'</span><span>'+pts+' pts</span></div>' +
+          '<div style="height:6px;background:var(--border);border-radius:99px;overflow:hidden">' +
+          '<div style="height:100%;width:'+pct+'%;background:var(--primary);border-radius:99px;transition:width .3s"></div></div></div>';
+      }).join('') :
+      '<div style="font-size:12px;color:var(--text-3);text-align:center;padding:8px 0">No rounds yet</div>'
+    ) + '</div>';
+
+  // Build tabbed modal content
+  var tabContent = hero +
+    '<div style="display:flex;border-bottom:1px solid var(--border);margin-bottom:14px">' +
+    ['Overview','Prizes','Rounds','Stats'].map(function(t,i){
+      return '<button id="'+tid+'_tab'+i+'" onclick="_ppTab(\'' + tid + '\','+i+')" style="flex:1;padding:8px 4px;border:none;background:none;font-size:12px;font-weight:600;cursor:pointer;border-bottom:2px solid '+(i===0?'var(--primary)':'transparent')+';color:'+(i===0?'var(--primary)':'var(--text-3)')+'">'+t+'</button>';
+    }).join('') + '</div>' +
+    '<div id="'+tid+'_panel0">'+overview+'</div>' +
+    '<div id="'+tid+'_panel1" style="display:none">'+prizes+'</div>' +
+    '<div id="'+tid+'_panel2" style="display:none">'+rounds+'</div>' +
+    '<div id="'+tid+'_panel3" style="display:none">'+stats+'</div>';
+
+  openModal(player.name, tabContent);
 }
+
+function _statTile(label, val) {
+  return '<div style="background:var(--bg);border-radius:var(--radius);padding:12px;text-align:center">' +
+    '<div style="font-size:10px;color:var(--text-3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em">'+label+'</div>' +
+    '<div style="font-size:22px;font-weight:800;color:var(--text)">'+val+'</div></div>';
+}
+
+function _ppTab(tid, idx) {
+  for (var i=0; i<4; i++) {
+    var tab = document.getElementById(tid+'_tab'+i);
+    var panel = document.getElementById(tid+'_panel'+i);
+    if (tab) { tab.style.borderBottomColor = i===idx ? 'var(--primary)' : 'transparent'; tab.style.color = i===idx ? 'var(--primary)' : 'var(--text-3)'; }
+    if (panel) panel.style.display = i===idx ? 'block' : 'none';
+  }
+}
+
 
 
 
@@ -2769,11 +2908,15 @@ toast('Results published! Handicaps updated.', 'success');
 }
 
 async function unpublishEvent(eid) {
-if (!confirm('Unpublish this event? Results will be hidden from members.')) return;
+if (!confirm('Unpublish this event? Results will be hidden from members and removed from the home feed.')) return;
 try {
 await apiPatch('events?id=eq.'+eid, { published: false });
 var idx = db.events.findIndex(function(e){ return e.id === eid; });
 if (idx >= 0) db.events[idx].published = false;
+// Remove noticeboard post for this event
+var h = apiHeaders(); h['Prefer'] = 'return=minimal';
+await fetch(SUPABASE_URL + '/rest/v1/noticeboard?event_id=eq.'+eid, { method: 'DELETE', headers: h });
+db.noticeboard = db.noticeboard.filter(function(p){ return p.event_id !== eid; });
 await loadAll(); renderAll();
 toast('Event unpublished', 'success');
 openEventsModal();
