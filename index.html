@@ -119,6 +119,24 @@ overflow-y: auto;
 -webkit-overflow-scrolling: touch;
 overscroll-behavior: contain;
 }
+.content-pattern {
+  position: fixed;
+  inset: calc(60px + env(safe-area-inset-top,0px)) 0 calc(70px + env(safe-area-inset-bottom,0px)) 0;
+  pointer-events: none;
+  z-index: 0;
+}
+.content-watermark {
+  position: fixed;
+  bottom: calc(90px + env(safe-area-inset-bottom,0px));
+  right: 0;
+  width: 220px;
+  height: 220px;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.08;
+  display: none;
+}
+.content-watermark img { width: 100%; height: 100%; object-fit: contain; }
 .section { display: none; }
 .section.active { display: block; animation: fadeUp 0.2s ease; }
 @keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
@@ -456,6 +474,8 @@ Settings
 
 <!-- Content -->
 <div class="content" id="main-content">
+<div class="content-pattern" id="bg-pattern"></div>
+<div class="content-watermark" id="bg-watermark"><img id="bg-watermark-img" src="" alt=""></div>
 <div class="section active" id="sec-home">
 <div id="home-feed">
 <div class="skeleton" style="height:80px;border-radius:12px;margin-bottom:10px"></div>
@@ -570,12 +590,37 @@ return '<div class="avatar" style="width:'+size+'px;height:'+size+'px;font-size:
 
 // Theme
 function applyTheme(s) {
-var r = document.documentElement.style;
-var p = s.primary_colour || '#0a1628';
-var a = s.secondary_colour || '#C9A84C';
-r.setProperty('--primary', p);
-r.setProperty('--accent', a);
-document.getElementById('theme-color-meta') && (document.getElementById('theme-color-meta').content = p);
+  var r = document.documentElement.style;
+  var p = s.primary_colour || '#0a1628';
+  var a = s.secondary_colour || '#C9A84C';
+  r.setProperty('--primary', p);
+  r.setProperty('--accent', a);
+  document.getElementById('theme-color-meta') && (document.getElementById('theme-color-meta').content = p);
+  var bgStyle = s.bg_style || 'clean';
+  var bgMap = { clean:'#f4f6f4', slate:'#eef1f0', warm:'#f5f0e8', dark:'#0e1a14' };
+  r.setProperty('--app-bg', bgMap[bgStyle] || bgMap.clean);
+  var mc = document.getElementById('main-content');
+  if (mc) {
+    if (bgStyle === 'dark') {
+      mc.style.setProperty('--text','#e8ede8'); mc.style.setProperty('--text-2','#a0b0a0');
+      mc.style.setProperty('--text-3','#607060'); mc.style.setProperty('--surface','#162013');
+      mc.style.setProperty('--border','rgba(255,255,255,0.08)'); mc.style.setProperty('--bg','#111f16');
+    } else {
+      ['--text','--text-2','--text-3','--surface','--border','--bg'].forEach(function(v){ mc.style.removeProperty(v); });
+    }
+  }
+  var patternEl = document.getElementById('bg-pattern');
+  var watermarkEl = document.getElementById('bg-watermark');
+  var watermarkImg = document.getElementById('bg-watermark-img');
+  var bgPattern = s.bg_pattern || 'none';
+  var pc = bgStyle === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(26,51,32,0.07)';
+  if (patternEl) patternEl.style.backgroundImage = bgPattern === 'lines' ? 'repeating-linear-gradient(-45deg,'+pc+' 0px,'+pc+' 1px,transparent 1px,transparent 14px)' : 'none';
+  if (watermarkEl) {
+    watermarkEl.style.display = bgPattern === 'watermark' ? 'block' : 'none';
+    if (bgPattern === 'watermark' && watermarkImg) {
+      watermarkImg.src = s.logo_url || (typeof GOLFSOC_DEFAULT_LOGO !== 'undefined' ? GOLFSOC_DEFAULT_LOGO : '');
+    }
+  }
 }
 
 function updateBranding(s) {
@@ -1662,7 +1707,8 @@ var s = societySettings || {};
 openModal('Branding',
 '<div class="settings-row" onclick="closeModal();setTimeout(openBrandingModal,150)"><div class="settings-row-label">Society name</div><div class="settings-row-value">'+(s.society_name||s.name||'--')+' &#8250;</div></div>' +
 '<div class="settings-row" onclick="closeModal();setTimeout(openLogoModal,150)"><div class="settings-row-label">Logo</div><div class="settings-row-value">'+(s.logo_url?'Uploaded':'Not set')+' &#8250;</div></div>' +
-'<div class="settings-row" onclick="closeModal();setTimeout(openThemeModal,150)"><div class="settings-row-label">Theme &amp; colours</div><div class="settings-row-value"><div class="colour-dot" style="background:'+(s.primary_colour||'#0a1628')+'"></div><div class="colour-dot" style="background:'+(s.secondary_colour||'#C9A84C')+'"></div> &#8250;</div></div>'
+'<div class="settings-row" onclick="closeModal();setTimeout(openThemeModal,150)"><div class="settings-row-label">Theme &amp; colours</div><div class="settings-row-value"><div class="colour-dot" style="background:'+(s.primary_colour||'#0a1628')+'"></div><div class="colour-dot" style="background:'+(s.secondary_colour||'#C9A84C')+'"></div> &#8250;</div></div>' +
+'<div class="settings-row" onclick="closeModal();setTimeout(openAppearanceModal,150)"><div class="settings-row-label">Background &amp; pattern</div><div class="settings-row-value" style="font-size:12px;color:var(--text-3)">'+(({clean:'Clean',slate:'Slate',warm:'Warm',dark:'Dark'})[s.bg_style]||'Clean')+' &middot; '+(s.bg_pattern==='lines'?'Lines':s.bg_pattern==='watermark'?'Watermark':'No pattern')+' &#8250;</div></div>'
 );
 }
 
@@ -1933,6 +1979,77 @@ societySettings = Object.assign({}, societySettings, { society_name: name });
 updateBranding(societySettings);
 toast('Saved!', 'success'); closeModal(); renderSettings();
 } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+function openAppearanceModal() {
+  var s = societySettings || {};
+  var curBg = s.bg_style || 'clean';
+  var curPat = s.bg_pattern || 'none';
+  window._previewBg = curBg;
+  window._previewPat = curPat;
+
+  function bgBtn(id, label, color) {
+    var active = curBg === id;
+    return '<button onclick="previewBg(\''+id+'\',\''+color+'\')" id="bgb-'+id+'" style="flex:1;padding:8px 4px;border-radius:var(--radius);border:'+(active?'2px solid var(--primary)':'1px solid var(--border-strong)')+';background:'+(active?'var(--primary)':'var(--surface)')+';cursor:pointer;font-family:DM Sans,sans-serif;text-align:center">' +
+      '<div style="width:100%;height:28px;border-radius:6px;background:'+color+';margin-bottom:5px"></div>' +
+      '<div style="font-size:11px;font-weight:600;color:'+(active?'var(--accent)':'var(--text-2)')+'">'+label+'</div></button>';
+  }
+
+  function patBtn(id, label, preview) {
+    var active = curPat === id;
+    return '<button onclick="previewPattern(\''+id+'\')" id="patb-'+id+'" style="flex:1;padding:8px 4px;border-radius:var(--radius);border:'+(active?'2px solid var(--primary)':'1px solid var(--border-strong)')+';background:'+(active?'var(--primary)':'var(--surface)')+';cursor:pointer;font-family:DM Sans,sans-serif;text-align:center">' +
+      '<div style="width:100%;height:28px;border-radius:6px;background:#eef1f0;margin-bottom:5px;overflow:hidden;position:relative">'+preview+'</div>' +
+      '<div style="font-size:11px;font-weight:600;color:'+(active?'var(--accent)':'var(--text-2)')+'">'+label+'</div></button>';
+  }
+
+  var linePreview = '<div style="position:absolute;inset:0;background-image:repeating-linear-gradient(-45deg,rgba(26,51,32,0.2) 0px,rgba(26,51,32,0.2) 1px,transparent 1px,transparent 10px)"></div>';
+  var logo = s.logo_url || (typeof GOLFSOC_DEFAULT_LOGO !== 'undefined' ? GOLFSOC_DEFAULT_LOGO : '');
+  var waterPreview = logo ? '<img src="'+logo+'" style="position:absolute;bottom:-4px;right:-4px;width:36px;height:36px;object-fit:contain;opacity:0.25">' : '<div style="position:absolute;bottom:4px;right:4px;font-size:9px;color:rgba(26,51,32,0.3);font-weight:700">Logo</div>';
+
+  openModal('Background &amp; pattern',
+    '<div class="field"><label>Background</label>' +
+    '<div style="display:flex;gap:6px;margin-top:6px">' + bgBtn('clean','Clean','#f4f6f4') + bgBtn('slate','Slate','#eef1f0') + bgBtn('warm','Warm','#f5f0e8') + bgBtn('dark','Dark','#0e1a14') + '</div></div>' +
+    '<div class="field"><label>Pattern</label>' +
+    '<div style="display:flex;gap:6px;margin-top:6px">' + patBtn('none','None','') + patBtn('lines','Lines',linePreview) + patBtn('watermark','Watermark',waterPreview) + '</div></div>' +
+    '<button class="btn accent full" onclick="saveAppearance()">Save appearance</button>'
+  );
+}
+
+function previewBg(id, color) {
+  window._previewBg = id;
+  document.documentElement.style.setProperty('--app-bg', color);
+  document.querySelectorAll('[id^="bgb-"]').forEach(function(b) {
+    var active = b.id === 'bgb-'+id;
+    b.style.border = active ? '2px solid var(--primary)' : '1px solid var(--border-strong)';
+    b.style.background = active ? 'var(--primary)' : 'var(--surface)';
+    b.querySelector('div:last-child').style.color = active ? 'var(--accent)' : 'var(--text-2)';
+  });
+}
+
+function previewPattern(id) {
+  window._previewPat = id;
+  var s = Object.assign({}, societySettings, { bg_style: window._previewBg, bg_pattern: id });
+  applyTheme(s);
+  document.querySelectorAll('[id^="patb-"]').forEach(function(b) {
+    var active = b.id === 'patb-'+id;
+    b.style.border = active ? '2px solid var(--primary)' : '1px solid var(--border-strong)';
+    b.style.background = active ? 'var(--primary)' : 'var(--surface)';
+    b.querySelector('div:last-child').style.color = active ? 'var(--accent)' : 'var(--text-2)';
+  });
+}
+
+async function saveAppearance() {
+  var sid = currentUser && currentUser.user_metadata ? currentUser.user_metadata.society_id : null;
+  if (!sid) return;
+  var bgStyle = window._previewBg || 'clean';
+  var bgPattern = window._previewPat || 'none';
+  try {
+    await apiPatch('society_settings?society_id=eq.'+sid, { bg_style: bgStyle, bg_pattern: bgPattern });
+    societySettings = Object.assign({}, societySettings, { bg_style: bgStyle, bg_pattern: bgPattern });
+    applyTheme(societySettings);
+    toast('Appearance saved!', 'success');
+    closeModal(); renderSettings();
+  } catch(e) { toast('Error: '+e.message, 'error'); }
 }
 
 function openThemeModal() {
