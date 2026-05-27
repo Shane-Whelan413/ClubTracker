@@ -1109,7 +1109,7 @@ function buildResultCard(post) {
         '<div style="font-size:11px;color:var(--text-3);margin-top:2px">'+(ev?fmtDate(ev.event_date):'')+(evType?' &middot; '+evType:'')+'</div>' +
       '</div>' +
       '<div style="display:flex;align-items:center;gap:6px;flex-shrink:0;margin-left:8px">' +
-        (isAdmin ? '<button onclick="deletePost(\''+postId+'\',\''+post.id+'\')" style="background:none;border:none;padding:6px;cursor:pointer;color:var(--text-3);line-height:1" title="Delete post">&#128465;</button>' : '') +
+        (isAdmin ? '<button onclick="deletePost(\''+postId+'\',\''+post.id+'\')" style="background:none;border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;color:var(--text-3);font-size:11px;font-weight:600;font-family:DM Sans,sans-serif;line-height:1" title="Delete post">Delete</button>' : '') +
         '<button onclick="shareResult(this.getAttribute(\'data-post\'))" data-post="'+postId+'" style="background:#25D366;border:none;border-radius:8px;padding:6px 12px;color:white;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px">Share</button>' +
       '</div>' +
     '</div>' +
@@ -1124,12 +1124,15 @@ async function deletePost(postId, dbId) {
   if (!confirm('Delete this result post? The event and scores will remain.')) return;
   try {
     var h = apiHeaders(); h['Prefer'] = 'return=minimal';
-    if (dbId && dbId !== postId) {
+    // Delete by event_id to catch all duplicates regardless of post id
+    var eid = postId; // postId is event_id when post.id falls back
+    if (dbId && dbId.length > 10) {
+      // We have a real post UUID - delete by id
       await fetch(SUPABASE_URL + '/rest/v1/noticeboard?id=eq.' + dbId, { method: 'DELETE', headers: h });
-    } else {
-      await fetch(SUPABASE_URL + '/rest/v1/noticeboard?event_id=eq.' + postId, { method: 'DELETE', headers: h });
     }
-    db.noticeboard = db.noticeboard.filter(function(p){ return p.id !== dbId && p.event_id !== postId; });
+    // Also delete by event_id to catch any duplicates
+    await fetch(SUPABASE_URL + '/rest/v1/noticeboard?event_id=eq.' + eid, { method: 'DELETE', headers: h });
+    db.noticeboard = db.noticeboard.filter(function(p){ return p.id !== dbId && p.event_id !== eid; });
     renderHome();
     toast('Post deleted', 'success');
   } catch(e) { toast('Error: ' + e.message, 'error'); }
