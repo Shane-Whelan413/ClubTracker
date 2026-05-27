@@ -602,8 +602,8 @@ var APP_THEMES = {
   },
   white: {
     primary:'#1a3320', accent:'#C9A84C',
-    appBg:'#ffffff', bg:'#ffffff', surface:'#ffffff',
-    text:'#111111', text2:'#444444', text3:'#999999', border:'#e8e8e8',
+    appBg:'#ffffff', bg:'#f8f8f6', surface:'#ffffff',
+    text:'#111111', text2:'#444444', text3:'#999999', border:'#e0e0dc',
     dark:false, pattern:'none'
   },
   dark: {
@@ -1213,7 +1213,9 @@ function renderHome() {
         return '<div style="background:var(--primary);border-radius:var(--radius-lg);padding:14px 16px;margin-bottom:12px;position:relative;overflow:hidden">' +
           '<div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent-dark),var(--accent),var(--accent-dark))"></div>' +
           '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">' +
-          '<div style="width:38px;height:38px;border-radius:10px;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.3);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">&#9968;</div>' +
+          '<div style="width:38px;height:38px;border-radius:10px;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.3);display:flex;align-items:center;justify-content:center;flex-shrink:0">' +
+        '<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="5" y1="2" x2="5" y2="16" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"/><path d="M5 2 L14 5.5 L5 9" fill="#C9A84C"/><circle cx="5" cy="16" r="1.5" fill="#C9A84C"/></svg>' +
+        '</div>' +
           '<div style="flex:1"><div style="font-size:15px;font-weight:700;color:white">'+(ev.course_name||'Event')+'</div>' +
           '<div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:2px">'+fmtDate(ev.event_date)+' &middot; '+statusText+'</div></div></div>' +
           '<div style="display:flex;gap:8px">' +
@@ -1729,7 +1731,7 @@ function openPlayerProfile(pid) {
 }
 
 function _statTile(label, val) {
-  return '<div style="background:var(--bg);border-radius:var(--radius);padding:12px;text-align:center">' +
+  return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px;text-align:center">' +
     '<div style="font-size:10px;color:var(--text-3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em">'+label+'</div>' +
     '<div style="font-size:22px;font-weight:800;color:var(--text)">'+val+'</div></div>';
 }
@@ -1758,9 +1760,9 @@ function renderProfile() {
       el.innerHTML =
         '<div style="background:var(--accent-light);border:1px solid var(--accent);border-radius:var(--radius);padding:8px 12px;margin-bottom:12px;font-size:12px;color:var(--accent-dark);text-align:center">Preview — this is what your profile will look like</div>' +
         '<div class="profile-hero"><div class="avatar" style="width:60px;height:60px;font-size:20px">YN</div><div style="flex:1"><div style="font-size:20px;color:white;font-weight:600">Your Name</div></div><div style="text-align:right"><div style="font-size:28px;font-weight:800;color:var(--accent)">18.0</div><div style="font-size:10px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:.05em">Handicap</div></div></div>' +
-        '<button class="btn danger full" onclick="doLogout()" style="margin-top:8px">Sign out</button>';
+        '';
     } else {
-      el.innerHTML = '<div class="empty"><div class="empty-icon">&#128100;</div><div class="empty-title">Profile not set up</div><div class="empty-sub">Ask your admin to add you as a player</div></div><button class="btn danger full" onclick="doLogout()" style="margin-top:16px">Sign out</button>';
+      el.innerHTML = '<div class="empty"><div class="empty-icon">&#128100;</div><div class="empty-title">Profile not set up</div><div class="empty-sub">Ask your admin to add you as a player</div></div>';
     }
     return;
   }
@@ -1945,7 +1947,7 @@ function renderProfile() {
     '<div id="'+tid+'_panel1" style="display:none">'+prizes+'</div>' +
     '<div id="'+tid+'_panel2" style="display:none">'+rounds+'</div>' +
     '<div id="'+tid+'_panel3" style="display:none">'+stats+'</div>' +
-    '<button class="btn danger full" onclick="doLogout()" style="margin-top:14px">Sign out</button>';
+    '';
 
   el.innerHTML = tabContent;
 
