@@ -967,7 +967,7 @@ var banner = document.createElement('div');
 banner.id = 'pending-banner';
 banner.style.cssText = 'position:fixed;top:calc(env(safe-area-inset-top,0px) + 68px);left:12px;right:12px;background:#856404;color:white;border-radius:10px;padding:10px 14px;z-index:500;box-shadow:0 4px 16px rgba(0,0,0,0.25);display:flex;align-items:center;gap:10px';
 banner.innerHTML =
-'<div style="font-size:18px">&#128276;</div>' +
+'<div style="width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:white;flex-shrink:0">!</div>' +
 '<div style="flex:1"><div style="font-size:13px;font-weight:700">'+member.name+' wants to join</div></div>' +
 '<button onclick="showTab(\'home\');document.getElementById(\'pending-banner\').remove()" style="background:rgba(255,255,255,0.25);border:none;border-radius:6px;padding:4px 10px;color:white;font-size:12px;font-weight:700;cursor:pointer">Review</button>' +
 '<button onclick="document.getElementById(\'pending-banner\').remove()" style="background:none;border:none;color:white;font-size:16px;cursor:pointer;padding:2px 6px">&#x2715;</button>';
@@ -1234,7 +1234,7 @@ function renderHome() {
       var me = getMemberPlayer();
       var myRound = me ? db.rounds.filter(function(r){ return r.event_id===activeEv.id && r.player_id===me.id; })[0] : null;
       var isSubAdmin = canCurrentUserEnterScores();
-      var btnLabel = myRound && myRound.verified ? 'Score verified ✓' : myRound ? 'Edit my score' : isSubAdmin ? 'Enter scores' : 'Enter my score';
+      var btnLabel = myRound && myRound.verified ? 'Score verified' : myRound ? 'Edit my score' : isSubAdmin ? 'Enter scores' : 'Enter my score';
       var btnDisabled = (myRound && myRound.verified && !isSubAdmin);
       memberCard =
         '<div style="background:var(--primary);border-radius:var(--radius-lg);padding:14px 16px;margin-bottom:12px;position:relative;overflow:hidden">' +
@@ -3060,14 +3060,14 @@ if(bB!==aB)return bB-aB;
 }
 return 0;
 });
-var medals = ['🥇','🥈','🥉'];
+var medals = ['1st','2nd','3rd'];
 liveBoard = '<div style="background:var(--primary);border-radius:var(--radius);padding:10px 12px;margin-bottom:12px">' +
 '<div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Live leaderboard</div>' +
 sorted.slice(0,5).map(function(r,i){
 var p = db.players.filter(function(x){return x.id===r.player_id;})[0];
 var isVerified = r.verified;
 return '<div style="display:flex;align-items:center;gap:8px;padding:4px 0">' +
-'<div style="font-size:14px;width:20px;text-align:center">'+(medals[i]||i+1+'.')+'</div>' +
+'<div style="width:20px;height:20px;border-radius:50%;background:rgba(201,168,76,0.2);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:var(--accent);flex-shrink:0">'+(i+1)+'</div>' +
 '<div style="flex:1;font-size:13px;color:'+(isVerified?'white':'rgba(255,255,255,0.5)')+'">'+( p?p.name:'?')+'</div>' +
 '<div style="font-size:13px;font-weight:700;color:'+(isVerified?'var(--accent)':'rgba(255,255,255,0.4)')+'">'+( r.stableford_points||0)+'<span style="font-size:10px;font-weight:400;color:rgba(255,255,255,0.3)"> pts</span></div>' +
 (isVerified?'':'<span style="font-size:9px;color:rgba(255,255,255,0.3);margin-left:2px">unverified</span>') +
@@ -3527,7 +3527,7 @@ return 0;
 }
 
 var sorted = tbSort(eventRounds);
-var medals = ['🥇','🥈','🥉'];
+var medals = ['1st','2nd','3rd'];
 var lbPts = s.league_pts_table || {1:20,2:17,3:15,4:13,5:11,6:10,7:9,8:8,9:7,10:6};
 var cutMap = {1:parseFloat(s.cut_1st||-1.0),2:parseFloat(s.cut_2nd||-0.5),3:parseFloat(s.cut_3rd||-0.2),4:parseFloat(s.cut_4th||0),5:parseFloat(s.cut_5th||0)};
 
@@ -3732,7 +3732,7 @@ if (existingPosts.length) {
 await loadAll();
 renderAll();
 closeModal();
-toast('Published! Handicaps updated ✓', 'success');
+toast('Published! Handicaps updated', 'success');
 
 // Show result card with share option
 setTimeout(function(){ showResultCard(eid, topPlayers, extraWinners); }, 500);
@@ -3743,10 +3743,11 @@ setTimeout(function(){ showResultCard(eid, topPlayers, extraWinners); }, 500);
 function showResultCard(eid, topPlayers, extraPrizes) {
 var ev = db.events.filter(function(e){ return e.id === eid; })[0];
 if (!ev) return;
-var medals = ['🥇','🥈','🥉'];
+var medals = ['1st','2nd','3rd'];
+var medalColors = ['#B8860B','#888888','#8B4513'];
 var resultRows = topPlayers.map(function(p,i){
 return '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid rgba(255,255,255,0.1)">' +
-'<div style="font-size:20px;width:28px">'+medals[i]+'</div>' +
+'<div style="width:28px;height:28px;border-radius:50%;background:'+medalColors[i]+';color:white;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+medals[i]+'</div>' +
 '<div style="flex:1;font-size:14px;font-weight:600;color:white">'+p.name+'</div>' +
 '<div style="font-size:18px;font-weight:800;color:var(--accent)">'+p.pts+'<span style="font-size:11px;color:rgba(255,255,255,0.5)"> pts</span></div>' +
 '</div>';
@@ -3774,7 +3775,7 @@ shareText += '\n\nPosted via GolfSoc \u26f3';
 openModal('Results posted!',
 '<div style="background:var(--primary);border-radius:var(--radius-lg);padding:16px;margin-bottom:14px">' +
 '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.1)">' +
-'<div style="font-size:22px">⛳</div>' +
+'<div style="width:32px;height:32px;border-radius:8px;background:rgba(201,168,76,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="13" r="2" fill="#C9A84C"/><line x1="8" y1="11" x2="8" y2="2" stroke="#C9A84C" stroke-width="1.5"/><path d="M8 2 L13 5 L8 8" fill="#C9A84C"/></svg></div>' +
 '<div><div style="font-size:15px;font-weight:700;color:white">'+(ev.course_name||'Event')+'</div>' +
 '<div style="font-size:11px;color:rgba(255,255,255,0.45)">'+fmtDate(ev.event_date)+'</div></div>' +
 '</div>' +
