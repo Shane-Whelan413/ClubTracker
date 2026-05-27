@@ -592,54 +592,63 @@ return '<div class="avatar" style="width:'+size+'px;height:'+size+'px;font-size:
 
 // Theme
 var APP_THEMES = {
-  classic:  { bg:'#f4f6f4', surface:'#ffffff', text:'#1a1a1a', text2:'#555555', text3:'#888888', border:'#dde8e0', appBg:'#f0f4f1', dark:false, pattern:'none' },
-  slate:    { bg:'#e8eeeb', surface:'#ffffff', text:'#1a3320', text2:'#4a6a54', text3:'#6a8a74', border:'#c8d8ce', appBg:'#e2eae5', dark:false, pattern:'none' },
-  dark:     { bg:'#0e1a14', surface:'#162013', text:'#e8ede8', text2:'#a0b0a0', text3:'#607060', border:'rgba(255,255,255,0.08)', appBg:'#0e1a14', dark:true, pattern:'none' },
-  links:    { bg:'#f0e8d0', surface:'#fffdf5', text:'#2c4a1e', text2:'#4a5a38', text3:'#7a6a40', border:'#d4c496', appBg:'#ede4c8', dark:false, pattern:'lines' },
-  midnight: { bg:'#0d1a11', surface:'#1a3320', text:'#e8ede0', text2:'#8aaa8a', text3:'#4a6a4a', border:'rgba(201,168,76,0.15)', appBg:'#0d1a11', dark:true, pattern:'none' }
+  classic: {
+    primary:'#1a3320', accent:'#C9A84C',
+    appBg:'#f4f6f4', bg:'#f4f6f4', surface:'#ffffff',
+    text:'#111111', text2:'#444444', text3:'#888888', border:'#dde8e0',
+    dark:false, pattern:'none'
+  },
+  slate: {
+    primary:'#2d4a38', accent:'#C9A84C',
+    appBg:'#e4ede7', bg:'#e4ede7', surface:'#ffffff',
+    text:'#1a3320', text2:'#4a6a54', text3:'#6a8a74', border:'#c0d4c8',
+    dark:false, pattern:'none'
+  },
+  dark: {
+    primary:'#0a1210', accent:'#C9A84C',
+    appBg:'#0e1a14', bg:'#111f16', surface:'#162013',
+    text:'#e8ede8', text2:'#a0b0a0', text3:'#607060', border:'rgba(255,255,255,0.08)',
+    dark:true, pattern:'none'
+  },
+  navy: {
+    primary:'#0f2044', accent:'#C9A84C',
+    appBg:'#f0f4f8', bg:'#f0f4f8', surface:'#ffffff',
+    text:'#0f2044', text2:'#2a4060', text3:'#6a88a8', border:'#c8d8e8',
+    dark:false, pattern:'none'
+  }
 };
 
 function applyTheme(s) {
   var r = document.documentElement.style;
-  var p = s.primary_colour || '#1a3320';
-  var a = s.secondary_colour || '#C9A84C';
-  r.setProperty('--primary', p);
-  r.setProperty('--accent', a);
-  document.getElementById('theme-color-meta') && (document.getElementById('theme-color-meta').content = p);
   var themeId = s.bg_style || 'classic';
   var t = APP_THEMES[themeId] || APP_THEMES.classic;
+
+  // Theme controls primary and accent — overrides any separate colour setting
+  r.setProperty('--primary', t.primary);
+  r.setProperty('--accent', t.accent);
   r.setProperty('--app-bg', t.appBg);
-  var mc = document.getElementById('main-content');
-  if (mc) {
-    if (t.dark) {
-      mc.style.setProperty('--text', t.text);
-      mc.style.setProperty('--text-2', t.text2);
-      mc.style.setProperty('--text-3', t.text3);
-      mc.style.setProperty('--surface', t.surface);
-      mc.style.setProperty('--border', t.border);
-      mc.style.setProperty('--bg', t.bg);
-    } else {
-      mc.style.setProperty('--text', t.text);
-      mc.style.setProperty('--text-2', t.text2);
-      mc.style.setProperty('--text-3', t.text3);
-      mc.style.setProperty('--surface', t.surface);
-      mc.style.setProperty('--border', t.border);
-      mc.style.setProperty('--bg', t.bg);
-    }
-  }
+
+  // Update meta theme colour for browser chrome
+  var meta = document.getElementById('theme-color-meta');
+  if (meta) meta.content = t.primary;
+
+  // Apply to whole document so topbar + bottom nav pick it up
+  r.setProperty('--text', t.text);
+  r.setProperty('--text-2', t.text2);
+  r.setProperty('--text-3', t.text3);
+  r.setProperty('--surface', t.surface);
+  r.setProperty('--border', t.border);
+  r.setProperty('--bg', t.bg);
+
+  // Pattern
   var patternEl = document.getElementById('bg-pattern');
+  var pc = t.dark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.05)';
+  if (patternEl) patternEl.style.backgroundImage = t.pattern === 'lines' ? 'repeating-linear-gradient(-45deg,'+pc+' 0px,'+pc+' 1px,transparent 1px,transparent 14px)' : 'none';
+
+  // Watermark
   var watermarkEl = document.getElementById('bg-watermark');
   var watermarkImg = document.getElementById('bg-watermark-img');
-  var bgPattern = t.pattern || s.bg_pattern || 'none';
-  var pc = t.dark ? 'rgba(255,255,255,0.04)' : 'rgba(26,51,32,0.07)';
-  if (themeId === 'links') pc = 'rgba(44,74,30,0.07)';
-  if (patternEl) patternEl.style.backgroundImage = bgPattern === 'lines' ? 'repeating-linear-gradient(-45deg,'+pc+' 0px,'+pc+' 1px,transparent 1px,transparent 14px)' : 'none';
-  if (watermarkEl) {
-    watermarkEl.style.display = bgPattern === 'watermark' ? 'block' : 'none';
-    if (bgPattern === 'watermark' && watermarkImg) {
-      watermarkImg.src = s.logo_url || (typeof GOLFSOC_DEFAULT_LOGO !== 'undefined' ? GOLFSOC_DEFAULT_LOGO : '');
-    }
-  }
+  if (watermarkEl) watermarkEl.style.display = 'none';
 }
 
 function updateBranding(s) {
@@ -1727,7 +1736,7 @@ openModal('Branding',
 '<div class="settings-row" onclick="closeModal();setTimeout(openBrandingModal,150)"><div class="settings-row-label">Society name</div><div class="settings-row-value">'+(s.society_name||s.name||'--')+' &#8250;</div></div>' +
 '<div class="settings-row" onclick="closeModal();setTimeout(openLogoModal,150)"><div class="settings-row-label">Logo</div><div class="settings-row-value">'+(s.logo_url?'Uploaded':'Not set')+' &#8250;</div></div>' +
 '<div class="settings-row" onclick="closeModal();setTimeout(openThemeModal,150)"><div class="settings-row-label">Theme &amp; colours</div><div class="settings-row-value"><div class="colour-dot" style="background:'+(s.primary_colour||'#0a1628')+'"></div><div class="colour-dot" style="background:'+(s.secondary_colour||'#C9A84C')+'"></div> &#8250;</div></div>' +
-'<div class="settings-row" onclick="closeModal();setTimeout(openAppearanceModal,150)"><div class="settings-row-label">App theme</div><div class="settings-row-value" style="font-size:12px;color:var(--text-3)">'+(({classic:'Classic',slate:'Slate',dark:'Dark',links:'Links',midnight:'Midnight'})[s.bg_style]||'Classic')+' &#8250;</div></div>'
+'<div class="settings-row" onclick="closeModal();setTimeout(openAppearanceModal,150)"><div class="settings-row-label">App theme</div><div class="settings-row-value" style="font-size:12px;color:var(--text-3)">'+(({classic:'Classic',slate:'Slate',dark:'Dark',navy:'Navy'})[s.bg_style]||'Classic')+' &#8250;</div></div>'
 );
 }
 
@@ -2006,28 +2015,31 @@ function openAppearanceModal() {
   window._previewTheme = curTheme;
 
   var themeList = [
-    { id:'classic',  label:'Classic',  desc:'Clean white',     p:['#1a3320','#f4f6f4','#ffffff'] },
-    { id:'slate',    label:'Slate',    desc:'Green tint',      p:['#1a3320','#e8eeeb','#ffffff'] },
-    { id:'dark',     label:'Dark',     desc:'Forest dark',     p:['#0a1210','#0e1a14','#162013'] },
-    { id:'links',    label:'Links',    desc:'Scorecard',       p:['#2c4a1e','#f0e8d0','#fffdf5'] },
-    { id:'midnight', label:'Midnight', desc:'Login style',     p:['#0d1a11','#1a3320','#C9A84C'] }
+    { id:'classic', label:'Classic',  desc:'Green & white',    p:['#1a3320','#f4f6f4','#ffffff','#C9A84C'] },
+    { id:'slate',   label:'Slate',    desc:'Deep green tint',  p:['#2d4a38','#e4ede7','#ffffff','#C9A84C'] },
+    { id:'dark',    label:'Dark',     desc:'Dark mode',        p:['#0a1210','#0e1a14','#162013','#C9A84C'] },
+    { id:'navy',    label:'Navy',     desc:'Navy & gold',      p:['#0f2044','#f0f4f8','#ffffff','#C9A84C'] }
   ];
 
   var tiles = themeList.map(function(t) {
     var active = curTheme === t.id;
-    var swatch = t.p.map(function(c){
-      return '<div style="flex:1;background:'+c+';height:100%"></div>';
-    }).join('');
-    return '<button onclick="previewTheme(\''+t.id+'\')" id="th-'+t.id+'" style="border-radius:var(--radius-lg);border:'+(active?'2px solid var(--primary)':'1px solid var(--border-strong)')+';background:'+(active?'var(--primary)':'var(--surface)')+';padding:0;cursor:pointer;overflow:hidden;text-align:left;font-family:DM Sans,sans-serif">' +
-      '<div style="height:40px;display:flex;overflow:hidden">'+swatch+'</div>' +
-      '<div style="padding:8px 10px">' +
-        '<div style="font-size:12px;font-weight:700;color:'+(active?'var(--accent)':'var(--text)')+'">'+t.label+'</div>' +
-        '<div style="font-size:10px;color:'+(active?'rgba(255,255,255,0.5)':'var(--text-3)')+'">'+t.desc+'</div>' +
+    return '<button onclick="previewTheme(\''+t.id+'\')" id="th-'+t.id+'" style="border-radius:var(--radius-lg);border:'+(active?'2.5px solid var(--primary)':'1px solid var(--border)')+';background:'+(active?'var(--primary)':'var(--surface)')+';padding:0;cursor:pointer;overflow:hidden;text-align:left;font-family:DM Sans,sans-serif;width:100%">' +
+      '<div style="height:44px;display:flex;overflow:hidden">' +
+        '<div style="width:35%;background:'+t.p[0]+'"></div>' +
+        '<div style="flex:1;background:'+t.p[1]+';display:flex;flex-direction:column;justify-content:center;padding:4px 6px;gap:3px">' +
+          '<div style="height:6px;border-radius:3px;background:'+t.p[2]+';width:80%;opacity:0.9"></div>' +
+          '<div style="height:5px;border-radius:3px;background:'+t.p[2]+';width:60%;opacity:0.6"></div>' +
+          '<div style="height:4px;border-radius:2px;background:'+t.p[3]+';width:30%"></div>' +
+        '</div>' +
+      '</div>' +
+      '<div style="padding:8px 12px;background:'+(active?'transparent':'var(--surface)')+'">' +
+        '<div style="font-size:13px;font-weight:700;color:'+(active?'var(--accent)':'var(--text)')+'">'+t.label+'</div>' +
+        '<div style="font-size:11px;color:'+(active?'rgba(255,255,255,0.5)':'var(--text-3)')+'">'+t.desc+'</div>' +
       '</div>' +
     '</button>';
   }).join('');
 
-  openModal('Appearance',
+  openModal('App theme',
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">'+tiles+'</div>' +
     '<button class="btn accent full" onclick="saveAppearance()">Apply theme</button>'
   );
@@ -2037,12 +2049,17 @@ function previewTheme(id) {
   window._previewTheme = id;
   var s = Object.assign({}, societySettings, { bg_style: id });
   applyTheme(s);
-  document.querySelectorAll('[id^="th-"]').forEach(function(b) {
-    var active = b.id === 'th-'+id;
-    b.style.border = active ? '2px solid var(--primary)' : '1px solid var(--border-strong)';
+  var themeList = ['classic','slate','dark','navy'];
+  themeList.forEach(function(tid) {
+    var b = document.getElementById('th-'+tid);
+    if (!b) return;
+    var active = tid === id;
+    b.style.border = active ? '2.5px solid var(--primary)' : '1px solid var(--border)';
     b.style.background = active ? 'var(--primary)' : 'var(--surface)';
-    var nameEl = b.querySelector('div > div:first-child');
-    var descEl = b.querySelector('div > div:last-child');
+    var inner = b.querySelector('div:last-child');
+    if (inner) inner.style.background = active ? 'transparent' : 'var(--surface)';
+    var nameEl = b.querySelector('div:last-child > div:first-child');
+    var descEl = b.querySelector('div:last-child > div:last-child');
     if (nameEl) nameEl.style.color = active ? 'var(--accent)' : 'var(--text)';
     if (descEl) descEl.style.color = active ? 'rgba(255,255,255,0.5)' : 'var(--text-3)';
   });
