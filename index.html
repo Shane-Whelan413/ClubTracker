@@ -128,15 +128,17 @@ overscroll-behavior: contain;
 .content-watermark {
   position: fixed;
   bottom: calc(90px + env(safe-area-inset-bottom,0px));
-  right: 0;
-  width: 220px;
-  height: 220px;
+  right: -40px;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  overflow: hidden;
   pointer-events: none;
   z-index: 0;
   opacity: 0.08;
   display: none;
 }
-.content-watermark img { width: 100%; height: 100%; object-fit: contain; }
+.content-watermark img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
 .section { display: none; }
 .section.active { display: block; animation: fadeUp 0.2s ease; }
 @keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
@@ -244,9 +246,9 @@ transition: opacity 0.4s;
 .stat-tile.rank-2 .stat-val { color: #c0c0c0; }
 .stat-tile.rank-3 .stat-val { color: #c07840; }
 .lb-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 12px; display: flex; align-items: center; gap: 10px; margin-bottom: 6px; border-left-width: 3px; }
-.lb-card-gold { background: #fef8e6 !important; border-color: #ddc050 !important; border-left-color: #B8860B !important; }
-.lb-card-silver { background: #f5f5f5 !important; border-color: #bebebe !important; border-left-color: #888 !important; }
-.lb-card-bronze { background: #fdf3ee !important; border-color: #c8855a !important; border-left-color: #8B4513 !important; }
+.lb-card-gold { background: rgba(184,134,11,0.08); border-color: rgba(184,134,11,0.3); border-left-color: #B8860B; }
+.lb-card-silver { background: rgba(136,136,136,0.08); border-color: rgba(136,136,136,0.3); border-left-color: #888; }
+.lb-card-bronze { background: rgba(139,69,19,0.08); border-color: rgba(139,69,19,0.3); border-left-color: #8B4513; }
 .lb-wrap { overflow: hidden; border-radius: var(--radius); margin-bottom: 6px; }
 .lb-wrap .lb-card { margin-bottom: 0; }
 .lb-filters { display: flex; gap: 6px; margin-bottom: 12px; }
@@ -597,8 +599,8 @@ function applyTheme(s) {
   r.setProperty('--accent', a);
   document.getElementById('theme-color-meta') && (document.getElementById('theme-color-meta').content = p);
   var bgStyle = s.bg_style || 'clean';
-  var bgMap = { clean:'#f4f6f4', slate:'#eef1f0', warm:'#f5f0e8', dark:'#0e1a14' };
-  r.setProperty('--app-bg', bgMap[bgStyle] || bgMap.clean);
+  var bgColor = s.bg_color || '#f4f6f4';
+  r.setProperty('--app-bg', bgColor);
   var mc = document.getElementById('main-content');
   if (mc) {
     if (bgStyle === 'dark') {
@@ -1988,13 +1990,6 @@ function openAppearanceModal() {
   window._previewBg = curBg;
   window._previewPat = curPat;
 
-  function bgBtn(id, label, color) {
-    var active = curBg === id;
-    return '<button onclick="previewBg(\''+id+'\',\''+color+'\')" id="bgb-'+id+'" style="flex:1;padding:8px 4px;border-radius:var(--radius);border:'+(active?'2px solid var(--primary)':'1px solid var(--border-strong)')+';background:'+(active?'var(--primary)':'var(--surface)')+';cursor:pointer;font-family:DM Sans,sans-serif;text-align:center">' +
-      '<div style="width:100%;height:28px;border-radius:6px;background:'+color+';margin-bottom:5px"></div>' +
-      '<div style="font-size:11px;font-weight:600;color:'+(active?'var(--accent)':'var(--text-2)')+'">'+label+'</div></button>';
-  }
-
   function patBtn(id, label, preview) {
     var active = curPat === id;
     return '<button onclick="previewPattern(\''+id+'\')" id="patb-'+id+'" style="flex:1;padding:8px 4px;border-radius:var(--radius);border:'+(active?'2px solid var(--primary)':'1px solid var(--border-strong)')+';background:'+(active?'var(--primary)':'var(--surface)')+';cursor:pointer;font-family:DM Sans,sans-serif;text-align:center">' +
@@ -2002,13 +1997,23 @@ function openAppearanceModal() {
       '<div style="font-size:11px;font-weight:600;color:'+(active?'var(--accent)':'var(--text-2)')+'">'+label+'</div></button>';
   }
 
+  var curBgColor = s.bg_color || '#f4f6f4';
   var linePreview = '<div style="position:absolute;inset:0;background-image:repeating-linear-gradient(-45deg,rgba(26,51,32,0.2) 0px,rgba(26,51,32,0.2) 1px,transparent 1px,transparent 10px)"></div>';
   var logo = s.logo_url || (typeof GOLFSOC_DEFAULT_LOGO !== 'undefined' ? GOLFSOC_DEFAULT_LOGO : '');
-  var waterPreview = logo ? '<img src="'+logo+'" style="position:absolute;bottom:-4px;right:-4px;width:36px;height:36px;object-fit:contain;opacity:0.25">' : '<div style="position:absolute;bottom:4px;right:4px;font-size:9px;color:rgba(26,51,32,0.3);font-weight:700">Logo</div>';
+  var waterPreview = logo ? '<img src="'+logo+'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:50%;opacity:0.3">' : '<div style="position:absolute;bottom:4px;right:4px;font-size:9px;color:rgba(26,51,32,0.3);font-weight:700">Logo</div>';
 
   openModal('Background &amp; pattern',
-    '<div class="field"><label>Background</label>' +
-    '<div style="display:flex;gap:6px;margin-top:6px">' + bgBtn('clean','Clean','#f4f6f4') + bgBtn('slate','Slate','#eef1f0') + bgBtn('warm','Warm','#f5f0e8') + bgBtn('dark','Dark','#0e1a14') + '</div></div>' +
+    '<div class="field"><label>Background colour</label>' +
+    '<div class="colour-picker-wrap" style="margin-top:6px">' +
+    '<div class="colour-preview" id="bgcp" style="background:'+curBgColor+'"></div>' +
+    '<input type="color" id="bgc" value="'+curBgColor+'" oninput="document.getElementById(\'bgcp\').style.background=this.value;document.getElementById(\'bgch\').value=this.value;document.documentElement.style.setProperty(\'--app-bg\',this.value);window._previewBgColor=this.value">' +
+    '<input type="text" id="bgch" value="'+curBgColor+'" style="flex:1;padding:8px 10px;border-radius:8px;border:1px solid var(--border-strong)" oninput="if(this.value.match(/^#[0-9a-fA-F]{6}$/)){document.getElementById(\'bgcp\').style.background=this.value;document.getElementById(\'bgc\').value=this.value;document.documentElement.style.setProperty(\'--app-bg\',this.value);window._previewBgColor=this.value}">' +
+    '</div>' +
+    '<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">' +
+    ['#f4f6f4','#eef1f0','#f5f0e8','#0e1a14','#f0f0f0','#e8eaf6','#fce4ec','#e0f2f1'].map(function(c){
+      return '<button onclick="setBgColor(\''+c+'\')" style="width:28px;height:28px;border-radius:50%;background:'+c+';border:2px solid rgba(0,0,0,0.1);cursor:pointer;flex-shrink:0"></button>';
+    }).join('') +
+    '</div></div>' +
     '<div class="field"><label>Pattern</label>' +
     '<div style="display:flex;gap:6px;margin-top:6px">' + patBtn('none','None','') + patBtn('lines','Lines',linePreview) + patBtn('watermark','Watermark',waterPreview) + '</div></div>' +
     '<button class="btn accent full" onclick="saveAppearance()">Save appearance</button>'
@@ -2017,13 +2022,8 @@ function openAppearanceModal() {
 
 function previewBg(id, color) {
   window._previewBg = id;
+  window._previewBgColor = color;
   document.documentElement.style.setProperty('--app-bg', color);
-  document.querySelectorAll('[id^="bgb-"]').forEach(function(b) {
-    var active = b.id === 'bgb-'+id;
-    b.style.border = active ? '2px solid var(--primary)' : '1px solid var(--border-strong)';
-    b.style.background = active ? 'var(--primary)' : 'var(--surface)';
-    b.querySelector('div:last-child').style.color = active ? 'var(--accent)' : 'var(--text-2)';
-  });
 }
 
 function previewPattern(id) {
@@ -2038,14 +2038,23 @@ function previewPattern(id) {
   });
 }
 
+function setBgColor(c) {
+  var el = document.getElementById('bgc'); if (el) el.value = c;
+  var cp = document.getElementById('bgcp'); if (cp) cp.style.background = c;
+  var ch = document.getElementById('bgch'); if (ch) ch.value = c;
+  document.documentElement.style.setProperty('--app-bg', c);
+  window._previewBgColor = c;
+}
+
 async function saveAppearance() {
   var sid = currentUser && currentUser.user_metadata ? currentUser.user_metadata.society_id : null;
   if (!sid) return;
   var bgStyle = window._previewBg || 'clean';
   var bgPattern = window._previewPat || 'none';
   try {
-    await apiPatch('society_settings?society_id=eq.'+sid, { bg_style: bgStyle, bg_pattern: bgPattern });
-    societySettings = Object.assign({}, societySettings, { bg_style: bgStyle, bg_pattern: bgPattern });
+    var bgColor = window._previewBgColor || '#f4f6f4';
+    await apiPatch('society_settings?society_id=eq.'+sid, { bg_style: bgStyle, bg_pattern: bgPattern, bg_color: bgColor });
+    societySettings = Object.assign({}, societySettings, { bg_style: bgStyle, bg_pattern: bgPattern, bg_color: bgColor });
     applyTheme(societySettings);
     toast('Appearance saved!', 'success');
     closeModal(); renderSettings();
