@@ -1742,47 +1742,259 @@ function _ppTab(tid, idx) {
 
 
 function renderProfile() {
-var el = document.getElementById('profile-content');
-var pid = currentUser ? currentUser.id : null;
-var player = db.players.filter(function(p){ return p.user_id === pid || (currentUser && currentUser.isMemberSession && p.id === pid); })[0];
-var isAdmin = currentUser && currentUser.user_metadata && currentUser.user_metadata.role === 'admin';
-// Stat cards helper
-function makeStatCards(rounds, rank) {
-var pts = rounds.reduce(function(s,r){ return s+(r.league_points||0); }, 0);
-var best = rounds.length ? Math.max.apply(null, rounds.map(function(r){ return r.stableford_points||0; })) : null;
-var rLabel = rank===1?'1st':rank===2?'2nd':rank===3?'3rd':rank>0?rank+'th':'--';
-return '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">' +
-'<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center"><div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);margin-bottom:6px">Season points</div><div style="font-size:24px;font-weight:800;color:var(--text)">'+(pts||'--')+'</div><div style="font-size:11px;color:var(--text-3);margin-top:2px">'+(rounds.length?'pts total':'No rounds yet')+'</div></div>' +
-'<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center"><div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);margin-bottom:6px">Best round</div><div style="font-size:24px;font-weight:800;color:var(--text)">'+(best!==null?best:'--')+'</div><div style="font-size:11px;color:var(--text-3);margin-top:2px">pts stableford</div></div>' +
-'<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center"><div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);margin-bottom:6px">Rounds played</div><div style="font-size:24px;font-weight:800;color:var(--text)">'+rounds.length+'</div><div style="font-size:11px;color:var(--text-3);margin-top:2px">this season</div></div>' +
-'<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center"><div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);margin-bottom:6px">Current rank</div><div style="font-size:24px;font-weight:800;color:var(--text)">'+rLabel+'</div><div style="font-size:11px;color:var(--text-3);margin-top:2px">in standings</div></div>' +
-'</div>';
+  var el = document.getElementById('profile-content');
+  var pid = currentUser ? currentUser.id : null;
+  var player = db.players.filter(function(p){ return p.user_id === pid || (currentUser && currentUser.isMemberSession && p.id === pid); })[0];
+  var isAdmin = currentUser && currentUser.user_metadata && currentUser.user_metadata.role === 'admin';
+
+  if (!player) {
+    var previewOnP = !societySettings || societySettings.show_preview !== false;
+    if (previewOnP) {
+      el.innerHTML =
+        '<div style="background:var(--accent-light);border:1px solid var(--accent);border-radius:var(--radius);padding:8px 12px;margin-bottom:12px;font-size:12px;color:var(--accent-dark);text-align:center">Preview — this is what your profile will look like</div>' +
+        '<div class="profile-hero"><div class="avatar" style="width:60px;height:60px;font-size:20px">YN</div><div style="flex:1"><div style="font-size:20px;color:white;font-weight:600">Your Name</div></div><div style="text-align:right"><div style="font-size:28px;font-weight:800;color:var(--accent)">18.0</div><div style="font-size:10px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:.05em">Handicap</div></div></div>' +
+        '<button class="btn danger full" onclick="doLogout()" style="margin-top:8px">Sign out</button>';
+    } else {
+      el.innerHTML = '<div class="empty"><div class="empty-icon">&#128100;</div><div class="empty-title">Profile not set up</div><div class="empty-sub">Ask your admin to add you as a player</div></div><button class="btn danger full" onclick="doLogout()" style="margin-top:16px">Sign out</button>';
+    }
+    return;
+  }
+
+  var pubEids = new Set(db.events.filter(function(e){ return e.published; }).map(function(e){ return e.id; }));
+  var myRounds = db.rounds.filter(function(r){ return r.player_id===player.id&&r.verified&&pubEids.has(r.event_id); })
+    .sort(function(a,b){ return a.event_date < b.event_date ? -1 : 1; });
+  var allSorted = db.players.map(function(p){ return { id:p.id, pts:db.rounds.filter(function(r){ return r.player_id===p.id&&r.verified&&pubEids.has(r.event_id); }).reduce(function(s,r){ return s+(r.league_points||0); },0) }; }).sort(function(a,b){ return b.pts-a.pts; });
+  var myRank = allSorted.findIndex(function(p){ return p.id===player.id; })+1;
+  var myPts = myRounds.reduce(function(s,r){ return s+(r.league_points||0); },0);
+  var best = myRounds.length ? Math.max.apply(null, myRounds.map(function(r){ return r.stableford_points||0; })) : null;
+  var rankLabel = myRank===1?'1st':myRank===2?'2nd':myRank===3?'3rd':myRank>0?myRank+'th':'--';
+
+  // Use same tab structure as openPlayerProfile
+  var tid = 'prof_main';
+
+  // ── OVERVIEW ──
+  var pubEidsArr = Array.from(pubEids);
+  var hcpChanges = myRounds.filter(function(r){ return r.handicap_before!=null&&r.handicap_after!=null; });
+  var overview =
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">' +
+    _statTile('Rank', rankLabel) + _statTile('Points', myPts||0) +
+    _statTile('Rounds', myRounds.length) + _statTile('Best round', best!==null?best+' pts':'--') +
+    '</div>' +
+    '<div style="background:var(--bg);border-radius:var(--radius);padding:12px;margin-bottom:8px">' +
+    '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);margin-bottom:8px">Handicap history</div>' +
+    (hcpChanges.length ?
+      hcpChanges.slice(0,5).map(function(r){
+        var ev = db.events.filter(function(e){ return e.id===r.event_id; })[0];
+        var diff = parseFloat(r.handicap_after) - parseFloat(r.handicap_before);
+        var col = diff<0?'var(--green)':diff>0?'#e07b00':'var(--text-3)';
+        var arrow = diff<0?'▼':diff>0?'▲':'—';
+        return '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:0.5px solid var(--border)">' +
+          '<div style="flex:1;font-size:12px;color:var(--text-2)">'+(ev?ev.course_name:'Event')+'</div>' +
+          '<div style="font-size:12px;color:var(--text-3)">'+parseFloat(r.handicap_before).toFixed(1)+' → '+parseFloat(r.handicap_after).toFixed(1)+'</div>' +
+          '<div style="font-size:12px;font-weight:700;color:'+col+'">'+arrow+' '+Math.abs(diff).toFixed(1)+'</div></div>';
+      }).join('') :
+      '<div style="font-size:12px;color:var(--text-3);text-align:center;padding:8px 0">No rounds yet</div>'
+    ) + '</div>';
+
+  // ── PRIZES ──
+  var prizesWon = [];
+  db.noticeboard.forEach(function(post){
+    var extra = {}; try { extra = post.extra_data?(typeof post.extra_data==='string'?JSON.parse(post.extra_data):post.extra_data):{}; } catch(e){}
+    var prizes = extra.extraPrizes||{};
+    var medals = ['1st place','2nd place','3rd place'];
+    var medalColors = ['#B8860B','#888','#8B4513'];
+    var top = extra.topPlayers||[];
+    var pos = top.findIndex(function(p){ return p.name===player.name; });
+    if (pos>=0) { var ev=db.events.filter(function(e){return e.id===post.event_id;})[0]; prizesWon.push({prize:medals[pos]||'Top finish',event:ev?ev.course_name:'Event',date:ev?ev.event_date:'',medal:pos}); }
+    Object.keys(prizes).forEach(function(pr){ if(prizes[pr]===player.name){ var ev2=db.events.filter(function(e){return e.id===post.event_id;})[0]; prizesWon.push({prize:pr,event:ev2?ev2.course_name:'Event',date:ev2?ev2.event_date:''}); } });
+  });
+  var prizes = prizesWon.length ?
+    '<div style="display:flex;flex-direction:column;gap:8px">' +
+    prizesWon.map(function(pw){
+      var col = pw.medal!==undefined?(['#B8860B','#888','#8B4513'][pw.medal]||'var(--primary)'):'var(--primary)';
+      return '<div style="display:flex;align-items:center;gap:12px;background:var(--bg);border-radius:var(--radius);padding:12px">' +
+        '<div style="width:36px;height:36px;border-radius:50%;background:'+col+';color:white;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">'+pw.prize.slice(0,3)+'</div>' +
+        '<div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--text)">'+pw.prize+'</div>' +
+        '<div style="font-size:11px;color:var(--text-3)">'+pw.event+(pw.date?' · '+fmtDate(pw.date):'')+'</div></div></div>';
+    }).join('') + '</div>' :
+    '<div style="text-align:center;padding:24px;color:var(--text-3);font-size:13px">No prizes yet</div>';
+
+  // ── ROUNDS — tappable ──
+  var rounds = myRounds.length ?
+    '<div style="display:flex;flex-direction:column;gap:6px">' +
+    myRounds.slice().reverse().map(function(r){
+      var ev = db.events.filter(function(e){ return e.id===r.event_id; })[0];
+      var pts = r.stableford_points||0;
+      var isBest = best!==null&&pts===best;
+      return '<button onclick="openRoundDetail(\''+r.id+'\')" style="display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:var(--radius);padding:10px 12px;border:'+(isBest?'1.5px solid var(--accent)':'0.5px solid var(--border)')+';cursor:pointer;width:100%;text-align:left;font-family:DM Sans,sans-serif">' +
+        '<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(ev?ev.course_name:'Event')+'</div>' +
+        '<div style="font-size:11px;color:var(--text-3)">'+(ev?fmtDate(ev.event_date):'')+(isBest?' · Best round':'')+'</div></div>' +
+        '<div style="text-align:right;flex-shrink:0"><div style="font-size:16px;font-weight:800;color:var(--text)">'+pts+'</div>' +
+        '<div style="font-size:10px;color:var(--text-3)">pts</div></div>' +
+        '<div style="color:var(--text-3);font-size:16px;flex-shrink:0">›</div>' +
+      '</button>';
+    }).join('') + '</div>' :
+    '<div style="text-align:center;padding:24px;color:var(--text-3);font-size:13px">No rounds yet</div>';
+
+  // ── STATS — score history chart ──
+  var avg = myRounds.length ? (myRounds.reduce(function(s,r){return s+(r.stableford_points||0);},0)/myRounds.length).toFixed(1) : '--';
+  var totalGross = 0, roundsWithScores = 0;
+  myRounds.forEach(function(r){ if(r.gross_score){totalGross+=r.gross_score;roundsWithScores++;} });
+  var avgGross = roundsWithScores ? (totalGross/roundsWithScores).toFixed(1) : '--';
+
+  var chartHtml = '';
+  if (myRounds.length > 1) {
+    var scores = myRounds.map(function(r){ return r.stableford_points||0; });
+    var maxS = Math.max.apply(null, scores);
+    var minS = Math.min.apply(null, scores);
+    var range = maxS - minS || 1;
+    var chartId = 'sc_' + player.id.slice(0,6);
+    var pts_json = JSON.stringify(scores);
+    chartHtml =
+      '<div style="background:var(--bg);border-radius:var(--radius);padding:12px;margin-bottom:10px">' +
+      '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);margin-bottom:10px">Score history</div>' +
+      '<canvas id="'+chartId+'" height="80" style="width:100%;display:block"></canvas>' +
+      '</div>' +
+      '<script>' +
+      '(function(){' +
+      'var canvas=document.getElementById("'+chartId+'");' +
+      'if(!canvas)return;' +
+      'var ctx=canvas.getContext("2d");' +
+      'var scores='+pts_json+';' +
+      'var W=canvas.offsetWidth||280;canvas.width=W;canvas.height=80;' +
+      'var pad=10;var cW=W-pad*2;var cH=60;' +
+      'var maxS=Math.max.apply(null,scores);var minS=Math.min.apply(null,scores);var rng=maxS-minS||1;' +
+      'function x(i){return pad+i*(cW/(scores.length-1));}' +
+      'function y(v){return pad+cH-(((v-minS)/rng)*cH);}' +
+      'var cs=getComputedStyle(document.documentElement);' +
+      'var accent=cs.getPropertyValue("--accent").trim()||"#C9A84C";' +
+      'var text3=cs.getPropertyValue("--text-3").trim()||"#888";' +
+      // Draw gradient fill
+      'var grad=ctx.createLinearGradient(0,pad,0,pad+cH);' +
+      'grad.addColorStop(0,"rgba(201,168,76,0.25)");grad.addColorStop(1,"rgba(201,168,76,0)");' +
+      'ctx.beginPath();ctx.moveTo(x(0),y(scores[0]));' +
+      'for(var i=1;i<scores.length;i++){' +
+        'var cpx=(x(i-1)+x(i))/2;' +
+        'ctx.bezierCurveTo(cpx,y(scores[i-1]),cpx,y(scores[i]),x(i),y(scores[i]));' +
+      '}' +
+      'ctx.lineTo(x(scores.length-1),pad+cH);ctx.lineTo(x(0),pad+cH);ctx.closePath();' +
+      'ctx.fillStyle=grad;ctx.fill();' +
+      // Draw line
+      'ctx.beginPath();ctx.moveTo(x(0),y(scores[0]));' +
+      'for(var j=1;j<scores.length;j++){' +
+        'var cpx2=(x(j-1)+x(j))/2;' +
+        'ctx.bezierCurveTo(cpx2,y(scores[j-1]),cpx2,y(scores[j]),x(j),y(scores[j]));' +
+      '}' +
+      'ctx.strokeStyle=accent;ctx.lineWidth=2;ctx.stroke();' +
+      // Draw dots with animation
+      'var dotProgress=0;' +
+      'function drawDots(progress){' +
+        'for(var k=0;k<scores.length;k++){' +
+          'var p=Math.min(1,Math.max(0,(progress-k/scores.length)*scores.length));' +
+          'if(p<=0)continue;' +
+          'ctx.beginPath();ctx.arc(x(k),y(scores[k]),3*p,0,Math.PI*2);' +
+          'ctx.fillStyle=accent;ctx.fill();' +
+          'if(p>=1){ctx.fillStyle=text3;ctx.font="9px DM Sans,sans-serif";ctx.textAlign="center";ctx.fillText(scores[k],x(k),y(scores[k])-7);}' +
+        '}' +
+      '}' +
+      'function animate(ts){' +
+        'if(!animate.start)animate.start=ts;' +
+        'var prog=Math.min(1,(ts-animate.start)/800);' +
+        'ctx.clearRect(0,0,W,80);' +
+        // Redraw gradient
+        'ctx.beginPath();ctx.moveTo(x(0),y(scores[0]));' +
+        'for(var i2=1;i2<scores.length;i2++){var c2=(x(i2-1)+x(i2))/2;ctx.bezierCurveTo(c2,y(scores[i2-1]),c2,y(scores[i2]),x(i2),y(scores[i2]));}' +
+        'ctx.lineTo(x(scores.length-1),pad+cH);ctx.lineTo(x(0),pad+cH);ctx.closePath();ctx.fillStyle=grad;ctx.fill();' +
+        // Redraw line
+        'ctx.beginPath();ctx.moveTo(x(0),y(scores[0]));' +
+        'for(var i3=1;i3<scores.length;i3++){var c3=(x(i3-1)+x(i3))/2;ctx.bezierCurveTo(c3,y(scores[i3-1]),c3,y(scores[i3]),x(i3),y(scores[i3]));}' +
+        'ctx.strokeStyle=accent;ctx.lineWidth=2;ctx.stroke();' +
+        'drawDots(prog);' +
+        'if(prog<1)requestAnimationFrame(animate);' +
+      '}' +
+      'requestAnimationFrame(animate);' +
+      '})();' +
+      '<\/script>';
+  }
+
+  var stats =
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">' +
+    _statTile('Avg pts', avg) + _statTile('Avg gross', avgGross) +
+    '</div>' +
+    chartHtml;
+
+  // ── Build tabbed profile ──
+  var tabContent =
+    '<div style="background:var(--primary);border-radius:var(--radius-lg);padding:16px;margin-bottom:14px;display:flex;align-items:center;gap:14px">' +
+    avHtml(player,52,18) +
+    '<div style="flex:1"><div style="font-family:DM Serif Display,serif;font-size:20px;font-weight:400;color:white">'+player.name+'</div>' +
+    '<div style="font-size:12px;color:rgba(255,255,255,0.45);margin-top:2px">'+(isAdmin?'Admin':'Member')+'</div></div>' +
+    '<div style="text-align:right"><div style="font-size:30px;font-weight:800;color:var(--accent)">'+parseFloat(player.handicap_index||0).toFixed(1)+'</div>' +
+    '<div style="font-size:10px;color:rgba(255,255,255,0.45)">Handicap</div></div>' +
+    '</div>' +
+    '<div style="display:flex;border-bottom:1px solid var(--border);margin-bottom:14px">' +
+    ['Overview','Prizes','Rounds','Stats'].map(function(t,i){
+      return '<button id="'+tid+'_tab'+i+'" onclick="_ppTab(\''+tid+'\','+i+')" style="flex:1;padding:10px 4px;border:none;background:none;font-size:12px;font-weight:600;cursor:pointer;border-bottom:2px solid '+(i===0?'var(--primary)':'transparent')+';color:'+(i===0?'var(--primary)':'var(--text-3)')+';font-family:DM Sans,sans-serif">'+t+'</button>';
+    }).join('') + '</div>' +
+    '<div id="'+tid+'_panel0">'+overview+'</div>' +
+    '<div id="'+tid+'_panel1" style="display:none">'+prizes+'</div>' +
+    '<div id="'+tid+'_panel2" style="display:none">'+rounds+'</div>' +
+    '<div id="'+tid+'_panel3" style="display:none">'+stats+'</div>' +
+    '<button class="btn danger full" onclick="doLogout()" style="margin-top:14px">Sign out</button>';
+
+  el.innerHTML = tabContent;
+
+  // Trigger chart render after DOM is set
+  var scriptTags = el.querySelectorAll('script');
+  scriptTags.forEach(function(s){
+    var newScript = document.createElement('script');
+    newScript.textContent = s.textContent;
+    s.parentNode.replaceChild(newScript, s);
+  });
 }
 
-if (!player) {
-var previewOnP = !societySettings || societySettings.show_preview !== false;
-if (previewOnP) {
-el.innerHTML =
-'<div style="background:var(--accent-light);border:1px solid var(--accent);border-radius:var(--radius);padding:8px 12px;margin-bottom:12px;font-size:12px;color:var(--accent-dark);text-align:center">Preview - this is what your profile will look like</div>' +
-'<div class="profile-hero"><div class="avatar" style="width:60px;height:60px;font-size:20px">YN</div><div style="flex:1"><div style="font-size:20px;color:white;font-weight:600">Your Name</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px">Member</div></div><div style="text-align:right"><div style="font-size:28px;font-weight:800;color:var(--accent)">18.0</div><div style="font-size:10px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:.05em">Handicap</div></div></div>' +
-makeStatCards([], 0) +
-'<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px"><div style="font-size:12px;font-weight:600;color:var(--text-2);margin-bottom:8px">Handicap history</div><div style="display:flex;align-items:center;justify-content:center;height:48px;color:var(--text-3);font-size:13px">Changes appear here after each round</div></div>' +
-'<button class="btn danger full" onclick="doLogout()" style="margin-top:8px">Sign out</button>';
-} else {
-el.innerHTML = '<div class="empty"><div class="empty-icon">&#128100;</div><div class="empty-title">Profile not set up</div><div class="empty-sub">Ask your admin to add you as a player</div></div><button class="btn danger full" onclick="doLogout()" style="margin-top:16px">Sign out</button>';
-}
-return;
-}
-// Real player stats
-var pubEids = new Set(db.events.filter(function(e){ return e.published; }).map(function(e){ return e.id; }));
-var myRounds = db.rounds.filter(function(r){ return r.player_id===player.id&&r.verified&&pubEids.has(r.event_id); });
-var allSorted = db.players.map(function(p){ return { id:p.id, pts:db.rounds.filter(function(r){ return r.player_id===p.id&&r.verified&&pubEids.has(r.event_id); }).reduce(function(s,r){ return s+(r.league_points||0); },0) }; }).sort(function(a,b){ return b.pts-a.pts; });
-var myRank = allSorted.findIndex(function(p){ return p.id===player.id; })+1;
-el.innerHTML =
-'<div class="profile-hero">'+avHtml(player,60,20)+'<div style="flex:1"><div style="font-size:20px;color:white;font-weight:600">'+player.name+'</div><div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px">'+(isAdmin?'Admin - ':'')+'Member</div></div><div style="text-align:right"><div style="font-size:28px;font-weight:800;color:var(--accent)">'+parseFloat(player.handicap_index||0).toFixed(1)+'</div><div style="font-size:10px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:.05em">Handicap</div></div></div>' +
-makeStatCards(myRounds, myRank) +
-buildProgressionCharts(myRounds, player) +
-'<button class="btn danger full" onclick="doLogout()">Sign out</button>';
+function openRoundDetail(rid) {
+  var r = db.rounds.filter(function(x){ return x.id === rid; })[0];
+  if (!r) return;
+  var ev = db.events.filter(function(e){ return e.id === r.event_id; })[0];
+  var pl = db.players.filter(function(p){ return p.id === r.player_id; })[0];
+  var scores, pars, sis;
+  try { scores = r.hole_scores ? (typeof r.hole_scores==='string'?JSON.parse(r.hole_scores):r.hole_scores) : []; } catch(e){ scores=[]; }
+  try { pars = r.par_values ? (typeof r.par_values==='string'?JSON.parse(r.par_values):r.par_values) : []; } catch(e){ pars=[]; }
+  try { sis = ev && ev.hole_sis ? (typeof ev.hole_sis==='string'?JSON.parse(ev.hole_sis):ev.hole_sis) : []; } catch(e){ sis=[]; }
+
+  var rows = scores.map(function(score, i) {
+    if (!score || !pars[i]) return '';
+    var diff = parseInt(score) - parseInt(pars[i]);
+    var pts = Math.max(0, 2 - diff);
+    var label = diff<=-2?'Eagle':diff===-1?'Birdie':diff===0?'Par':diff===1?'Bogey':diff===2?'Double':'+++';
+    var col = diff<=-2?'#1a8a1a':diff===-1?'#2d7a2d':diff===0?'var(--text-2)':'var(--text-3)';
+    return '<div style="display:grid;grid-template-columns:28px 36px 36px 1fr 36px;align-items:center;gap:6px;padding:7px 0;border-bottom:0.5px solid var(--border);font-size:13px">' +
+      '<div style="color:var(--text-3);font-size:11px">H'+(i+1)+'</div>' +
+      '<div style="text-align:center;color:var(--text-3)">P'+pars[i]+'</div>' +
+      '<div style="text-align:center;font-weight:700;color:var(--text)">'+score+'</div>' +
+      '<div style="color:'+col+';font-size:11px">'+label+'</div>' +
+      '<div style="text-align:right;font-weight:700;color:var(--accent)">'+pts+'</div>' +
+    '</div>';
+  }).join('');
+
+  var totalPts = r.stableford_points || 0;
+  openModal((ev?ev.course_name:'Round')+' — '+(ev?fmtDate(ev.event_date):''),
+    '<div style="display:flex;justify-content:space-between;align-items:center;background:var(--primary);border-radius:var(--radius);padding:10px 14px;margin-bottom:12px">' +
+    '<div><div style="font-size:14px;font-weight:700;color:white">'+(pl?pl.name:'Player')+'</div>' +
+    '<div style="font-size:11px;color:rgba(255,255,255,0.45)">Hcp '+parseFloat(r.handicap_before||pl&&pl.handicap_index||0).toFixed(1)+'</div></div>' +
+    '<div style="text-align:right"><div style="font-size:26px;font-weight:800;color:var(--accent)">'+totalPts+'</div>' +
+    '<div style="font-size:10px;color:rgba(255,255,255,0.45)">pts</div></div>' +
+    '</div>' +
+    '<div style="display:grid;grid-template-columns:28px 36px 36px 1fr 36px;gap:6px;padding:4px 0 8px;border-bottom:1px solid var(--border);margin-bottom:2px">' +
+    '<div style="font-size:10px;color:var(--text-3)">Hole</div>' +
+    '<div style="font-size:10px;color:var(--text-3);text-align:center">Par</div>' +
+    '<div style="font-size:10px;color:var(--text-3);text-align:center">Score</div>' +
+    '<div style="font-size:10px;color:var(--text-3)">Result</div>' +
+    '<div style="font-size:10px;color:var(--text-3);text-align:right">Pts</div>' +
+    '</div>' +
+    (rows || '<div style="padding:12px 0;color:var(--text-3);font-size:13px;text-align:center">No hole scores recorded</div>')
+  );
 }
 
 function renderSettings() {
