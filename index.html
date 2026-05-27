@@ -591,31 +591,48 @@ return '<div class="avatar" style="width:'+size+'px;height:'+size+'px;font-size:
 };
 
 // Theme
+var APP_THEMES = {
+  classic:  { bg:'#f4f6f4', surface:'#ffffff', text:'#1a1a1a', text2:'#555555', text3:'#888888', border:'#dde8e0', appBg:'#f0f4f1', dark:false, pattern:'none' },
+  slate:    { bg:'#e8eeeb', surface:'#ffffff', text:'#1a3320', text2:'#4a6a54', text3:'#6a8a74', border:'#c8d8ce', appBg:'#e2eae5', dark:false, pattern:'none' },
+  dark:     { bg:'#0e1a14', surface:'#162013', text:'#e8ede8', text2:'#a0b0a0', text3:'#607060', border:'rgba(255,255,255,0.08)', appBg:'#0e1a14', dark:true, pattern:'none' },
+  links:    { bg:'#f0e8d0', surface:'#fffdf5', text:'#2c4a1e', text2:'#4a5a38', text3:'#7a6a40', border:'#d4c496', appBg:'#ede4c8', dark:false, pattern:'lines' },
+  midnight: { bg:'#0d1a11', surface:'#1a3320', text:'#e8ede0', text2:'#8aaa8a', text3:'#4a6a4a', border:'rgba(201,168,76,0.15)', appBg:'#0d1a11', dark:true, pattern:'none' }
+};
+
 function applyTheme(s) {
   var r = document.documentElement.style;
-  var p = s.primary_colour || '#0a1628';
+  var p = s.primary_colour || '#1a3320';
   var a = s.secondary_colour || '#C9A84C';
   r.setProperty('--primary', p);
   r.setProperty('--accent', a);
   document.getElementById('theme-color-meta') && (document.getElementById('theme-color-meta').content = p);
-  var bgStyle = s.bg_style || 'clean';
-  var bgColor = s.bg_color || '#f4f6f4';
-  r.setProperty('--app-bg', bgColor);
+  var themeId = s.bg_style || 'classic';
+  var t = APP_THEMES[themeId] || APP_THEMES.classic;
+  r.setProperty('--app-bg', t.appBg);
   var mc = document.getElementById('main-content');
   if (mc) {
-    if (bgStyle === 'dark') {
-      mc.style.setProperty('--text','#e8ede8'); mc.style.setProperty('--text-2','#a0b0a0');
-      mc.style.setProperty('--text-3','#607060'); mc.style.setProperty('--surface','#162013');
-      mc.style.setProperty('--border','rgba(255,255,255,0.08)'); mc.style.setProperty('--bg','#111f16');
+    if (t.dark) {
+      mc.style.setProperty('--text', t.text);
+      mc.style.setProperty('--text-2', t.text2);
+      mc.style.setProperty('--text-3', t.text3);
+      mc.style.setProperty('--surface', t.surface);
+      mc.style.setProperty('--border', t.border);
+      mc.style.setProperty('--bg', t.bg);
     } else {
-      ['--text','--text-2','--text-3','--surface','--border','--bg'].forEach(function(v){ mc.style.removeProperty(v); });
+      mc.style.setProperty('--text', t.text);
+      mc.style.setProperty('--text-2', t.text2);
+      mc.style.setProperty('--text-3', t.text3);
+      mc.style.setProperty('--surface', t.surface);
+      mc.style.setProperty('--border', t.border);
+      mc.style.setProperty('--bg', t.bg);
     }
   }
   var patternEl = document.getElementById('bg-pattern');
   var watermarkEl = document.getElementById('bg-watermark');
   var watermarkImg = document.getElementById('bg-watermark-img');
-  var bgPattern = s.bg_pattern || 'none';
-  var pc = bgStyle === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(26,51,32,0.07)';
+  var bgPattern = t.pattern || s.bg_pattern || 'none';
+  var pc = t.dark ? 'rgba(255,255,255,0.04)' : 'rgba(26,51,32,0.07)';
+  if (themeId === 'links') pc = 'rgba(44,74,30,0.07)';
   if (patternEl) patternEl.style.backgroundImage = bgPattern === 'lines' ? 'repeating-linear-gradient(-45deg,'+pc+' 0px,'+pc+' 1px,transparent 1px,transparent 14px)' : 'none';
   if (watermarkEl) {
     watermarkEl.style.display = bgPattern === 'watermark' ? 'block' : 'none';
@@ -1710,7 +1727,7 @@ openModal('Branding',
 '<div class="settings-row" onclick="closeModal();setTimeout(openBrandingModal,150)"><div class="settings-row-label">Society name</div><div class="settings-row-value">'+(s.society_name||s.name||'--')+' &#8250;</div></div>' +
 '<div class="settings-row" onclick="closeModal();setTimeout(openLogoModal,150)"><div class="settings-row-label">Logo</div><div class="settings-row-value">'+(s.logo_url?'Uploaded':'Not set')+' &#8250;</div></div>' +
 '<div class="settings-row" onclick="closeModal();setTimeout(openThemeModal,150)"><div class="settings-row-label">Theme &amp; colours</div><div class="settings-row-value"><div class="colour-dot" style="background:'+(s.primary_colour||'#0a1628')+'"></div><div class="colour-dot" style="background:'+(s.secondary_colour||'#C9A84C')+'"></div> &#8250;</div></div>' +
-'<div class="settings-row" onclick="closeModal();setTimeout(openAppearanceModal,150)"><div class="settings-row-label">Background &amp; pattern</div><div class="settings-row-value" style="font-size:12px;color:var(--text-3)">'+(({clean:'Clean',slate:'Slate',warm:'Warm',dark:'Dark'})[s.bg_style]||'Clean')+' &middot; '+(s.bg_pattern==='lines'?'Lines':s.bg_pattern==='watermark'?'Watermark':'No pattern')+' &#8250;</div></div>'
+'<div class="settings-row" onclick="closeModal();setTimeout(openAppearanceModal,150)"><div class="settings-row-label">App theme</div><div class="settings-row-value" style="font-size:12px;color:var(--text-3)">'+(({classic:'Classic',slate:'Slate',dark:'Dark',links:'Links',midnight:'Midnight'})[s.bg_style]||'Classic')+' &#8250;</div></div>'
 );
 }
 
@@ -1985,78 +2002,61 @@ toast('Saved!', 'success'); closeModal(); renderSettings();
 
 function openAppearanceModal() {
   var s = societySettings || {};
-  var curBg = s.bg_style || 'clean';
-  var curPat = s.bg_pattern || 'none';
-  window._previewBg = curBg;
-  window._previewPat = curPat;
+  var curTheme = s.bg_style || 'classic';
+  window._previewTheme = curTheme;
 
-  function patBtn(id, label, preview) {
-    var active = curPat === id;
-    return '<button onclick="previewPattern(\''+id+'\')" id="patb-'+id+'" style="flex:1;padding:8px 4px;border-radius:var(--radius);border:'+(active?'2px solid var(--primary)':'1px solid var(--border-strong)')+';background:'+(active?'var(--primary)':'var(--surface)')+';cursor:pointer;font-family:DM Sans,sans-serif;text-align:center">' +
-      '<div style="width:100%;height:28px;border-radius:6px;background:#eef1f0;margin-bottom:5px;overflow:hidden;position:relative">'+preview+'</div>' +
-      '<div style="font-size:11px;font-weight:600;color:'+(active?'var(--accent)':'var(--text-2)')+'">'+label+'</div></button>';
-  }
+  var themeList = [
+    { id:'classic',  label:'Classic',  desc:'Clean white',     p:['#1a3320','#f4f6f4','#ffffff'] },
+    { id:'slate',    label:'Slate',    desc:'Green tint',      p:['#1a3320','#e8eeeb','#ffffff'] },
+    { id:'dark',     label:'Dark',     desc:'Forest dark',     p:['#0a1210','#0e1a14','#162013'] },
+    { id:'links',    label:'Links',    desc:'Scorecard',       p:['#2c4a1e','#f0e8d0','#fffdf5'] },
+    { id:'midnight', label:'Midnight', desc:'Login style',     p:['#0d1a11','#1a3320','#C9A84C'] }
+  ];
 
-  var curBgColor = s.bg_color || '#f4f6f4';
-  var linePreview = '<div style="position:absolute;inset:0;background-image:repeating-linear-gradient(-45deg,rgba(26,51,32,0.2) 0px,rgba(26,51,32,0.2) 1px,transparent 1px,transparent 10px)"></div>';
-  var logo = s.logo_url || (typeof GOLFSOC_DEFAULT_LOGO !== 'undefined' ? GOLFSOC_DEFAULT_LOGO : '');
-  var waterPreview = logo ? '<img src="'+logo+'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:50%;opacity:0.3">' : '<div style="position:absolute;bottom:4px;right:4px;font-size:9px;color:rgba(26,51,32,0.3);font-weight:700">Logo</div>';
+  var tiles = themeList.map(function(t) {
+    var active = curTheme === t.id;
+    var swatch = t.p.map(function(c){
+      return '<div style="flex:1;background:'+c+';height:100%"></div>';
+    }).join('');
+    return '<button onclick="previewTheme(\''+t.id+'\')" id="th-'+t.id+'" style="border-radius:var(--radius-lg);border:'+(active?'2px solid var(--primary)':'1px solid var(--border-strong)')+';background:'+(active?'var(--primary)':'var(--surface)')+';padding:0;cursor:pointer;overflow:hidden;text-align:left;font-family:DM Sans,sans-serif">' +
+      '<div style="height:40px;display:flex;overflow:hidden">'+swatch+'</div>' +
+      '<div style="padding:8px 10px">' +
+        '<div style="font-size:12px;font-weight:700;color:'+(active?'var(--accent)':'var(--text)')+'">'+t.label+'</div>' +
+        '<div style="font-size:10px;color:'+(active?'rgba(255,255,255,0.5)':'var(--text-3)')+'">'+t.desc+'</div>' +
+      '</div>' +
+    '</button>';
+  }).join('');
 
-  openModal('Background &amp; pattern',
-    '<div class="field"><label>Background colour</label>' +
-    '<div class="colour-picker-wrap" style="margin-top:6px">' +
-    '<div class="colour-preview" id="bgcp" style="background:'+curBgColor+'"></div>' +
-    '<input type="color" id="bgc" value="'+curBgColor+'" oninput="document.getElementById(\'bgcp\').style.background=this.value;document.getElementById(\'bgch\').value=this.value;document.documentElement.style.setProperty(\'--app-bg\',this.value);window._previewBgColor=this.value">' +
-    '<input type="text" id="bgch" value="'+curBgColor+'" style="flex:1;padding:8px 10px;border-radius:8px;border:1px solid var(--border-strong)" oninput="if(this.value.match(/^#[0-9a-fA-F]{6}$/)){document.getElementById(\'bgcp\').style.background=this.value;document.getElementById(\'bgc\').value=this.value;document.documentElement.style.setProperty(\'--app-bg\',this.value);window._previewBgColor=this.value}">' +
-    '</div>' +
-    '<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">' +
-    ['#f4f6f4','#eef1f0','#f5f0e8','#0e1a14','#f0f0f0','#e8eaf6','#fce4ec','#e0f2f1'].map(function(c){
-      return '<button onclick="setBgColor(\''+c+'\')" style="width:28px;height:28px;border-radius:50%;background:'+c+';border:2px solid rgba(0,0,0,0.1);cursor:pointer;flex-shrink:0"></button>';
-    }).join('') +
-    '</div></div>' +
-    '<div class="field"><label>Pattern</label>' +
-    '<div style="display:flex;gap:6px;margin-top:6px">' + patBtn('none','None','') + patBtn('lines','Lines',linePreview) + patBtn('watermark','Watermark',waterPreview) + '</div></div>' +
-    '<button class="btn accent full" onclick="saveAppearance()">Save appearance</button>'
+  openModal('Appearance',
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">'+tiles+'</div>' +
+    '<button class="btn accent full" onclick="saveAppearance()">Apply theme</button>'
   );
 }
 
-function previewBg(id, color) {
-  window._previewBg = id;
-  window._previewBgColor = color;
-  document.documentElement.style.setProperty('--app-bg', color);
-}
-
-function previewPattern(id) {
-  window._previewPat = id;
-  var s = Object.assign({}, societySettings, { bg_style: window._previewBg, bg_pattern: id });
+function previewTheme(id) {
+  window._previewTheme = id;
+  var s = Object.assign({}, societySettings, { bg_style: id });
   applyTheme(s);
-  document.querySelectorAll('[id^="patb-"]').forEach(function(b) {
-    var active = b.id === 'patb-'+id;
+  document.querySelectorAll('[id^="th-"]').forEach(function(b) {
+    var active = b.id === 'th-'+id;
     b.style.border = active ? '2px solid var(--primary)' : '1px solid var(--border-strong)';
     b.style.background = active ? 'var(--primary)' : 'var(--surface)';
-    b.querySelector('div:last-child').style.color = active ? 'var(--accent)' : 'var(--text-2)';
+    var nameEl = b.querySelector('div > div:first-child');
+    var descEl = b.querySelector('div > div:last-child');
+    if (nameEl) nameEl.style.color = active ? 'var(--accent)' : 'var(--text)';
+    if (descEl) descEl.style.color = active ? 'rgba(255,255,255,0.5)' : 'var(--text-3)';
   });
-}
-
-function setBgColor(c) {
-  var el = document.getElementById('bgc'); if (el) el.value = c;
-  var cp = document.getElementById('bgcp'); if (cp) cp.style.background = c;
-  var ch = document.getElementById('bgch'); if (ch) ch.value = c;
-  document.documentElement.style.setProperty('--app-bg', c);
-  window._previewBgColor = c;
 }
 
 async function saveAppearance() {
   var sid = currentUser && currentUser.user_metadata ? currentUser.user_metadata.society_id : null;
   if (!sid) return;
-  var bgStyle = window._previewBg || 'clean';
-  var bgPattern = window._previewPat || 'none';
+  var themeId = window._previewTheme || 'classic';
   try {
-    var bgColor = window._previewBgColor || '#f4f6f4';
-    await apiPatch('society_settings?society_id=eq.'+sid, { bg_style: bgStyle, bg_pattern: bgPattern, bg_color: bgColor });
-    societySettings = Object.assign({}, societySettings, { bg_style: bgStyle, bg_pattern: bgPattern, bg_color: bgColor });
+    await apiPatch('society_settings?society_id=eq.'+sid, { bg_style: themeId });
+    societySettings = Object.assign({}, societySettings, { bg_style: themeId });
     applyTheme(societySettings);
-    toast('Appearance saved!', 'success');
+    toast('Theme saved!', 'success');
     closeModal(); renderSettings();
   } catch(e) { toast('Error: '+e.message, 'error'); }
 }
