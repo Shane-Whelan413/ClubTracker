@@ -246,9 +246,9 @@ transition: opacity 0.4s;
 .stat-tile.rank-2 .stat-val { color: #c0c0c0; }
 .stat-tile.rank-3 .stat-val { color: #c07840; }
 .lb-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 12px; display: flex; align-items: center; gap: 10px; margin-bottom: 6px; border-left-width: 3px; }
-.lb-card-gold { background: rgba(184,134,11,0.08); border-color: rgba(184,134,11,0.3); border-left-color: #B8860B; }
-.lb-card-silver { background: rgba(136,136,136,0.08); border-color: rgba(136,136,136,0.3); border-left-color: #888; }
-.lb-card-bronze { background: rgba(139,69,19,0.08); border-color: rgba(139,69,19,0.3); border-left-color: #8B4513; }
+.lb-card-gold { background: rgba(184,134,11,0.12); border-color: rgba(184,134,11,0.4); border-left-color: #B8860B; }
+.lb-card-silver { background: rgba(136,136,136,0.1); border-color: rgba(136,136,136,0.35); border-left-color: #888; }
+.lb-card-bronze { background: rgba(139,69,19,0.1); border-color: rgba(139,69,19,0.35); border-left-color: #8B4513; }
 .lb-wrap { overflow: hidden; border-radius: var(--radius); margin-bottom: 6px; }
 .lb-wrap .lb-card { margin-bottom: 0; }
 .lb-filters { display: flex; gap: 6px; margin-bottom: 12px; }
@@ -600,22 +600,22 @@ var APP_THEMES = {
     text:'#111111', text2:'#444444', text3:'#888888', border:'#dde8e0',
     dark:false, pattern:'none'
   },
-  slate: {
-    primary:'#2d4a38', accent:'#C9A84C',
-    appBg:'#e4ede7', bg:'#e4ede7', surface:'#ffffff',
-    text:'#1a3320', text2:'#4a6a54', text3:'#6a8a74', border:'#c0d4c8',
+  white: {
+    primary:'#1a3320', accent:'#C9A84C',
+    appBg:'#ffffff', bg:'#ffffff', surface:'#ffffff',
+    text:'#111111', text2:'#444444', text3:'#999999', border:'#e8e8e8',
     dark:false, pattern:'none'
   },
   dark: {
-    primary:'#0a1210', accent:'#C9A84C',
-    appBg:'#0e1a14', bg:'#111f16', surface:'#162013',
-    text:'#e8ede8', text2:'#a0b0a0', text3:'#607060', border:'rgba(255,255,255,0.08)',
+    primary:'#1a3320', accent:'#C9A84C',
+    appBg:'#1a2420', bg:'#22302a', surface:'#2a3d33',
+    text:'#edf2ee', text2:'#b0c4b8', text3:'#7a9988', border:'rgba(255,255,255,0.12)',
     dark:true, pattern:'none'
   },
   navy: {
-    primary:'#0f2044', accent:'#C9A84C',
+    primary:'#0a1628', accent:'#C9A84C',
     appBg:'#f0f4f8', bg:'#f0f4f8', surface:'#ffffff',
-    text:'#0f2044', text2:'#2a4060', text3:'#6a88a8', border:'#c8d8e8',
+    text:'#0a1628', text2:'#2a3a54', text3:'#6a7a98', border:'#d0dae8',
     dark:false, pattern:'none'
   }
 };
@@ -1126,7 +1126,7 @@ function buildResultCard(post) {
   return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:10px;border-left:3px solid var(--accent)">' +
     '<div style="padding:12px 14px 12px 13px;border-bottom:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between">' +
       '<div style="flex:1;min-width:0">' +
-        '<div style="font-size:15px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(ev?ev.course_name:'Event')+'</div>' +
+        '<div style="font-size:17px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:DM Serif Display,serif;letter-spacing:-0.01em">'+(ev?ev.course_name:'Event')+'</div>' +
         '<div style="font-size:11px;color:var(--text-3);margin-top:2px">'+(ev?fmtDate(ev.event_date):'')+(evType?' &middot; '+evType:'')+'</div>' +
       '</div>' +
       '<div style="display:flex;align-items:center;gap:6px;flex-shrink:0;margin-left:8px">' +
@@ -1529,7 +1529,7 @@ function evRow(ev, isPast) {
       '<div style="display:flex;align-items:center;gap:14px;padding:14px 16px">' +
         '<div class="ev-date"><div class="ev-day">'+parseInt(p[2])+'</div><div class="ev-month">'+mo[parseInt(p[1])-1]+'</div></div>' +
         '<div style="flex:1;min-width:0">' +
-          '<div style="font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(ev.course_name||'TBD')+'</div>' +
+          '<div style="font-size:17px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:DM Serif Display,serif;letter-spacing:-0.01em">'+(ev.course_name||'TBD')+'</div>' +
           '<div style="font-size:11px;color:var(--text-3);margin-top:2px">'+(isOuting?'Outing - 18 holes':'Sunday - 9 holes')+(ev.published?' · Results posted':'')+'</div>' +
         '</div>' +
       '</div>' +
@@ -2058,7 +2058,7 @@ openModal('Branding',
 '<div class="settings-row" onclick="closeModal();setTimeout(openBrandingModal,150)"><div class="settings-row-label">Society name</div><div class="settings-row-value">'+(s.society_name||s.name||'--')+' &#8250;</div></div>' +
 '<div class="settings-row" onclick="closeModal();setTimeout(openLogoModal,150)"><div class="settings-row-label">Logo</div><div class="settings-row-value">'+(s.logo_url?'Uploaded':'Not set')+' &#8250;</div></div>' +
 '<div class="settings-row" onclick="closeModal();setTimeout(openThemeModal,150)"><div class="settings-row-label">Theme &amp; colours</div><div class="settings-row-value"><div class="colour-dot" style="background:'+(s.primary_colour||'#0a1628')+'"></div><div class="colour-dot" style="background:'+(s.secondary_colour||'#C9A84C')+'"></div> &#8250;</div></div>' +
-'<div class="settings-row" onclick="closeModal();setTimeout(openAppearanceModal,150)"><div class="settings-row-label">App theme</div><div class="settings-row-value" style="font-size:12px;color:var(--text-3)">'+(({classic:'Classic',slate:'Slate',dark:'Dark',navy:'Navy'})[s.bg_style]||'Classic')+' &#8250;</div></div>'
+'<div class="settings-row" onclick="closeModal();setTimeout(openAppearanceModal,150)"><div class="settings-row-label">App theme</div><div class="settings-row-value" style="font-size:12px;color:var(--text-3)">'+(({classic:'Classic',white:'White',dark:'Dark',navy:'Navy'})[s.bg_style]||'Classic')+' &#8250;</div></div>'
 );
 }
 
@@ -2337,10 +2337,10 @@ function openAppearanceModal() {
   window._previewTheme = curTheme;
 
   var themeList = [
-    { id:'classic', label:'Classic',  desc:'Green & white',    p:['#1a3320','#f4f6f4','#ffffff','#C9A84C'] },
-    { id:'slate',   label:'Slate',    desc:'Deep green tint',  p:['#2d4a38','#e4ede7','#ffffff','#C9A84C'] },
-    { id:'dark',    label:'Dark',     desc:'Dark mode',        p:['#0a1210','#0e1a14','#162013','#C9A84C'] },
-    { id:'navy',    label:'Navy',     desc:'Navy & gold',      p:['#0f2044','#f0f4f8','#ffffff','#C9A84C'] }
+    { id:'classic', label:'Classic', desc:'Green & white',  p:['#1a3320','#f4f6f4','#ffffff','#C9A84C'] },
+    { id:'white',   label:'White',   desc:'Clean minimal',  p:['#1a3320','#ffffff','#ffffff','#C9A84C'] },
+    { id:'dark',    label:'Dark',    desc:'Dark mode',      p:['#1a3320','#22302a','#2a3d33','#C9A84C'] },
+    { id:'navy',    label:'Navy',    desc:'Navy & gold',    p:['#0a1628','#f0f4f8','#ffffff','#C9A84C'] }
   ];
 
   var tiles = themeList.map(function(t) {
@@ -2371,7 +2371,7 @@ function previewTheme(id) {
   window._previewTheme = id;
   var s = Object.assign({}, societySettings, { bg_style: id });
   applyTheme(s);
-  var themeList = ['classic','slate','dark','navy'];
+  var themeList = ['classic','white','dark','navy'];
   themeList.forEach(function(tid) {
     var b = document.getElementById('th-'+tid);
     if (!b) return;
