@@ -486,6 +486,7 @@ Settings
 </div>
 <div class="section" id="sec-leaderboard">
 <div class="lb-filters" id="lb-filters"></div>
+<div id="lb-season-stats"></div>
 <div id="lb-table">
 <div class="skeleton" style="height:52px;margin-bottom:6px;border-radius:10px"></div>
 <div class="skeleton" style="height:52px;margin-bottom:6px;border-radius:10px"></div>
@@ -1332,6 +1333,69 @@ var el = document.getElementById('lb-table');
 var filtersEl = document.getElementById('lb-filters');
 if (filtersEl) filtersEl.style.display = 'none';
 var pubEids = new Set(db.events.filter(function(e){ return e.published; }).map(function(e){ return e.id; }));
+
+// ── Season stats dropdown ──
+var statsEl = document.getElementById('lb-season-stats');
+if (statsEl) {
+  var allRounds = db.rounds.filter(function(r){ return r.verified && pubEids.has(r.event_id); });
+
+  // Calculate eagles/birdies/pars/bogeys per player
+  var playerStats = {};
+  db.players.forEach(function(p){ playerStats[p.id] = { name:p.name, eagles:0, birdies:0, pars:0, bogeys:0, rounds:0 }; });
+
+  allRounds.forEach(function(r) {
+    if (!r.hole_scores || !r.par_values) return;
+    var stats = playerStats[r.player_id];
+    if (!stats) return;
+    stats.rounds++;
+    var scores, pars;
+    try { scores = typeof r.hole_scores==='string' ? JSON.parse(r.hole_scores) : r.hole_scores; } catch(e){ return; }
+    try { pars = typeof r.par_values==='string' ? JSON.parse(r.par_values) : r.par_values; } catch(e){ return; }
+    for (var i=0; i<scores.length; i++) {
+      if (!scores[i] || !pars[i]) continue;
+      var diff = parseInt(scores[i]) - parseInt(pars[i]);
+      if (diff <= -2) stats.eagles++;
+      else if (diff === -1) stats.birdies++;
+      else if (diff === 0) stats.pars++;
+      else if (diff === 1) stats.bogeys++;
+    }
+  });
+
+  var statRows = Object.values(playerStats).filter(function(s){ return s.rounds > 0; })
+    .sort(function(a,b){ return (b.eagles*3 + b.birdies*2 + b.pars) - (a.eagles*3 + a.birdies*2 + a.pars); })
+    .map(function(s){
+      return '<div style="display:grid;grid-template-columns:1fr repeat(4,44px);align-items:center;padding:8px 0;border-bottom:0.5px solid var(--border);gap:4px">' +
+        '<div style="font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+s.name+'</div>' +
+        (s.eagles ? '<div style="text-align:center"><div style="font-size:13px;font-weight:700;color:#1a8a1a">'+s.eagles+'</div></div>' : '<div style="text-align:center;font-size:13px;color:var(--text-3)">—</div>') +
+        '<div style="text-align:center"><div style="font-size:13px;font-weight:600;color:#2d7a2d">'+(s.birdies||'—')+'</div></div>' +
+        '<div style="text-align:center"><div style="font-size:13px;color:var(--text-2)">'+(s.pars||'—')+'</div></div>' +
+        '<div style="text-align:center"><div style="font-size:13px;color:var(--text-3)">'+(s.bogeys||'—')+'</div></div>' +
+      '</div>';
+    }).join('');
+
+  if (statRows) {
+    statsEl.innerHTML =
+      '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:12px">' +
+        '<button onclick="var b=document.getElementById(\'lb-stats-body\');var a=document.getElementById(\'lb-stats-arrow\');var open=b.style.display!==\'none\';b.style.display=open?\'none\':\'block\';a.style.transform=open?\'rotate(0deg)\':\'rotate(180deg)\'" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:none;border:none;cursor:pointer;font-family:DM Sans,sans-serif">' +
+          '<div style="font-size:13px;font-weight:700;color:var(--text)">Season stats</div>' +
+          '<span id="lb-stats-arrow" style="font-size:12px;color:var(--text-3);transition:transform 0.2s">&#9660;</span>' +
+        '</button>' +
+        '<div id="lb-stats-body" style="display:none;padding:0 16px 8px">' +
+          '<div style="display:grid;grid-template-columns:1fr repeat(4,44px);padding:4px 0 8px;border-bottom:1px solid var(--border);gap:4px">' +
+            '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3)">Player</div>' +
+            '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#1a8a1a;text-align:center">Eagle</div>' +
+            '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#2d7a2d;text-align:center">Birdie</div>' +
+            '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);text-align:center">Par</div>' +
+            '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);text-align:center">Bogey</div>' +
+          '</div>' +
+          statRows +
+        '</div>' +
+      '</div>';
+  } else {
+    statsEl.innerHTML = '';
+  }
+}
+
 var rows = db.players.map(function(p) {
 return Object.assign({}, p, { pts: db.rounds.filter(function(r){ return r.player_id===p.id&&r.verified&&pubEids.has(r.event_id); }).reduce(function(s,r){ return s+(r.league_points||0); }, 0) });
 }).sort(function(a,b){ return b.pts - a.pts; });
