@@ -1463,24 +1463,26 @@ if (statsEl) {
   var activePlayers = Object.values(playerStats).filter(function(s){ return s.rounds > 0; });
   if (activePlayers.length) {
     var statTabDefs = [
-      { id:'pars',    label:'Pars',    color:'var(--text)',   key:'pars'    },
-      { id:'birdies', label:'Birdies', color:'#2d7a2d',       key:'birdies' },
-      { id:'eagles',  label:'Eagles',  color:'#1a8a1a',       key:'eagles'  },
-      { id:'bogeys',  label:'Bogeys',  color:'var(--text-3)', key:'bogeys'  }
+      { id:'pars',    label:'Pars',    color:'var(--text)',   key:'pars',    label:'pars'    },
+      { id:'birdies', label:'Birdies', color:'#2d7a2d',       key:'birdies', label:'birdies' },
+      { id:'eagles',  label:'Eagles',  color:'#1a8a1a',       key:'eagles',  label:'eagles'  },
+      { id:'bogeys',  label:'Bogeys',  color:'var(--text-3)', key:'bogeys',  label:'bogeys'  }
     ];
-    function buildStatPanel(key, color) {
+    function buildStatPanel(key, color, label) {
       var sorted = activePlayers.slice().sort(function(a,b){ return b[key]-a[key]; });
-      var max = sorted[0][key] || 1;
-      return sorted.map(function(p) {
+      var ordinals = ['1st','2nd','3rd','4th','5th','6th','7th','8th','9th','10th'];
+      return sorted.map(function(p, i) {
         var val = p[key];
-        var pct = Math.round((val/max)*100);
-        return '<div style="padding:8px 0;border-bottom:0.5px solid var(--border)">' +
-          '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">' +
-            '<span style="font-size:13px;color:var(--text)">'+p.name+'</span>' +
-            '<span style="font-size:13px;font-weight:600;color:'+color+'">'+val+'</span>' +
+        var numColor = i === 0 ? '#B8860B' : 'var(--text)';
+        var isLast = i === sorted.length - 1;
+        return '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;' + (isLast?'':'border-bottom:0.5px solid var(--border)') + '">' +
+          '<div>' +
+            '<div style="font-size:14px;color:var(--text)">' + p.name + '</div>' +
+            '<div style="font-size:11px;color:var(--text-3);margin-top:1px">' + (ordinals[i]||i+1+'th') + ' this season</div>' +
           '</div>' +
-          '<div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden">' +
-            '<div style="height:100%;width:'+pct+'%;background:'+color+';border-radius:2px"></div>' +
+          '<div style="text-align:right">' +
+            '<div style="font-size:28px;font-weight:700;line-height:1;color:' + numColor + '">' + val + '</div>' +
+            '<div style="font-size:10px;color:var(--text-3);margin-top:2px">' + label + '</div>' +
           '</div>' +
         '</div>';
       }).join('');
@@ -1490,7 +1492,7 @@ if (statsEl) {
       return '<button id="lbst-'+t.id+'" onclick="lbStatTab(\''+t.id+'\')" style="padding:10px 14px;background:none;border:none;border-bottom:2px solid '+(isFirst?'var(--primary)':'transparent')+';cursor:pointer;font-size:13px;font-weight:'+(isFirst?'600':'400')+';color:'+(isFirst?'var(--text)':'var(--text-2)')+';font-family:DM Sans,sans-serif;margin-bottom:-0.5px">'+t.label+'</button>';
     }).join('');
     var panels = statTabDefs.map(function(t) {
-      return '<div id="lbsp-'+t.id+'" style="display:'+(t.id==='pars'?'block':'none')+';padding:4px 0 4px">'+buildStatPanel(t.key, t.color)+'</div>';
+      return '<div id="lbsp-'+t.id+'" style="display:'+(t.id==='pars'?'block':'none')+';padding:4px 0 4px">'+buildStatPanel(t.key, t.color, t.label)+'</div>';
     }).join('');
     statsEl.innerHTML =
       '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:12px">' +
