@@ -1761,15 +1761,48 @@ function openPlayerProfile(pid) {
       prizesWon.push({ prize: medals[pos] || (pos+1)+'th place', event: ev ? ev.course_name : 'Event', date: ev ? ev.event_date : '', medal: pos });
     }
   });
-  var medalColors = ['#B8860B','#888','#8B4513'];
-  var prizes = prizesWon.length ?
+  // Group prizes by type for accordion
+  var prizeGroups = {};
+  prizesWon.forEach(function(pw) {
+    var key = pw.prize;
+    if (!prizeGroups[key]) prizeGroups[key] = { items: [], medal: pw.medal };
+    prizeGroups[key].items.push(pw);
+  });
+  var prizeEmoji = {
+    '1st place': '🥇', '2nd place': '🥈', '3rd place': '🥉',
+    'Closest to pin': '📍', 'Long drive': '🏌️', 'Best front 9': '🔟',
+    'Best back 9': '🔟', 'Best gross': '🎯', 'Birdie prize': '🐦'
+  };
+  var prizes = Object.keys(prizeGroups).length ?
     '<div style="display:flex;flex-direction:column;gap:8px">' +
-    prizesWon.map(function(pw){
-      var col = pw.medal !== undefined ? medalColors[pw.medal] || 'var(--primary)' : 'var(--primary)';
-      return '<div style="display:flex;align-items:center;gap:12px;background:var(--bg);border-radius:var(--radius);padding:12px">' +
-        '<div style="width:36px;height:36px;border-radius:50%;background:'+col+';color:white;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">'+pw.prize.slice(0,3)+'</div>' +
-        '<div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--text)">'+pw.prize+'</div>' +
-        '<div style="font-size:11px;color:var(--text-3)">'+pw.event+(pw.date?' · '+fmtDate(pw.date):'')+'</div></div></div>';
+    Object.keys(prizeGroups).map(function(key, gi) {
+      var grp = prizeGroups[key];
+      var emoji = prizeEmoji[key] || '🏆';
+      var count = grp.items.length;
+      var panelId = 'prize_grp_' + gi;
+      var events = grp.items.map(function(pw, ei) {
+        var isLast = ei === grp.items.length - 1;
+        return '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;' + (isLast ? '' : 'border-bottom:0.5px solid var(--border)') + '">' +
+          '<span style="font-size:13px;color:var(--text)">' + pw.event + '</span>' +
+          '<span style="font-size:12px;color:var(--text-3)">' + (pw.date ? fmtDate(pw.date) : '') + '</span>' +
+        '</div>';
+      }).join('');
+      return '<div style="border:0.5px solid var(--border);border-radius:var(--radius-lg);overflow:hidden">' +
+        '<div onclick="togglePrizeGroup(this)" data-panel="' + panelId + '" ' +
+        'style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--bg);cursor:pointer">' +
+          '<div style="display:flex;align-items:center;gap:10px">' +
+            '<span style="font-size:18px">' + emoji + '</span>' +
+            '<div>' +
+              '<div style="font-size:14px;font-weight:600;color:var(--text)">' + key + '</div>' +
+              '<div style="font-size:11px;color:var(--text-3);margin-top:1px">' + count + ' ' + (count === 1 ? 'win' : 'wins') + '</div>' +
+            '</div>' +
+          '</div>' +
+          '<span class="prize-arrow" style="font-size:11px;color:var(--text-3)">▼</span>' +
+        '</div>' +
+        '<div id="' + panelId + '" style="display:none;padding:0 14px;border-top:0.5px solid var(--border)">' +
+          events +
+        '</div>' +
+      '</div>';
     }).join('') + '</div>' :
     '<div style="text-align:center;padding:24px;color:var(--text-3);font-size:13px">No prizes yet</div>';
 
@@ -4252,6 +4285,16 @@ navigator.clipboard.writeText(code).then(function(){
 }).catch(function(){
   toast(code, 'success');
 });
+}
+
+function togglePrizeGroup(el) {
+  var panelId = el.getAttribute('data-panel');
+  var p = document.getElementById(panelId);
+  if (!p) return;
+  var open = p.style.display !== 'none';
+  p.style.display = open ? 'none' : 'block';
+  var arrow = el.querySelector('.prize-arrow');
+  if (arrow) arrow.textContent = open ? '▼' : '▲';
 }
 
 // Toast
