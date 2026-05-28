@@ -655,18 +655,19 @@ function applyTheme(s) {
 
 function updateBranding(s) {
 var name = s.society_name || s.name || 'GolfSoc';
-var i = ini(name);
 var logo = s.logo_url;
 document.getElementById('page-title').textContent = name;
 document.getElementById('topbar-name').textContent = name;
 document.getElementById('splash-name').textContent = name;
 document.getElementById('auth-title').textContent = 'Welcome back';
 document.getElementById('auth-sub').textContent = 'Sign in to ' + name;
-var displayLogo = logo || GOLFSOC_DEFAULT_LOGO;
-var logoHtml = '<img src="'+displayLogo+'" style="width:100%;height:100%;object-fit:cover">';
-document.getElementById('topbar-logo').innerHTML = logoHtml;
-document.getElementById('splash-logo').innerHTML = logoHtml;
-document.getElementById('auth-logo').innerHTML = logoHtml;
+// Topbar always shows GolfSoc logo
+var gsLogoHtml = '<img src="'+GOLFSOC_DEFAULT_LOGO+'" style="width:100%;height:100%;object-fit:cover">';
+document.getElementById('topbar-logo').innerHTML = gsLogoHtml;
+// Splash and auth show society logo if uploaded, otherwise GolfSoc default
+var societyLogoHtml = '<img src="'+(logo || GOLFSOC_DEFAULT_LOGO)+'" style="width:100%;height:100%;object-fit:cover">';
+document.getElementById('splash-logo').innerHTML = societyLogoHtml;
+document.getElementById('auth-logo').innerHTML = societyLogoHtml;
 }
 
 // Show app
@@ -2536,10 +2537,12 @@ if (!res.ok) {
 var errText = await res.text();
 throw new Error('Upload failed: ' + errText);
 }
-var url = SUPABASE_URL + '/storage/v1/object/public/society-logos/' + path;
+var url = SUPABASE_URL + '/storage/v1/object/public/society-logos/' + path + '?t=' + Date.now();
 await apiPatch('society_settings?society_id=eq.' + sid, { logo_url: url });
 societySettings = Object.assign({}, societySettings, { logo_url: url });
-updateBranding(societySettings); toast('Logo updated!', 'success'); closeModal(); renderSettings();
+updateBranding(societySettings);
+renderHome();
+toast('Logo updated!', 'success'); closeModal(); renderSettings();
 } catch(e) { toast('Error: ' + e.message, 'error'); }
 }
 
