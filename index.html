@@ -1744,6 +1744,11 @@ function _ppTab(tid, idx) {
     if (tab) { tab.style.borderBottomColor = i===idx ? 'var(--primary)' : 'transparent'; tab.style.color = i===idx ? 'var(--primary)' : 'var(--text-3)'; }
     if (panel) panel.style.display = i===idx ? 'block' : 'none';
   }
+  // Render charts when Stats tab (index 3) becomes visible
+  if (idx === 3) {
+    var uidEl = document.getElementById('chart_uid');
+    if (uidEl) setTimeout(function(){ renderCharts(uidEl.getAttribute('data-uid')); }, 50);
+  }
 }
 
 
@@ -1787,22 +1792,7 @@ function renderProfile() {
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">' +
     _statTile('Rank', rankLabel) + _statTile('Points', myPts||0) +
     _statTile('Rounds', myRounds.length) + _statTile('Best round', best!==null?best+' pts':'--') +
-    '</div>' +
-    '<div style="background:var(--bg);border-radius:var(--radius);padding:12px;margin-bottom:8px">' +
-    '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);margin-bottom:8px">Handicap history</div>' +
-    (hcpChanges.length ?
-      hcpChanges.slice(0,5).map(function(r){
-        var ev = db.events.filter(function(e){ return e.id===r.event_id; })[0];
-        var diff = parseFloat(r.handicap_after) - parseFloat(r.handicap_before);
-        var col = diff<0?'var(--green)':diff>0?'#e07b00':'var(--text-3)';
-        var arrow = diff<0?'▼':diff>0?'▲':'—';
-        return '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:0.5px solid var(--border)">' +
-          '<div style="flex:1;font-size:12px;color:var(--text-2)">'+(ev?ev.course_name:'Event')+'</div>' +
-          '<div style="font-size:12px;color:var(--text-3)">'+parseFloat(r.handicap_before).toFixed(1)+' → '+parseFloat(r.handicap_after).toFixed(1)+'</div>' +
-          '<div style="font-size:12px;font-weight:700;color:'+col+'">'+arrow+' '+Math.abs(diff).toFixed(1)+'</div></div>';
-      }).join('') :
-      '<div style="font-size:12px;color:var(--text-3);text-align:center;padding:8px 0">No rounds yet</div>'
-    ) + '</div>';
+    '</div>';
 
   // ── PRIZES ──
   var prizesWon = [];
@@ -2132,6 +2122,92 @@ function closeModal() { document.getElementById('modal-overlay').classList.remov
 function openBrandingModal() {
 var s = societySettings || {};
 openModal('Society name', '<div class="field"><label>Society name</label><input type="text" id="brand-name" value="'+(s.society_name||s.name||'')+'"></div><button class="btn accent full" onclick="saveBranding()">Save</button>');
+}
+
+function renderCharts(uid) {
+  var data = window._chartData && window._chartData[uid];
+  if (!data) return;
+  var hcpData = data.hcp, ptsData = data.pts;
+  var cs = getComputedStyle(document.documentElement);
+  var borderCol = cs.getPropertyValue('--border').trim() || '#eee';
+  var textCol = cs.getPropertyValue('--text-3').trim() || '#888';
+  var accent = cs.getPropertyValue('--accent').trim() || '#C9A84C';
+
+  // ── Handicap line chart ──
+  var hcpC = document.getElementById('hcp_'+uid);
+  if (hcpC && hcpData.length >= 2) {
+    var W = hcpC.parentElement.clientWidth - 32;
+    hcpC.width = W; hcpC.height = 90;
+    var ctx = hcpC.getContext('2d');
+    var n = hcpData.length, pad = 12, cH = 68;
+    var vals = hcpData.map(function(d){return d.val;});
+    var mn = Math.min.apply(null,vals), mx = Math.max.apply(null,vals), rng = mx-mn||1;
+    function fx(i){return pad+i*(W-pad*2)/(n-1);}
+    function fy(v){return pad+cH-(((v-mn)/rng)*cH);}
+    var grad = ctx.createLinearGradient(0,0,0,90);
+    grad.addColorStop(0,'rgba(22,163,74,0.2)'); grad.addColorStop(1,'rgba(22,163,74,0)');
+    var st1 = null;
+    function animHcp(ts) {
+      if(!st1) st1=ts;
+      var prog = Math.min(1,(ts-st1)/700);
+      var ease = 1-Math.pow(1-prog,3);
+      ctx.clearRect(0,0,W,90);
+      var drawN = Math.max(2,Math.round(ease*(n-1))+1);
+      ctx.beginPath(); ctx.moveTo(fx(0),fy(vals[0]));
+      for(var i=1;i<drawN;i++){var cx=(fx(i-1)+fx(i))/2;ctx.bezierCurveTo(cx,fy(vals[i-1]),cx,fy(vals[i]),fx(i),fy(vals[i]));}
+      ctx.lineTo(fx(drawN-1),pad+cH); ctx.lineTo(fx(0),pad+cH); ctx.closePath();
+      ctx.fillStyle=grad; ctx.fill();
+      ctx.beginPath(); ctx.moveTo(fx(0),fy(vals[0]));
+      for(var j=1;j<drawN;j++){var cx2=(fx(j-1)+fx(j))/2;ctx.bezierCurveTo(cx2,fy(vals[j-1]),cx2,fy(vals[j]),fx(j),fy(vals[j]));}
+      ctx.strokeStyle='#16a34a'; ctx.lineWidth=2.5; ctx.stroke();
+      for(var k=0;k<drawN;k++){
+        var dp=Math.min(1,Math.max(0,(ease*n-k)));
+        ctx.beginPath(); ctx.arc(fx(k),fy(vals[k]),3.5*dp,0,Math.PI*2);
+        ctx.fillStyle='#16a34a'; ctx.fill();
+        if(dp>=1){ctx.fillStyle=textCol;ctx.font='bold 9px DM Sans,sans-serif';ctx.textAlign='center';ctx.fillText(vals[k].toFixed(1),fx(k),fy(vals[k])-8);}
+      }
+      if(prog<1) requestAnimationFrame(animHcp);
+    }
+    requestAnimationFrame(animHcp);
+  }
+
+  // ── Points bar chart ──
+  var ptsC = document.getElementById('pts_'+uid);
+  if (ptsC && ptsData.length >= 1) {
+    var W2 = ptsC.parentElement.clientWidth - 32;
+    ptsC.width = W2; ptsC.height = 90;
+    var ctx2 = ptsC.getContext('2d');
+    var n2 = ptsData.length, pad2 = 8, cH2 = 68;
+    var vals2 = ptsData.map(function(d){return d.val;});
+    var mx2 = Math.max.apply(null,vals2)||1;
+    var bw = Math.min(32,(W2-pad2*2)/n2-4);
+    var avg2 = vals2.reduce(function(s,v){return s+v;},0)/n2;
+    var st2 = null;
+    function animPts(ts) {
+      if(!st2) st2=ts;
+      var prog2 = Math.min(1,(ts-st2)/700);
+      var ease2 = 1-Math.pow(1-prog2,3);
+      ctx2.clearRect(0,0,W2,90);
+      var avgY = pad2+cH2-(avg2/mx2)*cH2;
+      ctx2.strokeStyle=borderCol; ctx2.lineWidth=1; ctx2.setLineDash([3,3]);
+      ctx2.beginPath(); ctx2.moveTo(pad2,avgY); ctx2.lineTo(W2-pad2,avgY); ctx2.stroke();
+      ctx2.setLineDash([]);
+      for(var i=0;i<n2;i++){
+        var barDelay=i/n2;
+        var barProg=Math.min(1,Math.max(0,(ease2-barDelay)/(1-barDelay+0.001)));
+        var bh=(vals2[i]/mx2)*cH2*barProg;
+        var x2=pad2+(i*(W2-pad2*2)/n2)+(W2-pad2*2)/n2/2-bw/2;
+        var y2=pad2+cH2-bh;
+        ctx2.fillStyle=vals2[i]===mx2?accent:'rgba(201,168,76,0.5)';
+        ctx2.beginPath();
+        if(ctx2.roundRect){ctx2.roundRect(x2,y2,bw,bh,Math.min(4,bw/2));}else{ctx2.rect(x2,y2,bw,bh);}
+        ctx2.fill();
+        if(barProg>=1){ctx2.fillStyle=textCol;ctx2.font='bold 9px DM Sans,sans-serif';ctx2.textAlign='center';ctx2.fillText(vals2[i],x2+bw/2,y2-4);}
+      }
+      if(prog2<1) requestAnimationFrame(animPts);
+    }
+    requestAnimationFrame(animPts);
+  }
 }
 
 function buildProgressionCharts(rounds, player) {
