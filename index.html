@@ -1527,7 +1527,8 @@ function evRow(ev, isPast) {
     if (ev.published) {
       actionBtn = '<button onclick="openEventResults(\''+ev.id+'\')" style="margin:0 14px 10px;width:calc(100% - 28px);padding:10px;border-radius:var(--radius);border:none;background:var(--primary);color:var(--accent);font-size:13px;font-weight:700;cursor:pointer;font-family:DM Sans,sans-serif">&#9654; View results</button>';
     }
-    return '<div class="event-card" style="'+(isPast?'opacity:0.7':'')+';margin-bottom:10px;border-radius:var(--radius-lg);box-shadow:0 2px 8px rgba(0,0,0,0.06)">' +
+    var showFaded = isPast && ev.published;
+return '<div class="event-card" style="'+(showFaded?'opacity:0.6':'')+';margin-bottom:10px;border-radius:var(--radius-lg);box-shadow:0 2px 8px rgba(0,0,0,0.06)">' +
       '<div style="display:flex;align-items:center;gap:14px;padding:14px 16px">' +
         '<div class="ev-date"><div class="ev-day">'+parseInt(p[2])+'</div><div class="ev-month">'+mo[parseInt(p[1])-1]+'</div></div>' +
         '<div style="flex:1;min-width:0">' +
@@ -2230,6 +2231,7 @@ standardPrizes.forEach(function(p){
 var el = document.getElementById('prize-'+p.replace(/ /g,'-'));
 if (el && el.checked) prizes.push(p);
 });
+prizes = prizes.filter(function(p){ return ['Closest to pin','Long drive','Best gross'].indexOf(p) === -1; });
 var custom = document.getElementById('ep-custom') ? document.getElementById('ep-custom').value.trim() : '';
 if (custom) prizes.push(custom);
 try {
@@ -3381,13 +3383,14 @@ verified: false
 
 try {
 var res;
-if (existing) {
-res = await apiPatch('rounds?id=eq.'+existing.id, payload);
-var idx = db.rounds.findIndex(function(r){ return r.id===existing.id; });
-if (idx >= 0) db.rounds[idx] = Object.assign({}, db.rounds[idx], payload, {id:existing.id});
+if (existingId) {
+res = await apiPatch('rounds?id=eq.'+existingId, payload);
+var idx = db.rounds.findIndex(function(r){ return r.id===existingId; });
+if (idx >= 0) db.rounds[idx] = Object.assign({}, db.rounds[idx], payload, {id:existingId});
+else db.rounds.push(Object.assign({}, payload, {id:existingId}));
 } else {
 res = await apiPost('rounds', payload);
-db.rounds.push(res[0]);
+if (res && res[0]) db.rounds.push(res[0]);
 }
 toast('Score saved — '+totalPts+' pts', 'success');
 window._scoreEntry = null;
@@ -3597,34 +3600,67 @@ var playerOpts = '<option value="">— None —</option>' + db.players.map(funct
   return '<option value="'+p.id+'">'+p.name+'</option>';
 }).join('');
 
-// Always show front/back 9 for 18 hole events, closest to pin, long drive + any configured extras
+// Standard prizes — always shown
 var standardPrizes = [];
 if (holes === 18) {
-  standardPrizes.push({ id: 'front9', label: 'Best front 9' });
-  standardPrizes.push({ id: 'back9', label: 'Best back 9' });
+  standardPrizes.push({ id: 'front9', label: 'Best front 9', auto: true });
+  standardPrizes.push({ id: 'back9', label: 'Best back 9', auto: true });
 }
-standardPrizes.push({ id: 'closest', label: 'Closest to pin' });
-standardPrizes.push({ id: 'longdrive', label: 'Long drive' });
-standardPrizes.push({ id: 'bestgross', label: 'Best gross' });
-configuredPrizes.forEach(function(p){ standardPrizes.push({ id: 'custom_'+p, label: p }); });
+standardPrizes.push({ id: 'closest', label: 'Closest to pin', auto: false });
+standardPrizes.push({ id: 'longdrive', label: 'Long drive', auto: false });
+standardPrizes.push({ id: 'bestgross', label: 'Best gross', auto: true });
+// Add custom prizes, deduplicate against built-ins
+var builtInIds = ['closest','longdrive','bestgross','front9','back9'];
+configuredPrizes.forEach(function(p){
+  if (builtInIds.indexOf(p.toLowerCase().replace(/ /g,'_')) === -1) {
+    standardPrizes.push({ id: 'custom_'+p, label: p, auto: false });
+  }
+});
 
-// Restore any previously set winners
-var prev = window._extraPrizeWinners || {};
+// Auto-calculate front 9, back 9, best gross from rounds
+var evRounds = db.rounds.filter(function(r){ return r.event_id===eid && r.stableford_points != null; });
+function calcHalf(r, start, end) {
+  var scores = r.hole_scores ? (typeof r.hole_scores==='string'?JSON.parse(r.hole_scores):r.hole_scores) : [];
+  var pars = r.par_values ? (typeof r.par_values==='string'?JSON.parse(r.par_values):r.par_values) : [];
+  var sis = ev && ev.hole_sis ? (typeof ev.hole_sis==='string'?JSON.parse(ev.hole_sis):ev.hole_sis) : [];
+  var hcp = r.course_handicap || 0;
+  var pts = 0;
+  for (var i=start; i<end; i++) {
+    if (!scores[i]||!pars[i]) continue;
+    var str = hcp >= (sis[i]||i+1) ? 1 : 0;
+    pts += Math.max(0, 2-(parseInt(scores[i])-parseInt(pars[i])-str));
+  }
+  return pts;
+}
+var autoWinners = {};
+if (evRounds.length) {
+  if (holes === 18) {
+    var f9 = evRounds.slice().sort(function(a,b){ return calcHalf(b,0,9)-calcHalf(a,0,9); })[0];
+    var b9 = evRounds.slice().sort(function(a,b){ return calcHalf(b,9,18)-calcHalf(a,9,18); })[0];
+    var f9p = db.players.filter(function(p){ return f9&&p.id===f9.player_id; })[0];
+    var b9p = db.players.filter(function(p){ return b9&&p.id===b9.player_id; })[0];
+    if (f9p) autoWinners['front9'] = f9p.id;
+    if (b9p) autoWinners['back9'] = b9p.id;
+  }
+  var bg = evRounds.filter(function(r){ return r.gross_score; }).sort(function(a,b){ return (a.gross_score||99)-(b.gross_score||99); })[0];
+  var bgp = db.players.filter(function(p){ return bg&&p.id===bg.player_id; })[0];
+  if (bgp) autoWinners['bestgross'] = bgp.id;
+}
+
 var prevById = window._extraPrizeWinnersById || {};
-
 var prizeFields = standardPrizes.map(function(prize) {
-  var prevVal = prevById[prize.id] || '';
+  var preselect = prevById[prize.id] || autoWinners[prize.id] || '';
+  var autoTag = (prize.auto && autoWinners[prize.id]) ? '<span style="font-size:10px;background:rgba(201,168,76,0.15);color:var(--accent-dark);border-radius:4px;padding:2px 6px;margin-left:6px;font-weight:600">Auto</span>' : '';
+  var opts = playerOpts.replace('value="'+preselect+'"', 'value="'+preselect+'" selected');
   return '<div style="background:var(--bg);border-radius:var(--radius);padding:12px;margin-bottom:8px">' +
-    '<div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px">'+prize.label+'</div>' +
-    '<select id="ep-'+prize.id+'" style="width:100%;padding:10px;border-radius:var(--radius);border:1px solid var(--border-strong);background:var(--surface);font-size:13px;font-family:DM Sans,sans-serif">' +
-    playerOpts.replace('value="'+prevVal+'"', 'value="'+prevVal+'" selected') +
-    '</select>' +
+    '<div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px">'+prize.label+autoTag+'</div>' +
+    '<select id="ep-'+prize.id+'" style="width:100%;padding:10px;border-radius:var(--radius);border:1px solid var(--border-strong);background:var(--surface);font-size:13px;font-family:DM Sans,sans-serif">'+opts+'</select>' +
     '</div>';
 }).join('');
 
 document.getElementById('modal-title').textContent = 'Honours & prizes';
 document.getElementById('modal-body').innerHTML =
-  '<p style="font-size:13px;color:var(--text-2);margin-bottom:14px">Assign winners for each prize. Leave blank to skip. These appear on the result post.</p>' +
+  '<p style="font-size:13px;color:var(--text-2);margin-bottom:14px">Winners auto-calculated where possible. Override any by selecting a different player.</p>' +
   prizeFields +
   '<button onclick="saveExtraPrizesAndPublish(\''+eid+'\')" class="btn accent full" style="margin-top:14px">&#10003; Save &amp; publish</button>' +
   '<button onclick="openReviewPublish(\''+eid+'\')" class="btn full" style="margin-top:8px">&#8592; Back</button>';
