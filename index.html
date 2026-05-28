@@ -1723,10 +1723,12 @@ function openPlayerProfile(pid) {
     ['Overview','Prizes','Rounds','Stats'].map(function(t,i){
       return '<button id="'+tid+'_tab'+i+'" onclick="_ppTab(\'' + tid + '\','+i+')" style="flex:1;padding:8px 4px;border:none;background:none;font-size:12px;font-weight:600;cursor:pointer;border-bottom:2px solid '+(i===0?'var(--primary)':'transparent')+';color:'+(i===0?'var(--primary)':'var(--text-3)')+'">'+t+'</button>';
     }).join('') + '</div>' +
+    '<div style="min-height:260px">' +
     '<div id="'+tid+'_panel0">'+overview+'</div>' +
     '<div id="'+tid+'_panel1" style="display:none">'+prizes+'</div>' +
     '<div id="'+tid+'_panel2" style="display:none">'+rounds+'</div>' +
-    '<div id="'+tid+'_panel3" style="display:none">'+stats+'</div>';
+    '<div id="'+tid+'_panel3" style="display:none">'+stats+'</div>' +
+    '</div>';
 
   openModal(player.name, tabContent);
 }
@@ -1934,11 +1936,12 @@ function renderProfile() {
     ['Overview','Prizes','Rounds','Stats'].map(function(t,i){
       return '<button id="'+tid+'_tab'+i+'" onclick="_ppTab(\''+tid+'\','+i+')" style="flex:1;padding:10px 4px;border:none;background:none;font-size:12px;font-weight:600;cursor:pointer;border-bottom:2px solid '+(i===0?'var(--primary)':'transparent')+';color:'+(i===0?'var(--primary)':'var(--text-3)')+';font-family:DM Sans,sans-serif">'+t+'</button>';
     }).join('') + '</div>' +
+    '<div style="min-height:260px">' +
     '<div id="'+tid+'_panel0">'+overview+'</div>' +
     '<div id="'+tid+'_panel1" style="display:none">'+prizes+'</div>' +
     '<div id="'+tid+'_panel2" style="display:none">'+rounds+'</div>' +
     '<div id="'+tid+'_panel3" style="display:none">'+stats+'</div>' +
-    '';
+    '</div>';
 
   el.innerHTML = tabContent;
 
@@ -2212,161 +2215,56 @@ function renderCharts(uid) {
 
 function buildProgressionCharts(rounds, player) {
   if (!rounds || !rounds.length) {
-    return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;text-align:center;color:var(--text-3);font-size:13px">Play your first round to see your stats</div>';
+    return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;text-align:center;color:var(--text-3);font-size:13px">Play your first round to see your stats</div>';
   }
   var sorted = rounds.slice().sort(function(a,b){ return (a.created_at||'').localeCompare(b.created_at||''); });
   var uid = player.id.slice(0,6);
-  var html = '';
 
-  // ── Handicap chart ──
   var hcpData = sorted.filter(function(r){ return r.handicap_after != null; })
     .map(function(r,i){ return { x:i, val:parseFloat(r.handicap_after) }; });
-
-  if (hcpData.length >= 2) {
-    var first = hcpData[0].val, last = hcpData[hcpData.length-1].val;
-    var diff = (last - first).toFixed(1);
-    var improved = last < first;
-    var trendCol = improved ? '#16a34a' : '#dc2626';
-    var trendLabel = improved ? '▼ '+Math.abs(diff) : '▲ '+Math.abs(diff);
-    html +=
-      '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:12px">' +
-        '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px">' +
-          '<div>' +
-            '<div style="font-size:13px;font-weight:700;color:var(--text)">Handicap</div>' +
-            '<div style="font-size:11px;color:var(--text-3);margin-top:2px">'+hcpData.length+' rounds tracked</div>' +
-          '</div>' +
-          '<div style="text-align:right">' +
-            '<div style="font-size:28px;font-weight:800;color:var(--text);line-height:1">'+last.toFixed(1)+'</div>' +
-            '<div style="font-size:12px;font-weight:700;color:'+trendCol+'">'+trendLabel+'</div>' +
-          '</div>' +
-        '</div>' +
-        '<canvas id="hcp_'+uid+'" style="width:100%;height:90px;display:block;margin-top:8px"></canvas>' +
-      '</div>';
-  }
-
-  // ── Points per round chart ──
   var ptsData = sorted.filter(function(r){ return r.stableford_points != null; })
     .map(function(r,i){ return { x:i, val:r.stableford_points||0 }; });
+
+  // Store data for deferred rendering when tab becomes visible
+  window._chartData = window._chartData || {};
+  window._chartData[uid] = { hcp: hcpData, pts: ptsData };
+
+  var html = '';
+
+  if (hcpData.length >= 2) {
+    var last = hcpData[hcpData.length-1].val;
+    var first = hcpData[0].val;
+    var diff = Math.abs(last - first).toFixed(1);
+    var improved = last < first;
+    html +=
+      '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:12px">' +
+        '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px">' +
+          '<div><div style="font-size:13px;font-weight:700;color:var(--text)">Handicap</div>' +
+          '<div style="font-size:11px;color:var(--text-3);margin-top:2px">'+hcpData.length+' rounds</div></div>' +
+          '<div style="text-align:right">' +
+            '<div style="font-size:28px;font-weight:800;color:var(--text);line-height:1">'+last.toFixed(1)+'</div>' +
+            '<div style="font-size:12px;font-weight:700;color:'+(improved?'#16a34a':'#dc2626')+'">'+(improved?'▼ ':'▲ ')+diff+'</div>' +
+          '</div>' +
+        '</div>' +
+        '<canvas id="hcp_'+uid+'" style="width:100%;height:90px;display:block"></canvas>' +
+      '</div>';
+  }
 
   if (ptsData.length >= 1) {
     var avg = Math.round(ptsData.reduce(function(s,p){return s+p.val;},0)/ptsData.length);
     var best = Math.max.apply(null, ptsData.map(function(p){return p.val;}));
     html +=
       '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:12px">' +
-        '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px">' +
-          '<div>' +
-            '<div style="font-size:13px;font-weight:700;color:var(--text)">Points per round</div>' +
-            '<div style="font-size:11px;color:var(--text-3);margin-top:2px">Avg '+avg+' pts · Best '+best+' pts</div>' +
-          '</div>' +
+        '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px">' +
+          '<div><div style="font-size:13px;font-weight:700;color:var(--text)">Points per round</div>' +
+          '<div style="font-size:11px;color:var(--text-3);margin-top:2px">Avg '+avg+' · Best '+best+' pts</div></div>' +
         '</div>' +
-        '<canvas id="pts_'+uid+'" style="width:100%;height:90px;display:block;margin-top:8px"></canvas>' +
+        '<canvas id="pts_'+uid+'" style="width:100%;height:90px;display:block"></canvas>' +
       '</div>';
   }
 
-  // ── Inject canvas rendering script ──
-  var hcpJson = JSON.stringify(hcpData);
-  var ptsJson = JSON.stringify(ptsData);
-  html += '<sc'+'ript>(function(){'
-    + 'var uid="'+uid+'";'
-    + 'var hcpData='+hcpJson+';'
-    + 'var ptsData='+ptsJson+';'
-    + 'function drawHcp(){'
-    +   'var c=document.getElementById("hcp_"+uid);if(!c)return;'
-    +   'var W=c.parentElement.clientWidth-32;c.width=W;c.height=90;'
-    +   'var ctx=c.getContext("2d");'
-    +   'var n=hcpData.length;if(n<2)return;'
-    +   'var pad=12,cW=W-pad*2,cH=70;'
-    +   'var vals=hcpData.map(function(d){return d.val;});'
-    +   'var mn=Math.min.apply(null,vals),mx=Math.max.apply(null,vals),rng=mx-mn||1;'
-    +   'function fx(i){return pad+i*(cW/(n-1));}'
-    +   'function fy(v){return pad+cH-(((v-mn)/rng)*cH);}'
-    +   'var cs=getComputedStyle(document.documentElement);'
-    +   'var green="#16a34a";'
-    +   'var borderCol=cs.getPropertyValue("--border").trim()||"#eee";'
-    +   // Gradient fill
-    +   'var grad=ctx.createLinearGradient(0,0,0,90);'
-    +   'grad.addColorStop(0,"rgba(22,163,74,0.2)");grad.addColorStop(1,"rgba(22,163,74,0)");'
-    +   // Animate
-    +   'var startTime=null;'
-    +   'function animate(ts){'
-    +     'if(!startTime)startTime=ts;'
-    +     'var prog=Math.min(1,(ts-startTime)/700);'
-    +     'var ease=1-Math.pow(1-prog,3);'
-    +     'ctx.clearRect(0,0,W,90);'
-    +     // Draw grid line
-    +     'ctx.strokeStyle=borderCol;ctx.lineWidth=0.5;ctx.setLineDash([3,3]);'
-    +     'ctx.beginPath();var midY=pad+cH/2;ctx.moveTo(pad,midY);ctx.lineTo(W-pad,midY);ctx.stroke();'
-    +     'ctx.setLineDash([]);'
-    +     // Partial path up to progress
-    +     'var drawN=Math.max(2,Math.round(ease*(n-1))+1);'
-    +     // Fill
-    +     'ctx.beginPath();ctx.moveTo(fx(0),fy(vals[0]));'
-    +     'for(var i=1;i<drawN;i++){var cx=(fx(i-1)+fx(i))/2;ctx.bezierCurveTo(cx,fy(vals[i-1]),cx,fy(vals[i]),fx(i),fy(vals[i]));}'
-    +     'ctx.lineTo(fx(drawN-1),pad+cH);ctx.lineTo(fx(0),pad+cH);ctx.closePath();'
-    +     'ctx.fillStyle=grad;ctx.fill();'
-    +     // Line
-    +     'ctx.beginPath();ctx.moveTo(fx(0),fy(vals[0]));'
-    +     'for(var i=1;i<drawN;i++){var cx=(fx(i-1)+fx(i))/2;ctx.bezierCurveTo(cx,fy(vals[i-1]),cx,fy(vals[i]),fx(i),fy(vals[i]));}'
-    +     'ctx.strokeStyle=green;ctx.lineWidth=2.5;ctx.stroke();'
-    +     // Dots
-    +     'for(var i=0;i<drawN;i++){'
-    +       'var dotProg=Math.min(1,Math.max(0,(ease*n-i)));'
-    +       'ctx.beginPath();ctx.arc(fx(i),fy(vals[i]),3.5*dotProg,0,Math.PI*2);'
-    +       'ctx.fillStyle=green;ctx.fill();'
-    +       'if(dotProg>=1){ctx.fillStyle=cs.getPropertyValue("--text-3")||"#888";ctx.font="bold 9px DM Sans,sans-serif";ctx.textAlign="center";ctx.fillText(vals[i].toFixed(1),fx(i),fy(vals[i])-8);}'
-    +     '}'
-    +     'if(prog<1)requestAnimationFrame(animate);'
-    +   '}'
-    +   'requestAnimationFrame(animate);'
-    + '}'
-    // Points bar chart
-    + 'function drawPts(){'
-    +   'var c=document.getElementById("pts_"+uid);if(!c)return;'
-    +   'var W=c.parentElement.clientWidth-32;c.width=W;c.height=90;'
-    +   'var ctx=c.getContext("2d");'
-    +   'var n=ptsData.length;if(!n)return;'
-    +   'var pad=8,cH=70;'
-    +   'var vals=ptsData.map(function(d){return d.val;});'
-    +   'var mx=Math.max.apply(null,vals)||1;'
-    +   'var bw=Math.min(28,(W-pad*2)/n-4);'
-    +   'var cs=getComputedStyle(document.documentElement);'
-    +   'var gold=cs.getPropertyValue("--accent").trim()||"#C9A84C";'
-    +   'var borderCol=cs.getPropertyValue("--border").trim()||"#eee";'
-    +   'var startTime=null;'
-    +   'function animate(ts){'
-    +     'if(!startTime)startTime=ts;'
-    +     'var prog=Math.min(1,(ts-startTime)/700);'
-    +     'var ease=1-Math.pow(1-prog,3);'
-    +     'ctx.clearRect(0,0,W,90);'
-    +     // Avg line
-    +     'var avg=vals.reduce(function(s,v){return s+v;},0)/n;'
-    +     'var avgY=pad+cH-(avg/mx)*cH;'
-    +     'ctx.strokeStyle=borderCol;ctx.lineWidth=1;ctx.setLineDash([3,3]);'
-    +     'ctx.beginPath();ctx.moveTo(pad,avgY);ctx.lineTo(W-pad,avgY);ctx.stroke();'
-    +     'ctx.setLineDash([]);'
-    +     'for(var i=0;i<n;i++){'
-    +       'var barDelay=i/n;'
-    +       'var barProg=Math.min(1,Math.max(0,(ease-barDelay)/(1-barDelay+0.001)));'
-    +       'var bh=(vals[i]/mx)*cH*barProg;'
-    +       'var x=pad+(i*(W-pad*2)/n)+(W-pad*2)/n/2-bw/2;'
-    +       'var y=pad+cH-bh;'
-    +       'var isBest=vals[i]===mx;'
-    +       'ctx.fillStyle=isBest?"rgba(201,168,76,1)":"rgba(201,168,76,0.5)";'
-    +       'ctx.beginPath();'
-    +       'var r2=Math.min(4,bw/2);'
-    +       'ctx.roundRect?ctx.roundRect(x,y,bw,bh,r2):ctx.rect(x,y,bw,bh);'
-    +       'ctx.fill();'
-    +       'if(barProg>=1){ctx.fillStyle=cs.getPropertyValue("--text-3")||"#888";ctx.font="bold 9px DM Sans,sans-serif";ctx.textAlign="center";ctx.fillText(vals[i],x+bw/2,y-4);}'
-    +     '}'
-    +     'if(prog<1)requestAnimationFrame(animate);'
-    +   '}'
-    +   'requestAnimationFrame(animate);'
-    + '}'
-    // Run after DOM settles
-    + 'setTimeout(function(){drawHcp();drawPts();},50);'
-    + '})();<\/sc'+'ript>';
-
-  return html || '';
+  html += '<div id="chart_uid" data-uid="'+uid+'" style="display:none"></div>';
+  return html || '<div style="padding:20px;text-align:center;color:var(--text-3)">Not enough data yet</div>';
 }
 
 
