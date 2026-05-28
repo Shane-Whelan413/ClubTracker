@@ -1990,14 +1990,14 @@ function renderProfile() {
           '<span style="font-size:12px;color:var(--text-3)">' + (pw.date ? fmtDate(pw.date) : '') + '</span>' +
         '</div>';
       }).join('');
-      return '<div style="border:0.5px solid var(--border);border-radius:var(--radius-lg);overflow:hidden">' +
+      return '<div style="border:' + prizeBorder(key) + ';border-radius:var(--radius-lg);overflow:hidden">' +
         '<div onclick="togglePrizeGroup(this)" data-panel="' + panelId + '" ' +
-        'style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--bg);cursor:pointer">' +
-          '<div style="display:flex;align-items:center;gap:10px">' +
-            '<span style="font-size:18px">' + emoji + '</span>' +
+        'style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:' + prizeBg(key) + ';cursor:pointer">' +
+          '<div style="display:flex;align-items:center;gap:12px">' +
+            prizeIcon(key) +
             '<div>' +
-              '<div style="font-size:14px;font-weight:600;color:var(--text)">' + key + '</div>' +
-              '<div style="font-size:11px;color:var(--text-3);margin-top:1px">' + count + ' ' + (count === 1 ? 'win' : 'wins') + '</div>' +
+              '<div style="font-size:14px;font-weight:600;color:' + prizeColor(key) + '">' + key + '</div>' +
+              '<div style="font-size:11px;color:var(--text-3);margin-top:1px">' + count + ' ' + (count === 1 ? 'win' : 'wins') + ' this season</div>' +
             '</div>' +
           '</div>' +
           '<span class="prize-arrow" style="font-size:11px;color:var(--text-3)">▼</span>' +
