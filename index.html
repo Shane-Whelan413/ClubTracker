@@ -1676,7 +1676,7 @@ function openPlayerProfile(pid) {
       var ev = db.events.filter(function(e){ return e.id===r.event_id; })[0];
       var pts = r.stableford_points || 0;
       var isBest = best !== null && pts === best;
-      return '<div style="display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:var(--radius);padding:10px 12px;'+(isBest?'border:1.5px solid var(--accent)':'')+'">' +
+      return '<div onclick="openRoundDetail(\''+r.id+'\')" style="display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:var(--radius);padding:10px 12px;cursor:pointer;'+(isBest?'border:1.5px solid var(--accent)':'')+'">' +
         '<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(ev?ev.course_name:'Event')+'</div>' +
         '<div style="font-size:11px;color:var(--text-3)">'+(ev?fmtDate(ev.event_date):'')+(isBest?' · Best round':'')+'</div></div>' +
         '<div style="text-align:right;flex-shrink:0"><div style="font-size:16px;font-weight:800;color:var(--text)">'+pts+'</div>' +
