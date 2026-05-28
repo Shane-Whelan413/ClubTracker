@@ -141,6 +141,8 @@ overscroll-behavior: contain;
 .content-watermark img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
 .section { display: none; }
 .section.active { display: block; animation: fadeUp 0.2s ease; }
+@keyframes prizeShimmer { 0%{opacity:.5} 50%{opacity:1} 100%{opacity:.5} }
+.prize-shimmer { animation: prizeShimmer 2s ease-in-out infinite; }
 @keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
 
 /* ── Auth screen ── */
@@ -1768,16 +1770,24 @@ function openPlayerProfile(pid) {
     if (!prizeGroups[key]) prizeGroups[key] = { items: [], medal: pw.medal };
     prizeGroups[key].items.push(pw);
   });
-  var prizeEmoji = {
-    '1st place': '🥇', '2nd place': '🥈', '3rd place': '🥉',
-    'Closest to pin': '📍', 'Long drive': '🏌️', 'Best front 9': '🔟',
-    'Best back 9': '🔟', 'Best gross': '🎯', 'Birdie prize': '🐦'
-  };
+  function prizeIcon(key) {
+    var tG = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#B8860B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="prize-shimmer" style="flex-shrink:0"><path d="M6 9H4a2 2 0 0 1-2-2V5h4"/><path d="M18 9h2a2 2 0 0 0 2-2V5h-4"/><path d="M6 9a6 6 0 0 0 12 0"/><path d="M12 15v4"/><path d="M8 19h8"/><rect x="9" y="3" width="6" height="6" rx="1"/></svg>';
+    var tS = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M6 9H4a2 2 0 0 1-2-2V5h4"/><path d="M18 9h2a2 2 0 0 0 2-2V5h-4"/><path d="M6 9a6 6 0 0 0 12 0"/><path d="M12 15v4"/><path d="M8 19h8"/><rect x="9" y="3" width="6" height="6" rx="1"/></svg>';
+    var tB = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#8B4513" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M6 9H4a2 2 0 0 1-2-2V5h4"/><path d="M18 9h2a2 2 0 0 0 2-2V5h-4"/><path d="M6 9a6 6 0 0 0 12 0"/><path d="M12 15v4"/><path d="M8 19h8"/><rect x="9" y="3" width="6" height="6" rx="1"/></svg>';
+    var flag = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--text-2)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M4 21V4"/><path d="M4 4l12 4-12 4"/></svg>';
+    var arrow = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--text-2)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>';
+    var target = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--text-2)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1" fill="var(--text-2)"/></svg>';
+    var star = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--text-2)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+    var m = {'1st place':tG,'2nd place':tS,'3rd place':tB,'Closest to pin':flag,'Long drive':arrow,'Best gross':target,'Best front 9':star,'Best back 9':star,'Birdie prize':star};
+    return m[key] || star;
+  }
+  function prizeBg(key) { return key==='1st place'?'#fffbf0':key==='3rd place'?'#fdf6f0':'var(--bg)'; }
+  function prizeColor(key) { return key==='1st place'?'#92681a':key==='3rd place'?'#7a3b10':'var(--text)'; }
+  function prizeBorder(key) { return key==='1st place'?'0.5px solid #B8860B44':'0.5px solid var(--border)'; }
   var prizes = Object.keys(prizeGroups).length ?
     '<div style="display:flex;flex-direction:column;gap:8px">' +
     Object.keys(prizeGroups).map(function(key, gi) {
       var grp = prizeGroups[key];
-      var emoji = prizeEmoji[key] || '🏆';
       var count = grp.items.length;
       var panelId = 'prize_grp_' + gi;
       var events = grp.items.map(function(pw, ei) {
@@ -1787,14 +1797,14 @@ function openPlayerProfile(pid) {
           '<span style="font-size:12px;color:var(--text-3)">' + (pw.date ? fmtDate(pw.date) : '') + '</span>' +
         '</div>';
       }).join('');
-      return '<div style="border:0.5px solid var(--border);border-radius:var(--radius-lg);overflow:hidden">' +
+      return '<div style="border:' + prizeBorder(key) + ';border-radius:var(--radius-lg);overflow:hidden">' +
         '<div onclick="togglePrizeGroup(this)" data-panel="' + panelId + '" ' +
-        'style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--bg);cursor:pointer">' +
-          '<div style="display:flex;align-items:center;gap:10px">' +
-            '<span style="font-size:18px">' + emoji + '</span>' +
+        'style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:' + prizeBg(key) + ';cursor:pointer">' +
+          '<div style="display:flex;align-items:center;gap:12px">' +
+            prizeIcon(key) +
             '<div>' +
-              '<div style="font-size:14px;font-weight:600;color:var(--text)">' + key + '</div>' +
-              '<div style="font-size:11px;color:var(--text-3);margin-top:1px">' + count + ' ' + (count === 1 ? 'win' : 'wins') + '</div>' +
+              '<div style="font-size:14px;font-weight:600;color:' + prizeColor(key) + '">' + key + '</div>' +
+              '<div style="font-size:11px;color:var(--text-3);margin-top:1px">' + count + ' ' + (count === 1 ? 'win' : 'wins') + ' this season</div>' +
             '</div>' +
           '</div>' +
           '<span class="prize-arrow" style="font-size:11px;color:var(--text-3)">▼</span>' +
@@ -1953,16 +1963,24 @@ function renderProfile() {
     if (!prizeGroups[key]) prizeGroups[key] = { items: [], medal: pw.medal };
     prizeGroups[key].items.push(pw);
   });
-  var prizeEmoji = {
-    '1st place': '🥇', '2nd place': '🥈', '3rd place': '🥉',
-    'Closest to pin': '📍', 'Long drive': '🏌️', 'Best front 9': '🔟',
-    'Best back 9': '🔟', 'Best gross': '🎯', 'Birdie prize': '🐦'
-  };
+  function prizeIcon(key) {
+    var tG = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#B8860B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="prize-shimmer" style="flex-shrink:0"><path d="M6 9H4a2 2 0 0 1-2-2V5h4"/><path d="M18 9h2a2 2 0 0 0 2-2V5h-4"/><path d="M6 9a6 6 0 0 0 12 0"/><path d="M12 15v4"/><path d="M8 19h8"/><rect x="9" y="3" width="6" height="6" rx="1"/></svg>';
+    var tS = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M6 9H4a2 2 0 0 1-2-2V5h4"/><path d="M18 9h2a2 2 0 0 0 2-2V5h-4"/><path d="M6 9a6 6 0 0 0 12 0"/><path d="M12 15v4"/><path d="M8 19h8"/><rect x="9" y="3" width="6" height="6" rx="1"/></svg>';
+    var tB = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#8B4513" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M6 9H4a2 2 0 0 1-2-2V5h4"/><path d="M18 9h2a2 2 0 0 0 2-2V5h-4"/><path d="M6 9a6 6 0 0 0 12 0"/><path d="M12 15v4"/><path d="M8 19h8"/><rect x="9" y="3" width="6" height="6" rx="1"/></svg>';
+    var flag = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--text-2)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M4 21V4"/><path d="M4 4l12 4-12 4"/></svg>';
+    var arrow = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--text-2)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>';
+    var target = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--text-2)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1" fill="var(--text-2)"/></svg>';
+    var star = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--text-2)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+    var m = {'1st place':tG,'2nd place':tS,'3rd place':tB,'Closest to pin':flag,'Long drive':arrow,'Best gross':target,'Best front 9':star,'Best back 9':star,'Birdie prize':star};
+    return m[key] || star;
+  }
+  function prizeBg(key) { return key==='1st place'?'#fffbf0':key==='3rd place'?'#fdf6f0':'var(--bg)'; }
+  function prizeColor(key) { return key==='1st place'?'#92681a':key==='3rd place'?'#7a3b10':'var(--text)'; }
+  function prizeBorder(key) { return key==='1st place'?'0.5px solid #B8860B44':'0.5px solid var(--border)'; }
   var prizes = Object.keys(prizeGroups).length ?
     '<div style="display:flex;flex-direction:column;gap:8px">' +
     Object.keys(prizeGroups).map(function(key, gi) {
       var grp = prizeGroups[key];
-      var emoji = prizeEmoji[key] || '🏆';
       var count = grp.items.length;
       var panelId = 'rprize_grp_' + gi;
       var events = grp.items.map(function(pw, ei) {
