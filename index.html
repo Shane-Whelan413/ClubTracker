@@ -1592,10 +1592,10 @@ function evRow(ev, isPast) {
           return '<div style="background:var(--bg);border-radius:6px;padding:5px 10px;font-size:12px;color:var(--text-2)">' +
             pl.name.split(' ')[0]+' <strong style="color:var(--text)">'+courseHcp+'</strong></div>';
         }).join('');
-        hcpBreakdown = '<div style="border-top:0.5px solid var(--border)">' +
-          '<button onclick="var d=document.getElementById(\''+hcpId+'\');d.style.display=d.style.display===\'none\'?\'block\':\'none\';this.textContent=d.style.display===\'none\'?\'Playing handicaps &#9660;\':\'Playing handicaps &#9650;\'" style="width:100%;padding:10px 14px;background:none;border:none;text-align:left;font-size:12px;font-weight:700;color:var(--text-2);cursor:pointer;display:flex;align-items:center;justify-content:space-between;font-family:DM Sans,sans-serif">Playing handicaps <span>&#9660;</span></button>' +
-          '<div id="'+hcpId+'" style="display:none;padding:0 14px 10px"><div style="display:flex;flex-wrap:wrap;gap:4px">'+hcpPills+'</div></div>' +
-          '</div>';
+        hcpBreakdown = '<div style="border-top:0.5px solid var(--border);padding:8px 14px">' +
+          '<button onclick="openHandicapSheet(\''+ev.id+'\')" style="width:100%;padding:10px 14px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);color:var(--text-2);font-size:12px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif;display:flex;align-items:center;justify-content:space-between">' +
+          '<span>Playing handicaps</span><span style="font-size:11px;color:var(--text-3)">'+activePlayers.length+' players ›</span>' +
+          '</button></div>';
       }
     }
     var actionBtn = '';
@@ -1624,6 +1624,27 @@ return '<div class="event-card" style="'+(showFaded?'opacity:0.6':'')+';margin-b
     '</div>';
 }
 el.innerHTML = adminBtn + upcoming.map(function(e){ return evRow(e,false); }).join('') + (past.length ? '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-3);padding:8px 2px;margin-top:6px">Past events</div>' + past.map(function(e){ return evRow(e,true); }).join('') : '');
+}
+
+function openHandicapSheet(eid) {
+  var ev = db.events.filter(function(e){ return e.id === eid; })[0];
+  if (!ev) return;
+  var slope = parseFloat(ev.slope_rating) || 113;
+  var players = db.players.filter(function(p){ return p.status !== 'pending'; })
+    .sort(function(a,b){ return parseFloat(a.handicap_index||0) - parseFloat(b.handicap_index||0); });
+  var rows = players.map(function(p) {
+    var courseHcp = Math.round(parseFloat(p.handicap_index||0) * slope / 113);
+    return '<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:0.5px solid var(--border)">' +
+      '<div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--text)">' + p.name + '</div>' +
+      '<div style="font-size:11px;color:var(--text-3)">Index ' + parseFloat(p.handicap_index||0).toFixed(1) + '</div></div>' +
+      '<div style="text-align:right"><div style="font-size:20px;font-weight:800;color:var(--text)">' + courseHcp + '</div>' +
+      '<div style="font-size:10px;color:var(--text-3)">playing hcp</div></div>' +
+    '</div>';
+  }).join('');
+  openModal((ev.course_name||'Event') + ' \u2014 Playing Handicaps',
+    '<div style="background:var(--bg);border-radius:var(--radius);padding:8px 12px;margin-bottom:12px;font-size:12px;color:var(--text-3)">Slope ' + slope + ' \u00b7 sorted by handicap</div>' +
+    (rows || '<div style="text-align:center;padding:20px;color:var(--text-3)">No players</div>')
+  );
 }
 
 function openEventResults(eid) {
