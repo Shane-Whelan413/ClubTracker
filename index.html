@@ -3837,12 +3837,18 @@ if (evRounds.length) {
 var prevById = window._extraPrizeWinnersById || {};
 var prizeFields = standardPrizes.map(function(prize) {
   var preselect = prevById[prize.id] || autoWinners[prize.id] || '';
-  var autoTag = (prize.auto && autoWinners[prize.id]) ? '<span style="font-size:10px;background:rgba(201,168,76,0.15);color:var(--accent-dark);border-radius:4px;padding:2px 6px;margin-left:6px;font-weight:600">Auto</span>' : '';
+  var isAuto = prize.auto && autoWinners[prize.id];
+  var autoTag = isAuto ? '<span style="font-size:11px;font-weight:600;background:rgba(16,185,129,0.12);color:#065f46;padding:2px 8px;border-radius:4px">Auto</span>' : '';
   var opts = playerOpts.replace('value="'+preselect+'"', 'value="'+preselect+'" selected');
-  return '<div style="background:var(--bg);border-radius:var(--radius);padding:12px;margin-bottom:8px">' +
-    '<div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px">'+prize.label+autoTag+'</div>' +
-    '<select id="ep-'+prize.id+'" style="width:100%;padding:10px;border-radius:var(--radius);border:1px solid var(--border-strong);background:var(--surface);font-size:13px;font-family:DM Sans,sans-serif">'+opts+'</select>' +
-    '</div>';
+  return '<div style="border:0.5px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:10px">' +
+    '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg);border-bottom:0.5px solid var(--border)">' +
+      '<span style="font-size:14px;font-weight:600;color:var(--text)">' + prize.label + '</span>' +
+      autoTag +
+    '</div>' +
+    '<div style="padding:10px 14px">' +
+      '<select id="ep-'+prize.id+'" style="width:100%;padding:10px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);font-size:14px;font-family:DM Sans,sans-serif;color:var(--text)">' + opts + '</select>' +
+    '</div>' +
+  '</div>';
 }).join('');
 
 document.getElementById('modal-title').textContent = 'Honours & prizes';
