@@ -246,9 +246,9 @@ transition: opacity 0.4s;
 .stat-tile.rank-2 .stat-val { color: #c0c0c0; }
 .stat-tile.rank-3 .stat-val { color: #c07840; }
 .lb-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 12px; display: flex; align-items: center; gap: 10px; margin-bottom: 6px; border-left-width: 3px; }
-.lb-card-gold { background: rgba(184,134,11,0.08); border-color: rgba(184,134,11,0.3); border-left-color: #B8860B; }
-.lb-card-silver { background: rgba(136,136,136,0.08); border-color: rgba(136,136,136,0.3); border-left-color: #888; }
-.lb-card-bronze { background: rgba(139,69,19,0.08); border-color: rgba(139,69,19,0.3); border-left-color: #8B4513; }
+.lb-card-gold { background: rgba(184,134,11,0.12); border-color: rgba(184,134,11,0.4); border-left-color: #B8860B; }
+.lb-card-silver { background: rgba(136,136,136,0.1); border-color: rgba(136,136,136,0.35); border-left-color: #888; }
+.lb-card-bronze { background: rgba(139,69,19,0.1); border-color: rgba(139,69,19,0.35); border-left-color: #8B4513; }
 .lb-wrap { overflow: hidden; border-radius: var(--radius); margin-bottom: 6px; }
 .lb-wrap .lb-card { margin-bottom: 0; }
 .lb-filters { display: flex; gap: 6px; margin-bottom: 12px; }
@@ -348,7 +348,7 @@ input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px;
 <span class="auth-label">Mobile number</span>
 <input class="auth-input" type="tel" id="join-mobile" placeholder="e.g. 086 123 4567" autocomplete="tel">
 <span class="auth-label">Invite code</span>
-<input class="auth-input" type="text" id="join-code" placeholder="e.g. BHGS-2026" style="text-transform:uppercase">
+<input class="auth-input" type="text" id="join-code" placeholder="e.g. BHGS-1" style="text-transform:uppercase" oninput="formatJoinCode(this)" maxlength="12">
 <button class="auth-btn" id="join-btn" onclick="doMemberJoin()">Request to join</button>
 <div class="auth-err" id="join-err"></div>
 <div class="auth-forgot" onclick="switchMemberView('login')" style="margin-top:14px">Already a member? Sign in &rsaquo;</div>
@@ -389,6 +389,8 @@ input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px;
 <div class="wiz-dot"></div>
 <div class="wiz-dot"></div>
 <div class="wiz-dot"></div>
+<div class="wiz-dot"></div>
+<div class="wiz-dot"></div>
 </div>
 <div class="wiz-step active" id="wiz-1">
 <div class="wiz-title">What's your society called?</div>
@@ -397,7 +399,7 @@ input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px;
 <input class="auth-input" type="text" id="wiz-society-name" placeholder="e.g. Bray Head Golf Society">
 <span class="auth-label" style="margin-top:10px">Home course</span>
 <input class="auth-input" type="text" id="wiz-home-course" placeholder="e.g. Bray Head Golf Club">
-<button class="wiz-btn" onclick="wizNext(1)">Continue</button>
+<button class="wiz-btn" onclick="wizNext(1)" style="margin-top:16px">Continue</button>
 </div>
 <div class="wiz-step" id="wiz-2">
 <div class="wiz-title">Pick a theme</div>
@@ -408,23 +410,66 @@ input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px;
 </div>
 <div class="wiz-step" id="wiz-3">
 <div class="wiz-title">Handicap rules</div>
-<div class="wiz-sub">How do you calculate handicap changes after each round?</div>
+<div class="wiz-sub">How are handicaps adjusted after each round?</div>
 <div class="wiz-option" onclick="selectHcpMode('bhgs')" id="hm-bhgs">
-<div><div class="wiz-option-title">Points-based</div><div class="wiz-option-sub">1st -1.0, 2nd -0.5, 3rd -0.2, others +0.2</div></div>
+<div><div class="wiz-option-title">Points-based</div><div class="wiz-option-sub">Podium cuts: 1st −1.0 · 2nd −0.5 · 3rd −0.2 · others +0.2</div></div>
 <div class="wiz-check">&#10003;</div>
 </div>
 <div class="wiz-option" onclick="selectHcpMode('gui')" id="hm-gui">
-<div><div class="wiz-option-title">GUI standard</div><div class="wiz-option-sub">Golfing Union of Ireland rules</div></div>
+<div><div class="wiz-option-title">GUI standard</div><div class="wiz-option-sub">Golfing Union of Ireland rules — automatic</div></div>
 <div class="wiz-check">&#10003;</div>
 </div>
 <div class="wiz-option" onclick="selectHcpMode('custom')" id="hm-custom">
-<div><div class="wiz-option-title">Custom</div><div class="wiz-option-sub">Set your own cuts per position</div></div>
+<div><div class="wiz-option-title">Custom</div><div class="wiz-option-sub">Set your own cuts for every position</div></div>
 <div class="wiz-check">&#10003;</div>
+</div>
+
+<!-- Points-based: podium cuts only -->
+<div id="wiz-podium-cuts" style="display:none;background:rgba(255,255,255,0.06);border-radius:12px;padding:14px;margin-top:10px">
+  <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.5);margin-bottom:10px">Podium cuts (negative = reduction)</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+    <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">1st</div><input id="wiz-cut-1" type="number" step="0.1" value="-1.0" inputmode="decimal" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+    <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">2nd</div><input id="wiz-cut-2" type="number" step="0.1" value="-0.5" inputmode="decimal" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+    <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">3rd</div><input id="wiz-cut-3" type="number" step="0.1" value="-0.2" inputmode="decimal" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+  </div>
+  <div style="margin-top:8px"><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">All others (addition)</div><input id="wiz-cut-other" type="number" step="0.1" value="0.2" inputmode="decimal" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+</div>
+
+<!-- Custom: full 5-position scope -->
+<div id="wiz-custom-cuts" style="display:none;background:rgba(255,255,255,0.06);border-radius:12px;padding:14px;margin-top:10px">
+  <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.5);margin-bottom:10px">Cuts per position (negative = reduction)</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+    <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">1st place</div><input id="wiz-cut-1c" type="number" step="0.1" value="-1.0" inputmode="decimal" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+    <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">2nd place</div><input id="wiz-cut-2c" type="number" step="0.1" value="-0.5" inputmode="decimal" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+    <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">3rd place</div><input id="wiz-cut-3c" type="number" step="0.1" value="-0.2" inputmode="decimal" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+    <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">4th place</div><input id="wiz-cut-4c" type="number" step="0.1" value="0" inputmode="decimal" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+    <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">5th place</div><input id="wiz-cut-5c" type="number" step="0.1" value="0" inputmode="decimal" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+    <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">Others (addition)</div><input id="wiz-cut-otherc" type="number" step="0.1" value="0.2" inputmode="decimal" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+  </div>
 </div>
 <button class="wiz-btn" onclick="wizNext(3)" style="margin-top:16px">Continue</button>
 <button class="wiz-btn-back" onclick="wizStep(2)">Back</button>
 </div>
 <div class="wiz-step" id="wiz-4">
+<div class="wiz-title">League points</div>
+<div class="wiz-sub">Points awarded per position each round. Adjust to match your society's rules.</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+  <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">1st place</div><input id="wiz-pts-1" type="number" value="20" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+  <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">2nd place</div><input id="wiz-pts-2" type="number" value="17" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+  <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">3rd place</div><input id="wiz-pts-3" type="number" value="15" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+  <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">4th place</div><input id="wiz-pts-4" type="number" value="13" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+  <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">5th place</div><input id="wiz-pts-5" type="number" value="11" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+  <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">6th place</div><input id="wiz-pts-6" type="number" value="10" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+  <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">7th place</div><input id="wiz-pts-7" type="number" value="9" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+  <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">8th place</div><input id="wiz-pts-8" type="number" value="8" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+  <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">9th place</div><input id="wiz-pts-9" type="number" value="7" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+  <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">10th place</div><input id="wiz-pts-10" type="number" value="6" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+</div>
+<button class="wiz-btn" onclick="wizNext(4)">Continue</button>
+<button class="wiz-btn-back" onclick="wizStep(3)">Back</button>
+</div>
+
+<div class="wiz-step" id="wiz-5">
 <div class="wiz-title">Upload your logo</div>
 <div class="wiz-sub">Optional - you can add this later in Settings.</div>
 <div style="border:2px dashed rgba(255,255,255,0.2);border-radius:14px;padding:32px;text-align:center;cursor:pointer;margin-bottom:16px" onclick="document.getElementById('wiz-logo-input').click()">
@@ -434,8 +479,42 @@ input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px;
 <div style="font-size:13px;color:rgba(255,255,255,0.4)">Tap to upload club crest</div>
 </div>
 <button class="wiz-btn" onclick="finishWizard()">Finish setup</button>
-<button class="wiz-btn-back" onclick="wizStep(3)">Back</button>
+<button class="wiz-btn-back" onclick="wizStep(4)">Back</button>
 </div>
+
+<!-- Step 5: All set -->
+<div class="wiz-step" id="wiz-6">
+<div class="wiz-title">You're all set!</div>
+<div class="wiz-sub">Your society is live. Here's your member invite code:</div>
+<div id="wiz-invite-block" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);border-radius:14px;padding:20px;text-align:center;margin:16px 0">
+  <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,0.45);margin-bottom:8px">Invite code</div>
+  <div id="wiz-invite-code" style="font-family:monospace;font-size:28px;font-weight:800;color:white;letter-spacing:.08em;margin-bottom:12px">—</div>
+  <button onclick="copyInviteCode()" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:8px;padding:8px 20px;color:white;font-size:13px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif">Copy code</button>
+</div>
+<div style="background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.25);border-radius:12px;padding:14px;margin-bottom:16px">
+  <div style="font-size:12px;font-weight:700;color:rgba(201,168,76,0.9);margin-bottom:4px">30-day free trial active</div>
+  <div style="font-size:12px;color:rgba(255,255,255,0.5)">No payment needed now. We'll remind you before your trial ends.</div>
+</div>
+<div style="text-align:left;margin-bottom:20px">
+  <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">What to do next</div>
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.06);border-radius:10px;padding:10px 12px">
+      <div style="width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--primary);font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">1</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.8)">Add your members in the Members tab</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.06);border-radius:10px;padding:10px 12px">
+      <div style="width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--primary);font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">2</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.8)">Create your first event in the Schedule tab</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.06);border-radius:10px;padding:10px 12px">
+      <div style="width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--primary);font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">3</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.8)">Share the invite code so members can join</div>
+    </div>
+  </div>
+</div>
+<button class="wiz-btn" onclick="completeWizard()">Go to my society</button>
+</div>
+
 </div>
 
 <!-- Topbar — always rendered, hidden via CSS when auth showing -->
@@ -600,22 +679,22 @@ var APP_THEMES = {
     text:'#111111', text2:'#444444', text3:'#888888', border:'#dde8e0',
     dark:false, pattern:'none'
   },
-  slate: {
-    primary:'#2d4a38', accent:'#C9A84C',
-    appBg:'#e4ede7', bg:'#e4ede7', surface:'#ffffff',
-    text:'#1a3320', text2:'#4a6a54', text3:'#6a8a74', border:'#c0d4c8',
+  white: {
+    primary:'#1a3320', accent:'#C9A84C',
+    appBg:'#ffffff', bg:'#f8f8f6', surface:'#ffffff',
+    text:'#111111', text2:'#444444', text3:'#999999', border:'#e0e0dc',
     dark:false, pattern:'none'
   },
   dark: {
-    primary:'#0a1210', accent:'#C9A84C',
-    appBg:'#0e1a14', bg:'#111f16', surface:'#162013',
-    text:'#e8ede8', text2:'#a0b0a0', text3:'#607060', border:'rgba(255,255,255,0.08)',
+    primary:'#1a3320', accent:'#C9A84C',
+    appBg:'#1a2420', bg:'#22302a', surface:'#2a3d33',
+    text:'#edf2ee', text2:'#b0c4b8', text3:'#7a9988', border:'rgba(255,255,255,0.12)',
     dark:true, pattern:'none'
   },
   navy: {
-    primary:'#0f2044', accent:'#C9A84C',
+    primary:'#0a1628', accent:'#C9A84C',
     appBg:'#f0f4f8', bg:'#f0f4f8', surface:'#ffffff',
-    text:'#0f2044', text2:'#2a4060', text3:'#6a88a8', border:'#c8d8e8',
+    text:'#0a1628', text2:'#2a3a54', text3:'#6a7a98', border:'#d0dae8',
     dark:false, pattern:'none'
   }
 };
@@ -655,18 +734,19 @@ function applyTheme(s) {
 
 function updateBranding(s) {
 var name = s.society_name || s.name || 'GolfSoc';
-var i = ini(name);
 var logo = s.logo_url;
 document.getElementById('page-title').textContent = name;
 document.getElementById('topbar-name').textContent = name;
 document.getElementById('splash-name').textContent = name;
 document.getElementById('auth-title').textContent = 'Welcome back';
 document.getElementById('auth-sub').textContent = 'Sign in to ' + name;
-var displayLogo = logo || GOLFSOC_DEFAULT_LOGO;
-var logoHtml = '<img src="'+displayLogo+'" style="width:100%;height:100%;object-fit:cover">';
-document.getElementById('topbar-logo').innerHTML = logoHtml;
-document.getElementById('splash-logo').innerHTML = logoHtml;
-document.getElementById('auth-logo').innerHTML = logoHtml;
+// Topbar always shows GolfSoc logo
+var gsLogoHtml = '<img src="'+GOLFSOC_DEFAULT_LOGO+'" style="width:100%;height:100%;object-fit:cover">';
+document.getElementById('topbar-logo').innerHTML = gsLogoHtml;
+// Splash and auth show society logo if uploaded, otherwise GolfSoc default
+var societyLogoHtml = '<img src="'+(logo || GOLFSOC_DEFAULT_LOGO)+'" style="width:100%;height:100%;object-fit:cover">';
+document.getElementById('splash-logo').innerHTML = societyLogoHtml;
+document.getElementById('auth-logo').innerHTML = societyLogoHtml;
 }
 
 // Show app
@@ -840,7 +920,6 @@ async function doSignup() {
 var name = document.getElementById('signup-name').value.trim();
 var email = document.getElementById('signup-email').value.trim();
 var pass = document.getElementById('signup-password').value;
-var code = document.getElementById('signup-code').value.trim().toUpperCase();
 var btn = document.getElementById('signup-btn');
 var err = document.getElementById('signup-err');
 err.classList.remove('show');
@@ -848,31 +927,31 @@ if (!name || !email || !pass) { err.textContent = 'Please fill in all fields'; e
 if (pass.length < 8) { err.textContent = 'Password must be at least 8 characters'; err.classList.add('show'); return; }
 btn.classList.add('loading'); btn.textContent = 'Creating account...';
 try {
-var societyId = null;
-if (code) {
-var res = await fetch(SUPABASE_URL + '/rest/v1/societies?invite_code=eq.' + code + '&select=id', {
-headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
-});
-var soc = await res.json();
-if (!soc || !soc.length) {
-err.textContent = 'Invalid invite code';
+// Sign up
+var d = await authFetch('signup', { email: email, password: pass, data: { full_name: name, role: 'admin' } });
+
+// If Supabase requires email confirmation, access_token may be absent
+if (!d.access_token) {
+// Try to immediately sign in with the credentials
+try {
+var d2 = await authFetch('token?grant_type=password', { email: email, password: pass });
+d = d2;
+} catch(loginErr) {
+// Email confirmation required — show message
+btn.classList.remove('loading'); btn.textContent = 'Create society';
+err.textContent = 'Check your email to confirm your account, then sign in.';
+err.style.color = '#6ee7b7';
 err.classList.add('show');
-btn.classList.remove('loading'); btn.textContent = 'Create account';
 return;
 }
-societyId = soc[0].id;
 }
-var d = await authFetch('signup', { email: email, password: pass, data: { full_name: name, society_id: societyId, role: societyId ? 'member' : 'admin' } });
+
 currentUser = Object.assign({}, d.user, { access_token: d.access_token });
-if (!societyId) {
 document.getElementById('auth-screen').style.display = 'none';
 showWizard();
-} else {
-await afterLogin();
-}
 } catch(e) {
 err.textContent = e.message; err.classList.add('show');
-btn.classList.remove('loading'); btn.textContent = 'Create account';
+btn.classList.remove('loading'); btn.textContent = 'Create society';
 }
 }
 
@@ -967,7 +1046,7 @@ var banner = document.createElement('div');
 banner.id = 'pending-banner';
 banner.style.cssText = 'position:fixed;top:calc(env(safe-area-inset-top,0px) + 68px);left:12px;right:12px;background:#856404;color:white;border-radius:10px;padding:10px 14px;z-index:500;box-shadow:0 4px 16px rgba(0,0,0,0.25);display:flex;align-items:center;gap:10px';
 banner.innerHTML =
-'<div style="font-size:18px">&#128276;</div>' +
+'<div style="width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:white;flex-shrink:0">!</div>' +
 '<div style="flex:1"><div style="font-size:13px;font-weight:700">'+member.name+' wants to join</div></div>' +
 '<button onclick="showTab(\'home\');document.getElementById(\'pending-banner\').remove()" style="background:rgba(255,255,255,0.25);border:none;border-radius:6px;padding:4px 10px;color:white;font-size:12px;font-weight:700;cursor:pointer">Review</button>' +
 '<button onclick="document.getElementById(\'pending-banner\').remove()" style="background:none;border:none;color:white;font-size:16px;cursor:pointer;padding:2px 6px">&#x2715;</button>';
@@ -1126,7 +1205,7 @@ function buildResultCard(post) {
   return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:10px;border-left:3px solid var(--accent)">' +
     '<div style="padding:12px 14px 12px 13px;border-bottom:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between">' +
       '<div style="flex:1;min-width:0">' +
-        '<div style="font-size:15px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(ev?ev.course_name:'Event')+'</div>' +
+        '<div style="font-size:17px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:DM Serif Display,serif;letter-spacing:-0.01em">'+(ev?ev.course_name:'Event')+'</div>' +
         '<div style="font-size:11px;color:var(--text-3);margin-top:2px">'+(ev?fmtDate(ev.event_date):'')+(evType?' &middot; '+evType:'')+'</div>' +
       '</div>' +
       '<div style="display:flex;align-items:center;gap:6px;flex-shrink:0;margin-left:8px">' +
@@ -1138,9 +1217,6 @@ function buildResultCard(post) {
     (prizeRows ? '<div style="padding:8px 14px 10px 13px;border-top:0.5px solid var(--border);background:var(--bg)">' +
       '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-3);margin-bottom:6px">Extra prizes</div>' +
       prizeRows+'</div>' : '') +
-    '<div style="padding:10px 14px 12px 13px;border-top:0.5px solid var(--border)">' +
-      '<button onclick="openEventResults(\'' + postId + '\')" style="width:100%;padding:10px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);color:var(--text-2);font-size:13px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif">View full results</button>' +
-    '</div>' +
     '</div>';
 }
 
@@ -1216,7 +1292,9 @@ function renderHome() {
         return '<div style="background:var(--primary);border-radius:var(--radius-lg);padding:14px 16px;margin-bottom:12px;position:relative;overflow:hidden">' +
           '<div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent-dark),var(--accent),var(--accent-dark))"></div>' +
           '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">' +
-          '<div style="width:38px;height:38px;border-radius:10px;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.3);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">&#9968;</div>' +
+          '<div style="width:38px;height:38px;border-radius:10px;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.3);display:flex;align-items:center;justify-content:center;flex-shrink:0">' +
+        '<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="5" y1="2" x2="5" y2="16" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round"/><path d="M5 2 L14 5.5 L5 9" fill="#C9A84C"/><circle cx="5" cy="16" r="1.5" fill="#C9A84C"/></svg>' +
+        '</div>' +
           '<div style="flex:1"><div style="font-size:15px;font-weight:700;color:white">'+(ev.course_name||'Event')+'</div>' +
           '<div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:2px">'+fmtDate(ev.event_date)+' &middot; '+statusText+'</div></div></div>' +
           '<div style="display:flex;gap:8px">' +
@@ -1237,7 +1315,7 @@ function renderHome() {
       var me = getMemberPlayer();
       var myRound = me ? db.rounds.filter(function(r){ return r.event_id===activeEv.id && r.player_id===me.id; })[0] : null;
       var isSubAdmin = canCurrentUserEnterScores();
-      var btnLabel = myRound && myRound.verified ? 'Score verified ✓' : myRound ? 'Edit my score' : isSubAdmin ? 'Enter scores' : 'Enter my score';
+      var btnLabel = myRound && myRound.verified ? 'Score verified' : myRound ? 'Edit my score' : isSubAdmin ? 'Enter scores' : 'Enter my score';
       var btnDisabled = (myRound && myRound.verified && !isSubAdmin);
       memberCard =
         '<div style="background:var(--primary);border-radius:var(--radius-lg);padding:14px 16px;margin-bottom:12px;position:relative;overflow:hidden">' +
@@ -1406,19 +1484,21 @@ if (statsEl) {
     }
     var tabBtns = statTabDefs.map(function(t) {
       var isFirst = t.id === 'pars';
-      return '<button id="lbst-'+t.id+'" onclick="lbStatTab(\''+t.id+'\')" style="padding:10px 16px;background:none;border:none;border-bottom:2.5px solid '+(isFirst?'var(--primary)':'transparent')+';cursor:pointer;font-size:13px;font-weight:700;color:'+(isFirst?'var(--primary)':'var(--text-3)')+';font-family:DM Sans,sans-serif;white-space:nowrap;flex-shrink:0">'+t.label+'</button>';
+      return '<button id="lbst-'+t.id+'" onclick="lbStatTab(\''+t.id+'\')" style="padding:10px 14px;background:none;border:none;border-bottom:2px solid '+(isFirst?'var(--primary)':'transparent')+';cursor:pointer;font-size:13px;font-weight:'+(isFirst?'600':'400')+';color:'+(isFirst?'var(--text)':'var(--text-2)')+';font-family:DM Sans,sans-serif;margin-bottom:-0.5px">'+t.label+'</button>';
     }).join('');
     var panels = statTabDefs.map(function(t) {
       return '<div id="lbsp-'+t.id+'" style="display:'+(t.id==='pars'?'block':'none')+';padding:4px 0 4px">'+buildStatPanel(t.key, t.color)+'</div>';
     }).join('');
     statsEl.innerHTML =
       '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:12px">' +
-        '<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px 0">' +
+        '<button onclick="var b=document.getElementById(\'lb-stats-body\');var open=b.style.display!==\'none\';b.style.display=open?\'none\':\'block\';this.querySelector(\'span\').style.transform=open?\'rotate(0deg)\':\'rotate(180deg)\'" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:none;border:none;cursor:pointer;font-family:DM Sans,sans-serif">' +
           '<div style="font-size:13px;font-weight:700;color:var(--text)">Season stats</div>' +
-          '<div style="font-size:11px;color:var(--text-3)">' + activePlayers.length + ' players</div>' +
+          '<span style="font-size:12px;color:var(--text-3);transition:transform 0.2s;display:inline-block">&#9660;</span>' +
+        '</button>' +
+        '<div id="lb-stats-body" style="display:none">' +
+          '<div style="display:flex;border-bottom:0.5px solid var(--border);padding:0 16px">'+tabBtns+'</div>' +
+          '<div style="padding:0 16px 8px">'+panels+'</div>' +
         '</div>' +
-        '<div style="display:flex;border-bottom:0.5px solid var(--border);padding:0 16px;margin-top:10px;overflow-x:auto">'+tabBtns+'</div>' +
-        '<div style="padding:0 16px 12px;max-height:260px;overflow-y:auto">'+panels+'</div>' +
       '</div>';
   } else {
     statsEl.innerHTML = '';
@@ -1526,11 +1606,12 @@ function evRow(ev, isPast) {
     if (ev.published) {
       actionBtn = '<button onclick="openEventResults(\''+ev.id+'\')" style="margin:0 14px 10px;width:calc(100% - 28px);padding:10px;border-radius:var(--radius);border:none;background:var(--primary);color:var(--accent);font-size:13px;font-weight:700;cursor:pointer;font-family:DM Sans,sans-serif">&#9654; View results</button>';
     }
-    return '<div class="event-card" style="'+(isPast?'opacity:0.7':'')+';margin-bottom:10px;border-radius:var(--radius-lg);box-shadow:0 2px 8px rgba(0,0,0,0.06)">' +
+    var showFaded = isPast && ev.published;
+return '<div class="event-card" style="'+(showFaded?'opacity:0.6':'')+';margin-bottom:10px;border-radius:var(--radius-lg);box-shadow:0 2px 8px rgba(0,0,0,0.06)">' +
       '<div style="display:flex;align-items:center;gap:14px;padding:14px 16px">' +
         '<div class="ev-date"><div class="ev-day">'+parseInt(p[2])+'</div><div class="ev-month">'+mo[parseInt(p[1])-1]+'</div></div>' +
         '<div style="flex:1;min-width:0">' +
-          '<div style="font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(ev.course_name||'TBD')+'</div>' +
+          '<div style="font-size:17px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:DM Serif Display,serif;letter-spacing:-0.01em">'+(ev.course_name||'TBD')+'</div>' +
           '<div style="font-size:11px;color:var(--text-3);margin-top:2px">'+(isOuting?'Outing - 18 holes':'Sunday - 9 holes')+(ev.published?' · Results posted':'')+'</div>' +
         '</div>' +
       '</div>' +
@@ -1540,27 +1621,6 @@ function evRow(ev, isPast) {
     '</div>';
 }
 el.innerHTML = adminBtn + upcoming.map(function(e){ return evRow(e,false); }).join('') + (past.length ? '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-3);padding:8px 2px;margin-top:6px">Past events</div>' + past.map(function(e){ return evRow(e,true); }).join('') : '');
-}
-
-function openHandicapSheet(eid) {
-  var ev = db.events.filter(function(e){ return e.id === eid; })[0];
-  if (!ev) return;
-  var slope = parseFloat(ev.slope_rating) || 113;
-  var players = db.players.filter(function(p){ return p.status !== 'pending'; })
-    .sort(function(a,b){ return parseFloat(a.handicap_index||0) - parseFloat(b.handicap_index||0); });
-  var rows = players.map(function(p) {
-    var courseHcp = Math.round(parseFloat(p.handicap_index||0) * slope / 113);
-    return '<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:0.5px solid var(--border)">' +
-      '<div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--text)">' + p.name + '</div>' +
-      '<div style="font-size:11px;color:var(--text-3)">Index ' + parseFloat(p.handicap_index||0).toFixed(1) + '</div></div>' +
-      '<div style="text-align:right"><div style="font-size:20px;font-weight:800;color:var(--text)">' + courseHcp + '</div>' +
-      '<div style="font-size:10px;color:var(--text-3)">playing hcp</div></div>' +
-    '</div>';
-  }).join('');
-  openModal((ev.course_name||'Event') + ' — Playing Handicaps',
-    '<div style="background:var(--bg);border-radius:var(--radius);padding:8px 12px;margin-bottom:12px;font-size:12px;color:var(--text-3)">Slope ' + slope + ' · sorted by handicap</div>' +
-    (rows || '<div style="text-align:center;padding:20px;color:var(--text-3)">No players</div>')
-  );
 }
 
 function openEventResults(eid) {
@@ -1694,7 +1754,7 @@ function openPlayerProfile(pid) {
       var ev = db.events.filter(function(e){ return e.id===r.event_id; })[0];
       var pts = r.stableford_points || 0;
       var isBest = best !== null && pts === best;
-      return '<div style="display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:var(--radius);padding:10px 12px;'+(isBest?'border:1.5px solid var(--accent)':'')+'">' +
+      return '<div onclick="openRoundDetail(\''+r.id+'\')" style="display:flex;align-items:center;gap:10px;background:var(--bg);border-radius:var(--radius);padding:10px 12px;cursor:pointer;'+(isBest?'border:1.5px solid var(--accent)':'')+'">' +
         '<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(ev?ev.course_name:'Event')+'</div>' +
         '<div style="font-size:11px;color:var(--text-3)">'+(ev?fmtDate(ev.event_date):'')+(isBest?' · Best round':'')+'</div></div>' +
         '<div style="text-align:right;flex-shrink:0"><div style="font-size:16px;font-weight:800;color:var(--text)">'+pts+'</div>' +
@@ -1742,16 +1802,18 @@ function openPlayerProfile(pid) {
     ['Overview','Prizes','Rounds','Stats'].map(function(t,i){
       return '<button id="'+tid+'_tab'+i+'" onclick="_ppTab(\'' + tid + '\','+i+')" style="flex:1;padding:8px 4px;border:none;background:none;font-size:12px;font-weight:600;cursor:pointer;border-bottom:2px solid '+(i===0?'var(--primary)':'transparent')+';color:'+(i===0?'var(--primary)':'var(--text-3)')+'">'+t+'</button>';
     }).join('') + '</div>' +
+    '<div style="min-height:260px">' +
     '<div id="'+tid+'_panel0">'+overview+'</div>' +
     '<div id="'+tid+'_panel1" style="display:none">'+prizes+'</div>' +
     '<div id="'+tid+'_panel2" style="display:none">'+rounds+'</div>' +
-    '<div id="'+tid+'_panel3" style="display:none">'+stats+'</div>';
+    '<div id="'+tid+'_panel3" style="display:none">'+stats+'</div>' +
+    '</div>';
 
   openModal(player.name, tabContent);
 }
 
 function _statTile(label, val) {
-  return '<div style="background:var(--bg);border-radius:var(--radius);padding:12px;text-align:center">' +
+  return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px;text-align:center">' +
     '<div style="font-size:10px;color:var(--text-3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em">'+label+'</div>' +
     '<div style="font-size:22px;font-weight:800;color:var(--text)">'+val+'</div></div>';
 }
@@ -1762,6 +1824,11 @@ function _ppTab(tid, idx) {
     var panel = document.getElementById(tid+'_panel'+i);
     if (tab) { tab.style.borderBottomColor = i===idx ? 'var(--primary)' : 'transparent'; tab.style.color = i===idx ? 'var(--primary)' : 'var(--text-3)'; }
     if (panel) panel.style.display = i===idx ? 'block' : 'none';
+  }
+  // Render charts when Stats tab (index 3) becomes visible
+  if (idx === 3) {
+    var uidEl = document.getElementById('chart_uid');
+    if (uidEl) setTimeout(function(){ renderCharts(uidEl.getAttribute('data-uid')); }, 50);
   }
 }
 
@@ -1780,9 +1847,9 @@ function renderProfile() {
       el.innerHTML =
         '<div style="background:var(--accent-light);border:1px solid var(--accent);border-radius:var(--radius);padding:8px 12px;margin-bottom:12px;font-size:12px;color:var(--accent-dark);text-align:center">Preview — this is what your profile will look like</div>' +
         '<div class="profile-hero"><div class="avatar" style="width:60px;height:60px;font-size:20px">YN</div><div style="flex:1"><div style="font-size:20px;color:white;font-weight:600">Your Name</div></div><div style="text-align:right"><div style="font-size:28px;font-weight:800;color:var(--accent)">18.0</div><div style="font-size:10px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:.05em">Handicap</div></div></div>' +
-        '<button class="btn danger full" onclick="doLogout()" style="margin-top:8px">Sign out</button>';
+        '';
     } else {
-      el.innerHTML = '<div class="empty"><div class="empty-icon">&#128100;</div><div class="empty-title">Profile not set up</div><div class="empty-sub">Ask your admin to add you as a player</div></div><button class="btn danger full" onclick="doLogout()" style="margin-top:16px">Sign out</button>';
+      el.innerHTML = '<div class="empty"><div class="empty-icon">&#128100;</div><div class="empty-title">Profile not set up</div><div class="empty-sub">Ask your admin to add you as a player</div></div>';
     }
     return;
   }
@@ -1806,22 +1873,7 @@ function renderProfile() {
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">' +
     _statTile('Rank', rankLabel) + _statTile('Points', myPts||0) +
     _statTile('Rounds', myRounds.length) + _statTile('Best round', best!==null?best+' pts':'--') +
-    '</div>' +
-    '<div style="background:var(--bg);border-radius:var(--radius);padding:12px;margin-bottom:8px">' +
-    '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);margin-bottom:8px">Handicap history</div>' +
-    (hcpChanges.length ?
-      hcpChanges.slice(0,5).map(function(r){
-        var ev = db.events.filter(function(e){ return e.id===r.event_id; })[0];
-        var diff = parseFloat(r.handicap_after) - parseFloat(r.handicap_before);
-        var col = diff<0?'var(--green)':diff>0?'#e07b00':'var(--text-3)';
-        var arrow = diff<0?'▼':diff>0?'▲':'—';
-        return '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:0.5px solid var(--border)">' +
-          '<div style="flex:1;font-size:12px;color:var(--text-2)">'+(ev?ev.course_name:'Event')+'</div>' +
-          '<div style="font-size:12px;color:var(--text-3)">'+parseFloat(r.handicap_before).toFixed(1)+' → '+parseFloat(r.handicap_after).toFixed(1)+'</div>' +
-          '<div style="font-size:12px;font-weight:700;color:'+col+'">'+arrow+' '+Math.abs(diff).toFixed(1)+'</div></div>';
-      }).join('') :
-      '<div style="font-size:12px;color:var(--text-3);text-align:center;padding:8px 0">No rounds yet</div>'
-    ) + '</div>';
+    '</div>';
 
   // ── PRIZES ──
   var prizesWon = [];
@@ -1945,10 +1997,10 @@ function renderProfile() {
   }
 
   var stats =
-    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">' +
     _statTile('Avg pts', avg) + _statTile('Avg gross', avgGross) +
     '</div>' +
-    chartHtml;
+    buildProgressionCharts(myRounds, player);
 
   // ── Build tabbed profile ──
   var tabContent =
@@ -1963,11 +2015,12 @@ function renderProfile() {
     ['Overview','Prizes','Rounds','Stats'].map(function(t,i){
       return '<button id="'+tid+'_tab'+i+'" onclick="_ppTab(\''+tid+'\','+i+')" style="flex:1;padding:10px 4px;border:none;background:none;font-size:12px;font-weight:600;cursor:pointer;border-bottom:2px solid '+(i===0?'var(--primary)':'transparent')+';color:'+(i===0?'var(--primary)':'var(--text-3)')+';font-family:DM Sans,sans-serif">'+t+'</button>';
     }).join('') + '</div>' +
+    '<div style="min-height:260px">' +
     '<div id="'+tid+'_panel0">'+overview+'</div>' +
     '<div id="'+tid+'_panel1" style="display:none">'+prizes+'</div>' +
     '<div id="'+tid+'_panel2" style="display:none">'+rounds+'</div>' +
     '<div id="'+tid+'_panel3" style="display:none">'+stats+'</div>' +
-    '<button class="btn danger full" onclick="doLogout()" style="margin-top:14px">Sign out</button>';
+    '</div>';
 
   el.innerHTML = tabContent;
 
@@ -1990,38 +2043,95 @@ function openRoundDetail(rid) {
   try { pars = r.par_values ? (typeof r.par_values==='string'?JSON.parse(r.par_values):r.par_values) : []; } catch(e){ pars=[]; }
   try { sis = ev && ev.hole_sis ? (typeof ev.hole_sis==='string'?JSON.parse(ev.hole_sis):ev.hole_sis) : []; } catch(e){ sis=[]; }
 
-  var rows = scores.map(function(score, i) {
-    if (!score || !pars[i]) return '';
-    var diff = parseInt(score) - parseInt(pars[i]);
-    var pts = Math.max(0, 2 - diff);
-    var label = diff<=-2?'Eagle':diff===-1?'Birdie':diff===0?'Par':diff===1?'Bogey':diff===2?'Double':'+++';
-    var col = diff<=-2?'#1a8a1a':diff===-1?'#2d7a2d':diff===0?'var(--text-2)':'var(--text-3)';
-    return '<div style="display:grid;grid-template-columns:28px 36px 36px 1fr 36px;align-items:center;gap:6px;padding:7px 0;border-bottom:0.5px solid var(--border);font-size:13px">' +
-      '<div style="color:var(--text-3);font-size:11px">H'+(i+1)+'</div>' +
-      '<div style="text-align:center;color:var(--text-3)">P'+pars[i]+'</div>' +
-      '<div style="text-align:center;font-weight:700;color:var(--text)">'+score+'</div>' +
-      '<div style="color:'+col+';font-size:11px">'+label+'</div>' +
-      '<div style="text-align:right;font-weight:700;color:var(--accent)">'+pts+'</div>' +
-    '</div>';
-  }).join('');
-
   var totalPts = r.stableford_points || 0;
-  openModal((ev?ev.course_name:'Round')+' — '+(ev?fmtDate(ev.event_date):''),
-    '<div style="display:flex;justify-content:space-between;align-items:center;background:var(--primary);border-radius:var(--radius);padding:10px 14px;margin-bottom:12px">' +
-    '<div><div style="font-size:14px;font-weight:700;color:white">'+(pl?pl.name:'Player')+'</div>' +
-    '<div style="font-size:11px;color:rgba(255,255,255,0.45)">Hcp '+parseFloat(r.handicap_before||pl&&pl.handicap_index||0).toFixed(1)+'</div></div>' +
-    '<div style="text-align:right"><div style="font-size:26px;font-weight:800;color:var(--accent)">'+totalPts+'</div>' +
-    '<div style="font-size:10px;color:rgba(255,255,255,0.45)">pts</div></div>' +
-    '</div>' +
-    '<div style="display:grid;grid-template-columns:28px 36px 36px 1fr 36px;gap:6px;padding:4px 0 8px;border-bottom:1px solid var(--border);margin-bottom:2px">' +
-    '<div style="font-size:10px;color:var(--text-3)">Hole</div>' +
-    '<div style="font-size:10px;color:var(--text-3);text-align:center">Par</div>' +
-    '<div style="font-size:10px;color:var(--text-3);text-align:center">Score</div>' +
-    '<div style="font-size:10px;color:var(--text-3)">Result</div>' +
-    '<div style="font-size:10px;color:var(--text-3);text-align:right">Pts</div>' +
-    '</div>' +
-    (rows || '<div style="padding:12px 0;color:var(--text-3);font-size:13px;text-align:center">No hole scores recorded</div>')
-  );
+  var courseHcp = r.course_handicap || 0;
+  var holes = scores.length || 9;
+  var is18 = holes >= 18;
+
+  // Score colour coding
+  function scoreStyle(diff) {
+    if (diff <= -2) return { bg:'#15803d', text:'white', label:'Eagle' };
+    if (diff === -1) return { bg:'#16a34a', text:'white', label:'Birdie' };
+    if (diff === 0)  return { bg:'var(--border)', text:'var(--text-2)', label:'Par' };
+    if (diff === 1)  return { bg:'rgba(220,38,38,0.12)', text:'#dc2626', label:'Bogey' };
+    if (diff === 2)  return { bg:'rgba(220,38,38,0.2)', text:'#dc2626', label:'Double' };
+    return { bg:'rgba(220,38,38,0.3)', text:'#dc2626', label:'+++' };
+  }
+
+  function buildHalf(start, end) {
+    var halfPts = 0;
+    var cells = '';
+    for (var i = start; i < end; i++) {
+      var sc = parseInt(scores[i]) || 0;
+      var par = parseInt(pars[i]) || 4;
+      var si = sis[i] || i+1;
+      var strokes = courseHcp >= si ? 1 : 0;
+      var diff = sc > 0 ? sc - par : null;
+      var netDiff = diff !== null ? diff - strokes : null;
+      var pts = netDiff !== null ? Math.max(0, 2 - netDiff) : 0;
+      if (sc > 0) halfPts += pts;
+      var st = diff !== null ? scoreStyle(netDiff) : { bg:'var(--bg)', text:'var(--text-3)', label:'' };
+      cells +=
+        '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border)">' +
+          '<div style="width:32px;height:32px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--accent);flex-shrink:0">'+(i+1)+'</div>' +
+          '<div style="flex:1">' +
+            '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">' +
+              '<span style="font-size:14px;font-weight:700;color:var(--text-2)">Par '+par+'</span>' +
+              '<span style="font-size:13px;color:var(--text-3)">SI '+si+'</span>' +
+              (strokes > 0 ? '<span style="font-size:12px;background:rgba(201,168,76,0.15);color:var(--accent-dark);border-radius:4px;padding:2px 7px;font-weight:600">+'+strokes+' stroke</span>' : '') +
+            '</div>' +
+            (st.label ? '<div style="font-size:13px;font-weight:700;color:'+st.text+';margin-top:3px">'+st.label+'</div>' : '') +
+          '</div>' +
+          '<div style="text-align:center;flex-shrink:0">' +
+            '<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);margin-bottom:3px">Score</div>' +
+            '<div style="width:44px;height:44px;border-radius:10px;background:'+st.bg+';display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:'+st.text+'">'+(sc > 0 ? sc : '—')+'</div>' +
+          '</div>' +
+          '<div style="text-align:center;flex-shrink:0;min-width:44px">' +
+            '<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);margin-bottom:3px">Pts</div>' +
+
+            '<div style="font-size:20px;font-weight:800;color:'+(pts>2?'#15803d':pts>0?'var(--text)':'var(--text-3)')+'">'+(sc > 0 ? pts : '—')+'</div>' +
+
+          '</div>' +
+        '</div>';
+    }
+    return { cells: cells, pts: halfPts };
+  }
+
+  var front = buildHalf(0, Math.min(9, holes));
+  var back = is18 ? buildHalf(9, holes) : null;
+
+  function halfHeader(label, pts) {
+    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0 4px">' +
+      '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-3)">'+label+'</div>' +
+      '<div style="font-size:13px;font-weight:700;color:var(--text)">'+pts+' pts</div>' +
+    '</div>';
+  }
+
+  var body =
+    '<div style="background:var(--primary);border-radius:var(--radius-lg);padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between">' +
+      '<div>' +
+        '<div style="font-family:DM Serif Display,serif;font-size:16px;color:white">'+(ev?ev.course_name:'Round')+'</div>' +
+        '<div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px">'+(ev?fmtDate(ev.event_date):'')+(pl?' · '+(pl.name):'')+'</div>' +
+        '<div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:1px">Playing hcp '+courseHcp+'</div>' +
+      '</div>' +
+      '<div style="text-align:center">' +
+        '<div style="font-size:44px;font-weight:800;color:var(--accent);line-height:1">'+totalPts+'</div>' +
+        '<div style="font-size:10px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:.06em">pts</div>' +
+      '</div>' +
+    '</div>';
+
+  if (scores.length === 0) {
+    body += '<div style="text-align:center;padding:24px;color:var(--text-3)">No hole scores recorded</div>';
+  } else {
+    if (is18) {
+      body += halfHeader('Front 9', front.pts) + front.cells +
+              halfHeader('Back 9', back.pts) + back.cells;
+    } else {
+      body += front.cells;
+    }
+  }
+
+  openModal('Scorecard', body);
 }
 
 function renderSettings() {
@@ -2081,7 +2191,7 @@ openModal('Branding',
 '<div class="settings-row" onclick="closeModal();setTimeout(openBrandingModal,150)"><div class="settings-row-label">Society name</div><div class="settings-row-value">'+(s.society_name||s.name||'--')+' &#8250;</div></div>' +
 '<div class="settings-row" onclick="closeModal();setTimeout(openLogoModal,150)"><div class="settings-row-label">Logo</div><div class="settings-row-value">'+(s.logo_url?'Uploaded':'Not set')+' &#8250;</div></div>' +
 '<div class="settings-row" onclick="closeModal();setTimeout(openThemeModal,150)"><div class="settings-row-label">Theme &amp; colours</div><div class="settings-row-value"><div class="colour-dot" style="background:'+(s.primary_colour||'#0a1628')+'"></div><div class="colour-dot" style="background:'+(s.secondary_colour||'#C9A84C')+'"></div> &#8250;</div></div>' +
-'<div class="settings-row" onclick="closeModal();setTimeout(openAppearanceModal,150)"><div class="settings-row-label">App theme</div><div class="settings-row-value" style="font-size:12px;color:var(--text-3)">'+(({classic:'Classic',slate:'Slate',dark:'Dark',navy:'Navy'})[s.bg_style]||'Classic')+' &#8250;</div></div>'
+'<div class="settings-row" onclick="closeModal();setTimeout(openAppearanceModal,150)"><div class="settings-row-label">App theme</div><div class="settings-row-value" style="font-size:12px;color:var(--text-3)">'+(({classic:'Classic',white:'White',dark:'Dark',navy:'Navy'})[s.bg_style]||'Classic')+' &#8250;</div></div>'
 );
 }
 
@@ -2100,115 +2210,144 @@ var s = societySettings || {};
 openModal('Society name', '<div class="field"><label>Society name</label><input type="text" id="brand-name" value="'+(s.society_name||s.name||'')+'"></div><button class="btn accent full" onclick="saveBranding()">Save</button>');
 }
 
+function renderCharts(uid) {
+  var data = window._chartData && window._chartData[uid];
+  if (!data) return;
+  var hcpData = data.hcp, ptsData = data.pts;
+  var cs = getComputedStyle(document.documentElement);
+  var borderCol = cs.getPropertyValue('--border').trim() || '#eee';
+  var textCol = cs.getPropertyValue('--text-3').trim() || '#888';
+  var accent = cs.getPropertyValue('--accent').trim() || '#C9A84C';
+
+  // ── Handicap line chart ──
+  var hcpC = document.getElementById('hcp_'+uid);
+  if (hcpC && hcpData.length >= 2) {
+    var W = hcpC.parentElement.clientWidth - 32;
+    hcpC.width = W; hcpC.height = 90;
+    var ctx = hcpC.getContext('2d');
+    var n = hcpData.length, pad = 12, cH = 68;
+    var vals = hcpData.map(function(d){return d.val;});
+    var mn = Math.min.apply(null,vals), mx = Math.max.apply(null,vals), rng = mx-mn||1;
+    function fx(i){return pad+i*(W-pad*2)/(n-1);}
+    function fy(v){return pad+cH-(((v-mn)/rng)*cH);}
+    var grad = ctx.createLinearGradient(0,0,0,90);
+    grad.addColorStop(0,'rgba(22,163,74,0.2)'); grad.addColorStop(1,'rgba(22,163,74,0)');
+    var st1 = null;
+    function animHcp(ts) {
+      if(!st1) st1=ts;
+      var prog = Math.min(1,(ts-st1)/700);
+      var ease = 1-Math.pow(1-prog,3);
+      ctx.clearRect(0,0,W,90);
+      var drawN = Math.max(2,Math.round(ease*(n-1))+1);
+      ctx.beginPath(); ctx.moveTo(fx(0),fy(vals[0]));
+      for(var i=1;i<drawN;i++){var cx=(fx(i-1)+fx(i))/2;ctx.bezierCurveTo(cx,fy(vals[i-1]),cx,fy(vals[i]),fx(i),fy(vals[i]));}
+      ctx.lineTo(fx(drawN-1),pad+cH); ctx.lineTo(fx(0),pad+cH); ctx.closePath();
+      ctx.fillStyle=grad; ctx.fill();
+      ctx.beginPath(); ctx.moveTo(fx(0),fy(vals[0]));
+      for(var j=1;j<drawN;j++){var cx2=(fx(j-1)+fx(j))/2;ctx.bezierCurveTo(cx2,fy(vals[j-1]),cx2,fy(vals[j]),fx(j),fy(vals[j]));}
+      ctx.strokeStyle='#16a34a'; ctx.lineWidth=2.5; ctx.stroke();
+      for(var k=0;k<drawN;k++){
+        var dp=Math.min(1,Math.max(0,(ease*n-k)));
+        ctx.beginPath(); ctx.arc(fx(k),fy(vals[k]),3.5*dp,0,Math.PI*2);
+        ctx.fillStyle='#16a34a'; ctx.fill();
+        if(dp>=1){ctx.fillStyle=textCol;ctx.font='bold 9px DM Sans,sans-serif';ctx.textAlign='center';ctx.fillText(vals[k].toFixed(1),fx(k),fy(vals[k])-8);}
+      }
+      if(prog<1) requestAnimationFrame(animHcp);
+    }
+    requestAnimationFrame(animHcp);
+  }
+
+  // ── Points bar chart ──
+  var ptsC = document.getElementById('pts_'+uid);
+  if (ptsC && ptsData.length >= 1) {
+    var W2 = ptsC.parentElement.clientWidth - 32;
+    ptsC.width = W2; ptsC.height = 90;
+    var ctx2 = ptsC.getContext('2d');
+    var n2 = ptsData.length, pad2 = 8, cH2 = 68;
+    var vals2 = ptsData.map(function(d){return d.val;});
+    var mx2 = Math.max.apply(null,vals2)||1;
+    var bw = Math.min(32,(W2-pad2*2)/n2-4);
+    var avg2 = vals2.reduce(function(s,v){return s+v;},0)/n2;
+    var st2 = null;
+    function animPts(ts) {
+      if(!st2) st2=ts;
+      var prog2 = Math.min(1,(ts-st2)/700);
+      var ease2 = 1-Math.pow(1-prog2,3);
+      ctx2.clearRect(0,0,W2,90);
+      var avgY = pad2+cH2-(avg2/mx2)*cH2;
+      ctx2.strokeStyle=borderCol; ctx2.lineWidth=1; ctx2.setLineDash([3,3]);
+      ctx2.beginPath(); ctx2.moveTo(pad2,avgY); ctx2.lineTo(W2-pad2,avgY); ctx2.stroke();
+      ctx2.setLineDash([]);
+      for(var i=0;i<n2;i++){
+        var barDelay=i/n2;
+        var barProg=Math.min(1,Math.max(0,(ease2-barDelay)/(1-barDelay+0.001)));
+        var bh=(vals2[i]/mx2)*cH2*barProg;
+        var x2=pad2+(i*(W2-pad2*2)/n2)+(W2-pad2*2)/n2/2-bw/2;
+        var y2=pad2+cH2-bh;
+        ctx2.fillStyle=vals2[i]===mx2?accent:'rgba(201,168,76,0.5)';
+        ctx2.beginPath();
+        if(ctx2.roundRect){ctx2.roundRect(x2,y2,bw,bh,Math.min(4,bw/2));}else{ctx2.rect(x2,y2,bw,bh);}
+        ctx2.fill();
+        if(barProg>=1){ctx2.fillStyle=textCol;ctx2.font='bold 9px DM Sans,sans-serif';ctx2.textAlign='center';ctx2.fillText(vals2[i],x2+bw/2,y2-4);}
+      }
+      if(prog2<1) requestAnimationFrame(animPts);
+    }
+    requestAnimationFrame(animPts);
+  }
+}
+
 function buildProgressionCharts(rounds, player) {
-if (!rounds || !rounds.length) {
-return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:10px;text-align:center;color:var(--text-3);font-size:13px">Play your first round to see detailed stats</div>';
-}
+  if (!rounds || !rounds.length) {
+    return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;text-align:center;color:var(--text-3);font-size:13px">Play your first round to see your stats</div>';
+  }
+  var sorted = rounds.slice().sort(function(a,b){ return (a.created_at||'').localeCompare(b.created_at||''); });
+  var uid = player.id.slice(0,6);
 
-var sorted = rounds.slice().sort(function(a,b){ return (a.created_at||'').localeCompare(b.created_at||''); });
-var html = '';
+  var hcpData = sorted.filter(function(r){ return r.handicap_after != null; })
+    .map(function(r,i){ return { x:i, val:parseFloat(r.handicap_after) }; });
+  var ptsData = sorted.filter(function(r){ return r.stableford_points != null; })
+    .map(function(r,i){ return { x:i, val:r.stableford_points||0 }; });
 
-// ── Handicap progression ──
-var hcpPoints = sorted.filter(function(r){ return r.handicap_after != null; }).map(function(r,i){
-return { label: 'R'+(i+1), val: parseFloat(r.handicap_after) };
-});
-if (hcpPoints.length >= 1) {
-var hcpMin = Math.min.apply(null, hcpPoints.map(function(p){return p.val;}));
-var hcpMax = Math.max.apply(null, hcpPoints.map(function(p){return p.val;}));
-var hcpRange = hcpMax - hcpMin || 1;
-var svgW = 280, svgH = 80, pad = 20;
-var stepX = hcpPoints.length > 1 ? (svgW - pad*2) / (hcpPoints.length - 1) : 0;
-var pts = hcpPoints.map(function(p,i){
-var x = pad + i * stepX;
-var y = pad + (1 - (p.val - hcpMin) / hcpRange) * (svgH - pad*2);
-return x.toFixed(1)+','+y.toFixed(1);
-});
-var trend = hcpPoints[hcpPoints.length-1].val < hcpPoints[0].val ? 'Down ' : 'Up ';
-var diff = Math.abs(hcpPoints[hcpPoints.length-1].val - hcpPoints[0].val).toFixed(1);
-var trendColor = trend === 'Down ' ? '#16a34a' : '#dc2626';
-html += '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px">' +
-'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">' +
-'<div style="font-size:12px;font-weight:600;color:var(--text-2);text-transform:uppercase;letter-spacing:.05em">Handicap progression</div>' +
-'<div style="font-size:12px;font-weight:700;color:'+trendColor+'">'+trend+diff+'</div>' +
-'</div>' +
-'<svg viewBox="0 0 '+svgW+' '+svgH+'" style="width:100%;height:80px">' +
-'<polyline points="'+pts.join(' ')+'" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' +
-pts.map(function(p,i){
-var xy = p.split(',');
-return '<circle cx="'+xy[0]+'" cy="'+xy[1]+'" r="3" fill="var(--primary)"/>' +
-'<text x="'+xy[0]+'" y="'+(parseFloat(xy[1])-6)+'" text-anchor="middle" font-size="8" fill="var(--text-3)">'+hcpPoints[i].val.toFixed(1)+'</text>';
-}).join('') +
-'</svg></div>';
-}
+  // Store data for deferred rendering when tab becomes visible
+  window._chartData = window._chartData || {};
+  window._chartData[uid] = { hcp: hcpData, pts: ptsData };
 
-// ── Points per round chart ──
-var ptsPoints = sorted.filter(function(r){ return r.stableford_points != null; }).map(function(r,i){
-return { label:'R'+(i+1), val: r.stableford_points||0 };
-});
-if (ptsPoints.length >= 1) {
-var pMin = Math.min.apply(null, ptsPoints.map(function(p){return p.val;}));
-var pMax = Math.max.apply(null, ptsPoints.map(function(p){return p.val;}));
-var pRange = pMax - pMin || 1;
-var svgW2 = 280, svgH2 = 80, pad2 = 20;
-var stepX2 = ptsPoints.length > 1 ? (svgW2 - pad2*2) / (ptsPoints.length - 1) : 0;
-var pts2 = ptsPoints.map(function(p,i){
-var x = pad2 + i * stepX2;
-var y = pad2 + (1 - (p.val - pMin) / pRange) * (svgH2 - pad2*2);
-return x.toFixed(1)+','+y.toFixed(1);
-});
-var avg = Math.round(ptsPoints.reduce(function(s,p){return s+p.val;},0) / ptsPoints.length);
-html += '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px">' +
-'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">' +
-'<div style="font-size:12px;font-weight:600;color:var(--text-2);text-transform:uppercase;letter-spacing:.05em">Points per round</div>' +
-'<div style="font-size:12px;font-weight:700;color:var(--text-3)">Avg '+avg+' pts</div>' +
-'</div>' +
-'<svg viewBox="0 0 '+svgW2+' '+svgH2+'" style="width:100%;height:80px">' +
-'<polyline points="'+pts2.join(' ')+'" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' +
-pts2.map(function(p,i){
-var xy = p.split(',');
-return '<circle cx="'+xy[0]+'" cy="'+xy[1]+'" r="3" fill="var(--accent)"/>' +
-'<text x="'+xy[0]+'" y="'+(parseFloat(xy[1])-6)+'" text-anchor="middle" font-size="8" fill="var(--text-3)">'+ptsPoints[i].val+'</text>';
-}).join('') +
-'</svg></div>';
-}
+  var html = '';
 
-// ── Par averages (from hole_scores + par_values) ──
-var par3pts = [], par4pts = [], par5pts = [];
-sorted.forEach(function(r) {
-if (!r.hole_scores || !r.par_values) return;
-var scores, pars;
-try { scores = typeof r.hole_scores === 'string' ? JSON.parse(r.hole_scores) : r.hole_scores; } catch(e){ return; }
-try { pars = typeof r.par_values === 'string' ? JSON.parse(r.par_values) : r.par_values; } catch(e){ return; }
-if (!Array.isArray(scores) || !Array.isArray(pars)) return;
-scores.forEach(function(s,i) {
-var p = pars[i];
-var sc = parseInt(s); var par = parseInt(p);
-if (!sc || !par) return;
-var stab = Math.max(0, 2 - (sc - par));
-if (par === 3) par3pts.push(stab);
-else if (par === 4) par4pts.push(stab);
-else if (par === 5) par5pts.push(stab);
-});
-});
+  if (hcpData.length >= 2) {
+    var last = hcpData[hcpData.length-1].val;
+    var first = hcpData[0].val;
+    var diff = Math.abs(last - first).toFixed(1);
+    var improved = last < first;
+    html +=
+      '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:12px">' +
+        '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px">' +
+          '<div><div style="font-size:13px;font-weight:700;color:var(--text)">Handicap</div>' +
+          '<div style="font-size:11px;color:var(--text-3);margin-top:2px">'+hcpData.length+' rounds</div></div>' +
+          '<div style="text-align:right">' +
+            '<div style="font-size:28px;font-weight:800;color:var(--text);line-height:1">'+last.toFixed(1)+'</div>' +
+            '<div style="font-size:12px;font-weight:700;color:'+(improved?'#16a34a':'#dc2626')+'">'+(improved?'▼ ':'▲ ')+diff+'</div>' +
+          '</div>' +
+        '</div>' +
+        '<canvas id="hcp_'+uid+'" style="width:100%;height:90px;display:block"></canvas>' +
+      '</div>';
+  }
 
-if (par3pts.length || par4pts.length || par5pts.length) {
-function avg(arr) { return arr.length ? (arr.reduce(function(s,v){return s+v;},0)/arr.length).toFixed(2) : '--'; }
-function bar(val, max) {
-var pct = max > 0 ? Math.min(100, (parseFloat(val)/max)*100) : 0;
-var color = parseFloat(val) >= 2 ? '#16a34a' : parseFloat(val) >= 1.5 ? 'var(--accent)' : '#dc2626';
-return '<div style="height:8px;background:var(--border);border-radius:99px;margin-top:4px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:'+color+';border-radius:99px;transition:width 0.5s"></div></div>';
-}
-var a3 = avg(par3pts), a4 = avg(par4pts), a5 = avg(par5pts);
-html += '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px">' +
-'<div style="font-size:12px;font-weight:600;color:var(--text-2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px">Avg stableford by par</div>' +
-'<div style="display:flex;flex-direction:column;gap:10px">' +
-(par3pts.length ? '<div><div style="display:flex;justify-content:space-between"><span style="font-size:13px;color:var(--text)">Par 3</span><span style="font-size:13px;font-weight:700;color:var(--text)">'+a3+' pts</span></div>'+bar(a3,2)+'</div>' : '') +
-(par4pts.length ? '<div><div style="display:flex;justify-content:space-between"><span style="font-size:13px;color:var(--text)">Par 4</span><span style="font-size:13px;font-weight:700;color:var(--text)">'+a4+' pts</span></div>'+bar(a4,2)+'</div>' : '') +
-(par5pts.length ? '<div><div style="display:flex;justify-content:space-between"><span style="font-size:13px;color:var(--text)">Par 5</span><span style="font-size:13px;font-weight:700;color:var(--text)">'+a5+' pts</span></div>'+bar(a5,2)+'</div>' : '') +
-'</div></div>';
-}
+  if (ptsData.length >= 1) {
+    var avg = Math.round(ptsData.reduce(function(s,p){return s+p.val;},0)/ptsData.length);
+    var best = Math.max.apply(null, ptsData.map(function(p){return p.val;}));
+    html +=
+      '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:12px">' +
+        '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px">' +
+          '<div><div style="font-size:13px;font-weight:700;color:var(--text)">Points per round</div>' +
+          '<div style="font-size:11px;color:var(--text-3);margin-top:2px">Avg '+avg+' · Best '+best+' pts</div></div>' +
+        '</div>' +
+        '<canvas id="pts_'+uid+'" style="width:100%;height:90px;display:block"></canvas>' +
+      '</div>';
+  }
 
-return html || '';
+  html += '<div id="chart_uid" data-uid="'+uid+'" style="display:none"></div>';
+  return html || '<div style="padding:20px;text-align:center;color:var(--text-3)">Not enough data yet</div>';
 }
 
 
@@ -2251,6 +2390,7 @@ standardPrizes.forEach(function(p){
 var el = document.getElementById('prize-'+p.replace(/ /g,'-'));
 if (el && el.checked) prizes.push(p);
 });
+prizes = prizes.filter(function(p){ return ['Closest to pin','Long drive','Best gross'].indexOf(p) === -1; });
 var custom = document.getElementById('ep-custom') ? document.getElementById('ep-custom').value.trim() : '';
 if (custom) prizes.push(custom);
 try {
@@ -2311,38 +2451,6 @@ renderAll();
 } catch(e) { toast('Error: ' + e.message, 'error'); }
 }
 
-async function resetMemberPin() {
-var p = window._editPlayer;
-if (!p) return;
-var newPin = String(Math.floor(1000 + Math.random() * 9000));
-if (!confirm('Reset PIN for ' + p.name + '? Their current PIN will stop working.')) return;
-try {
-  await apiPatch('players?id=eq.' + p.id, { pin: newPin });
-  var idx = db.players.findIndex(function(x){ return x.id === p.id; });
-  if (idx >= 0) db.players[idx].pin = newPin;
-  window._editPlayer = Object.assign({}, p, { pin: newPin });
-  window._newPin = newPin;
-  openModal('PIN reset',
-    '<div style="text-align:center;padding:10px 0">' +
-    '<div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px">' + p.name + ' — New PIN</div>' +
-    '<div style="background:var(--primary);border-radius:var(--radius-lg);padding:20px;margin:16px 0">' +
-    '<div style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">PIN</div>' +
-    '<div style="font-size:48px;font-weight:800;color:var(--accent);letter-spacing:.2em">' + newPin + '</div>' +
-    '</div>' +
-    '<button onclick="sharePinFromData()" class="btn accent full" style="margin-bottom:8px">Share new PIN on WhatsApp</button>' +
-    '<button onclick="editPlayer(\'' + p.id + '\')" class="btn full">Back to player</button>' +
-    '</div>'
-  );
-} catch(e) { toast('Error: ' + e.message, 'error'); }
-}
-
-function sharePinFromData() {
-var p = window._editPlayer;
-var pin = window._newPin;
-if (!p || !pin) return;
-sharePin(p.name, pin);
-}
-
 function sharePin(name, pin) {
 var text = 'Hi ' + name + '! You\'ve been approved for the golf society app.\n\nYour PIN is: ' + pin + '\n\nTo sign in:\n1. Open the app\n2. Select Member\n3. Enter your mobile number and PIN';
 window.location.href = 'https://wa.me/?text=' + encodeURIComponent(text);
@@ -2392,10 +2500,10 @@ function openAppearanceModal() {
   window._previewTheme = curTheme;
 
   var themeList = [
-    { id:'classic', label:'Classic',  desc:'Green & white',    p:['#1a3320','#f4f6f4','#ffffff','#C9A84C'] },
-    { id:'slate',   label:'Slate',    desc:'Deep green tint',  p:['#2d4a38','#e4ede7','#ffffff','#C9A84C'] },
-    { id:'dark',    label:'Dark',     desc:'Dark mode',        p:['#0a1210','#0e1a14','#162013','#C9A84C'] },
-    { id:'navy',    label:'Navy',     desc:'Navy & gold',      p:['#0f2044','#f0f4f8','#ffffff','#C9A84C'] }
+    { id:'classic', label:'Classic', desc:'Green & white',  p:['#1a3320','#f4f6f4','#ffffff','#C9A84C'] },
+    { id:'white',   label:'White',   desc:'Clean minimal',  p:['#1a3320','#ffffff','#ffffff','#C9A84C'] },
+    { id:'dark',    label:'Dark',    desc:'Dark mode',      p:['#1a3320','#22302a','#2a3d33','#C9A84C'] },
+    { id:'navy',    label:'Navy',    desc:'Navy & gold',    p:['#0a1628','#f0f4f8','#ffffff','#C9A84C'] }
   ];
 
   var tiles = themeList.map(function(t) {
@@ -2426,7 +2534,7 @@ function previewTheme(id) {
   window._previewTheme = id;
   var s = Object.assign({}, societySettings, { bg_style: id });
   applyTheme(s);
-  var themeList = ['classic','slate','dark','navy'];
+  var themeList = ['classic','white','dark','navy'];
   themeList.forEach(function(tid) {
     var b = document.getElementById('th-'+tid);
     if (!b) return;
@@ -2478,7 +2586,12 @@ var sid = currentUser && currentUser.user_metadata ? currentUser.user_metadata.s
 var primary = document.getElementById('ph').value;
 var accent = document.getElementById('ah').value;
 try {
-await apiPatch('society_settings?society_id=eq.' + sid, { primary_colour: primary, secondary_colour: accent });
+var h = apiHeaders();
+h['Prefer'] = 'resolution=merge-duplicates,return=representation';
+await fetch(SUPABASE_URL + '/rest/v1/society_settings', {
+method: 'POST', headers: h,
+body: JSON.stringify({ society_id: sid, primary_colour: primary, secondary_colour: accent })
+});
 societySettings = Object.assign({}, societySettings, { primary_colour: primary, secondary_colour: accent });
 applyTheme(societySettings); toast('Theme saved!', 'success'); closeModal(); renderSettings();
 } catch(e) { toast('Error: ' + e.message, 'error'); }
@@ -2496,16 +2609,22 @@ toast('Uploading...');
 try {
 var ext = file.name.split('.').pop();
 var path = sid + '/logo.' + ext;
+// Try upsert first, fall back to POST
 var res = await fetch(SUPABASE_URL + '/storage/v1/object/society-logos/' + path, {
 method: 'POST',
-headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + currentUser.access_token, 'Content-Type': file.type },
+headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + (currentUser.access_token || SUPABASE_KEY), 'Content-Type': file.type, 'x-upsert': 'true' },
 body: file
 });
-if (!res.ok) throw new Error('Upload failed');
-var url = SUPABASE_URL + '/storage/v1/object/public/society-logos/' + path;
+if (!res.ok) {
+var errText = await res.text();
+throw new Error('Upload failed: ' + errText);
+}
+var url = SUPABASE_URL + '/storage/v1/object/public/society-logos/' + path + '?t=' + Date.now();
 await apiPatch('society_settings?society_id=eq.' + sid, { logo_url: url });
 societySettings = Object.assign({}, societySettings, { logo_url: url });
-updateBranding(societySettings); toast('Logo updated!', 'success'); closeModal(); renderSettings();
+updateBranding(societySettings);
+renderHome();
+toast('Logo updated!', 'success'); closeModal(); renderSettings();
 } catch(e) { toast('Error: ' + e.message, 'error'); }
 }
 
@@ -2632,7 +2751,7 @@ var role = document.getElementById('ap-role').value;
 var provisional = document.getElementById('ap-prov').checked;
 if (!name) { toast('Enter a name', 'error'); return; }
 try {
-var res = await apiPost('players', { society_id: sid, name: name, email: email||null, handicap_index: hcp, role: role, provisional: provisional });
+var res = await apiPost('players', { society_id: sid, name: name, email: email||null, handicap_index: hcp, role: role, provisional: provisional, status: 'active' });
 db.players.push(res[0]);
 db.players.sort(function(a,b){ return a.name.localeCompare(b.name); });
 toast(name + ' added!', 'success'); openMembersModal(); renderAll();
@@ -2641,7 +2760,6 @@ toast(name + ' added!', 'success'); openMembersModal(); renderAll();
 
 function editPlayer(pid) {
 var p = db.players.filter(function(x){ return x.id === pid; })[0]; if (!p) return;
-window._editPlayer = p;
 var ses = p.can_enter_scores || 'none';
 openModal('Edit player',
 '<div class="field"><label>Full name</label><input type="text" id="ep-name" value="'+p.name+'"></div>' +
@@ -2655,11 +2773,6 @@ openModal('Edit player',
 '<option value="today" '+(ses==='today'?'selected':'')+'>Today only — score entry helper</option>' +
 '<option value="permanent" '+(ses==='permanent'?'selected':'')+'>Permanent — sub admin</option>' +
 '</select></div>' +
-'<div style="background:var(--bg);border-radius:var(--radius);padding:10px 12px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between">' +
-'<div><div style="font-size:13px;font-weight:600;color:var(--text)">Member PIN</div>' +
-'<div style="font-size:11px;color:var(--text-3);margin-top:1px">' + (p.pin ? 'Current PIN set' : 'No PIN set') + '</div></div>' +
-'<button onclick="resetMemberPin()" style="background:var(--primary);border:none;border-radius:8px;padding:8px 14px;color:var(--accent);font-size:12px;font-weight:700;cursor:pointer;font-family:DM Sans,sans-serif">Reset PIN</button>' +
-'</div>' +
 '<div style="display:flex;gap:8px"><button onclick="openMembersModal()" class="btn">Back</button><button onclick="saveEditPlayer(\'' + pid + '\')" class="btn accent" style="flex:1">Save</button></div>'
 );
 }
@@ -2831,7 +2944,18 @@ return shuffled;
 
 var defaultPars = prevEvent ? (typeof prevEvent.hole_pars==='string'?JSON.parse(prevEvent.hole_pars):prevEvent.hole_pars) : genPars(holes, totalPar);
 // Default SI: 1-9 or 1-18
-var defaultSIs = prevEvent && prevEvent.hole_sis ? (typeof prevEvent.hole_sis==='string'?JSON.parse(prevEvent.hole_sis):prevEvent.hole_sis) : Array.from({length:holes},function(_,i){return i+1;});
+// Default SI: for 18 holes, odd SIs to front 9, even to back 9 (standard distribution)
+// For 9 holes, 1-9 sequential is correct
+var defaultSIsRaw;
+if (prevEvent && prevEvent.hole_sis) {
+  defaultSIsRaw = typeof prevEvent.hole_sis==='string'?JSON.parse(prevEvent.hole_sis):prevEvent.hole_sis;
+} else if (holes === 18) {
+  // Standard 18-hole SI: odd numbers on front 9, even on back 9
+  defaultSIsRaw = [1,3,5,7,9,11,13,15,17, 2,4,6,8,10,12,14,16,18];
+} else {
+  defaultSIsRaw = [1,2,3,4,5,6,7,8,9];
+}
+var defaultSIs = defaultSIsRaw;
 
 // Store for later
 window._ceData = { date:date, courseName:courseName, type:type, slope:slope, cr:cr, totalPar:totalPar, holes:holes, pars:defaultPars, sis:defaultSIs };
@@ -2963,8 +3087,8 @@ holes: cd.holes,
 slope_rating: cd.slope,
 course_rating: cd.cr,
 par: cd.totalPar,
-hole_pars: cd.pars,
-hole_sis: cd.sis,
+hole_pars: JSON.stringify(cd.pars),
+hole_sis: JSON.stringify(cd.sis),
 published: false
 });
 db.events.push(res[0]);
@@ -3093,9 +3217,7 @@ return '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;bord
 '<div style="display:flex;align-items:center;gap:8px">' +
 statusDot +
 '<span style="font-size:15px;font-weight:700;color:var(--text);min-width:28px;text-align:right">'+pts+'</span>' +
-(round && round.verified && currentUser && currentUser.user_metadata && currentUser.user_metadata.role !== 'admin'
-  ? '<span style="font-size:10px;color:var(--text-3)">Verified</span>'
-  : '<button onclick="openPlayerScoreEntry(\'' + eid + '\',\'' + p.id + '\')" class="btn sm" style="padding:5px 10px">'+(round?'Edit':'Add')+'</button>') +
+'<button onclick="openPlayerScoreEntry(\''+eid+'\',\''+p.id+'\')" class="btn sm" style="padding:5px 10px">'+(round?'Edit':'Add')+'</button>' +
 '</div>' +
 '</div>';
 }).join('');
@@ -3123,14 +3245,14 @@ if(bB!==aB)return bB-aB;
 }
 return 0;
 });
-var medals = ['🥇','🥈','🥉'];
+var medals = ['1st','2nd','3rd'];
 liveBoard = '<div style="background:var(--primary);border-radius:var(--radius);padding:10px 12px;margin-bottom:12px">' +
 '<div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Live leaderboard</div>' +
 sorted.slice(0,5).map(function(r,i){
 var p = db.players.filter(function(x){return x.id===r.player_id;})[0];
 var isVerified = r.verified;
 return '<div style="display:flex;align-items:center;gap:8px;padding:4px 0">' +
-'<div style="font-size:14px;width:20px;text-align:center">'+(medals[i]||i+1+'.')+'</div>' +
+'<div style="width:20px;height:20px;border-radius:50%;background:rgba(201,168,76,0.2);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:var(--accent);flex-shrink:0">'+(i+1)+'</div>' +
 '<div style="flex:1;font-size:13px;color:'+(isVerified?'white':'rgba(255,255,255,0.5)')+'">'+( p?p.name:'?')+'</div>' +
 '<div style="font-size:13px;font-weight:700;color:'+(isVerified?'var(--accent)':'rgba(255,255,255,0.4)')+'">'+( r.stableford_points||0)+'<span style="font-size:10px;font-weight:400;color:rgba(255,255,255,0.3)"> pts</span></div>' +
 (isVerified?'':'<span style="font-size:9px;color:rgba(255,255,255,0.3);margin-left:2px">unverified</span>') +
@@ -3412,7 +3534,8 @@ totalPts += Math.max(0, 2 - (sc - par - strokes));
 var existing = db.rounds.filter(function(r){ return r.event_id===eid && r.player_id===pid; })[0];
 var payload = {
 society_id: sid, event_id: eid, player_id: pid,
-hole_scores: scores, par_values: pars,
+hole_scores: JSON.stringify(scores),
+par_values: JSON.stringify(pars),
 stableford_points: totalPts, gross_score: totalGross,
 course_handicap: courseHcp,
 handicap_before: parseFloat(player.handicap_index||0),
@@ -3421,15 +3544,16 @@ verified: false
 
 try {
 var res;
-if (existing) {
-res = await apiPatch('rounds?id=eq.'+existing.id, payload);
-var idx = db.rounds.findIndex(function(r){ return r.id===existing.id; });
-if (idx >= 0) db.rounds[idx] = Object.assign({}, db.rounds[idx], payload, {id:existing.id});
+if (existingId) {
+res = await apiPatch('rounds?id=eq.'+existingId, payload);
+var idx = db.rounds.findIndex(function(r){ return r.id===existingId; });
+if (idx >= 0) db.rounds[idx] = Object.assign({}, db.rounds[idx], payload, {id:existingId});
+else db.rounds.push(Object.assign({}, payload, {id:existingId}));
 } else {
 res = await apiPost('rounds', payload);
-db.rounds.push(res[0]);
+if (res && res[0]) db.rounds.push(res[0]);
 }
-toast(verify ? '&#10003; '+player.name+' verified — '+totalPts+' pts' : 'Score saved', 'success');
+toast('Score saved — '+totalPts+' pts', 'success');
 window._scoreEntry = null;
 document.getElementById('score-screen').style.display = 'none';
 openScoreEntry(eid);
@@ -3590,7 +3714,7 @@ return 0;
 }
 
 var sorted = tbSort(eventRounds);
-var medals = ['🥇','🥈','🥉'];
+var medals = ['1st','2nd','3rd'];
 var lbPts = s.league_pts_table || {1:20,2:17,3:15,4:13,5:11,6:10,7:9,8:8,9:7,10:6};
 var cutMap = {1:parseFloat(s.cut_1st||-1.0),2:parseFloat(s.cut_2nd||-0.5),3:parseFloat(s.cut_3rd||-0.2),4:parseFloat(s.cut_4th||0),5:parseFloat(s.cut_5th||0)};
 
@@ -3637,39 +3761,67 @@ var playerOpts = '<option value="">— None —</option>' + db.players.map(funct
   return '<option value="'+p.id+'">'+p.name+'</option>';
 }).join('');
 
-// Always show front/back 9 for 18 hole events, closest to pin, long drive + any configured extras
+// Standard prizes — always shown
 var standardPrizes = [];
 if (holes === 18) {
-  standardPrizes.push({ id: 'front9', label: 'Best front 9' });
-  standardPrizes.push({ id: 'back9', label: 'Best back 9' });
+  standardPrizes.push({ id: 'front9', label: 'Best front 9', auto: true });
+  standardPrizes.push({ id: 'back9', label: 'Best back 9', auto: true });
 }
-standardPrizes.push({ id: 'closest', label: 'Closest to pin' });
-standardPrizes.push({ id: 'longdrive', label: 'Long drive' });
-standardPrizes.push({ id: 'bestgross', label: 'Best gross' });
-configuredPrizes.forEach(function(p){ standardPrizes.push({ id: 'custom_'+p, label: p }); });
+standardPrizes.push({ id: 'closest', label: 'Closest to pin', auto: false });
+standardPrizes.push({ id: 'longdrive', label: 'Long drive', auto: false });
+standardPrizes.push({ id: 'bestgross', label: 'Best gross', auto: true });
+// Add custom prizes, deduplicate against built-ins
+var builtInIds = ['closest','longdrive','bestgross','front9','back9'];
+configuredPrizes.forEach(function(p){
+  if (builtInIds.indexOf(p.toLowerCase().replace(/ /g,'_')) === -1) {
+    standardPrizes.push({ id: 'custom_'+p, label: p, auto: false });
+  }
+});
 
-// Restore any previously set winners
-var prev = window._extraPrizeWinners || {};
+// Auto-calculate front 9, back 9, best gross from rounds
+var evRounds = db.rounds.filter(function(r){ return r.event_id===eid && r.stableford_points != null; });
+function calcHalf(r, start, end) {
+  var scores = r.hole_scores ? (typeof r.hole_scores==='string'?JSON.parse(r.hole_scores):r.hole_scores) : [];
+  var pars = r.par_values ? (typeof r.par_values==='string'?JSON.parse(r.par_values):r.par_values) : [];
+  var sis = ev && ev.hole_sis ? (typeof ev.hole_sis==='string'?JSON.parse(ev.hole_sis):ev.hole_sis) : [];
+  var hcp = r.course_handicap || 0;
+  var pts = 0;
+  for (var i=start; i<end; i++) {
+    if (!scores[i]||!pars[i]) continue;
+    var str = hcp >= (sis[i]||i+1) ? 1 : 0;
+    pts += Math.max(0, 2-(parseInt(scores[i])-parseInt(pars[i])-str));
+  }
+  return pts;
+}
+var autoWinners = {};
+if (evRounds.length) {
+  if (holes === 18) {
+    var f9 = evRounds.slice().sort(function(a,b){ return calcHalf(b,0,9)-calcHalf(a,0,9); })[0];
+    var b9 = evRounds.slice().sort(function(a,b){ return calcHalf(b,9,18)-calcHalf(a,9,18); })[0];
+    var f9p = db.players.filter(function(p){ return f9&&p.id===f9.player_id; })[0];
+    var b9p = db.players.filter(function(p){ return b9&&p.id===b9.player_id; })[0];
+    if (f9p) autoWinners['front9'] = f9p.id;
+    if (b9p) autoWinners['back9'] = b9p.id;
+  }
+  var bg = evRounds.filter(function(r){ return r.gross_score; }).sort(function(a,b){ return (a.gross_score||99)-(b.gross_score||99); })[0];
+  var bgp = db.players.filter(function(p){ return bg&&p.id===bg.player_id; })[0];
+  if (bgp) autoWinners['bestgross'] = bgp.id;
+}
+
 var prevById = window._extraPrizeWinnersById || {};
-
 var prizeFields = standardPrizes.map(function(prize) {
-  var prevVal = prevById[prize.id] || autoWinners[prize.id] || '';
-  var autoTag = (prize.auto && autoWinners[prize.id]) ? '<span style="font-size:10px;background:rgba(82,183,136,0.15);color:#16a34a;border-radius:4px;padding:2px 6px;margin-left:6px;font-weight:600">Auto</span>' : '';
-  var opts = playerOpts.replace('value="'+prevVal+'"', 'value="'+prevVal+'" selected');
-  return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:10px">' +
-    '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:0.5px solid var(--border)">' +
-      '<div style="font-size:14px;font-weight:700;color:var(--text)">' + prize.label + '</div>' +
-      autoTag +
-    '</div>' +
-    '<div style="padding:10px 14px">' +
-      '<select id="ep-'+prize.id+'" style="width:100%;padding:12px;border-radius:var(--radius);border:1.5px solid var(--border);background:var(--bg);font-size:14px;font-family:DM Sans,sans-serif;color:var(--text)">' + opts + '</select>' +
-    '</div>' +
-  '</div>';
+  var preselect = prevById[prize.id] || autoWinners[prize.id] || '';
+  var autoTag = (prize.auto && autoWinners[prize.id]) ? '<span style="font-size:10px;background:rgba(201,168,76,0.15);color:var(--accent-dark);border-radius:4px;padding:2px 6px;margin-left:6px;font-weight:600">Auto</span>' : '';
+  var opts = playerOpts.replace('value="'+preselect+'"', 'value="'+preselect+'" selected');
+  return '<div style="background:var(--bg);border-radius:var(--radius);padding:12px;margin-bottom:8px">' +
+    '<div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px">'+prize.label+autoTag+'</div>' +
+    '<select id="ep-'+prize.id+'" style="width:100%;padding:10px;border-radius:var(--radius);border:1px solid var(--border-strong);background:var(--surface);font-size:13px;font-family:DM Sans,sans-serif">'+opts+'</select>' +
+    '</div>';
 }).join('');
 
 document.getElementById('modal-title').textContent = 'Honours & prizes';
 document.getElementById('modal-body').innerHTML =
-  '<p style="font-size:13px;color:var(--text-2);margin-bottom:14px">Assign winners for each prize. Leave blank to skip. These appear on the result post.</p>' +
+  '<p style="font-size:13px;color:var(--text-2);margin-bottom:14px">Winners auto-calculated where possible. Override any by selecting a different player.</p>' +
   prizeFields +
   '<button onclick="saveExtraPrizesAndPublish(\''+eid+'\')" class="btn accent full" style="margin-top:14px">&#10003; Save &amp; publish</button>' +
   '<button onclick="openReviewPublish(\''+eid+'\')" class="btn full" style="margin-top:8px">&#8592; Back</button>';
@@ -3760,7 +3912,8 @@ var leaguePts = lbPts[pos] || 0;
 var player = db.players.filter(function(p){ return p.id===r.player_id; })[0];
 if (!player) continue;
 var currentHcp = parseFloat(player.handicap_index||0);
-var hcpChange = cutMap[pos]!==undefined&&cutMap[pos]!==0?cutMap[pos]:addition;
+// If cut is defined and non-zero use it; if cut is 0 (no change), use 0; otherwise use addition
+var hcpChange = cutMap[pos]!==undefined ? (cutMap[pos]!==0 ? cutMap[pos] : 0) : addition;
 var newHcp = Math.min(maxHcp, Math.max(0, currentHcp+hcpChange));
 await apiPatch('rounds?id=eq.'+r.id, { league_points: leaguePts, handicap_after: newHcp, verified: true });
 await apiPatch('players?id=eq.'+r.player_id, { handicap_index: newHcp });
@@ -3800,7 +3953,7 @@ if (existingPosts.length) {
 await loadAll();
 renderAll();
 closeModal();
-toast('Published! Handicaps updated ✓', 'success');
+toast('Published! Handicaps updated', 'success');
 
 // Show result card with share option
 setTimeout(function(){ showResultCard(eid, topPlayers, extraWinners); }, 500);
@@ -3811,10 +3964,11 @@ setTimeout(function(){ showResultCard(eid, topPlayers, extraWinners); }, 500);
 function showResultCard(eid, topPlayers, extraPrizes) {
 var ev = db.events.filter(function(e){ return e.id === eid; })[0];
 if (!ev) return;
-var medals = ['🥇','🥈','🥉'];
+var medals = ['1st','2nd','3rd'];
+var medalColors = ['#B8860B','#888888','#8B4513'];
 var resultRows = topPlayers.map(function(p,i){
 return '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid rgba(255,255,255,0.1)">' +
-'<div style="font-size:20px;width:28px">'+medals[i]+'</div>' +
+'<div style="width:28px;height:28px;border-radius:50%;background:'+medalColors[i]+';color:white;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+medals[i]+'</div>' +
 '<div style="flex:1;font-size:14px;font-weight:600;color:white">'+p.name+'</div>' +
 '<div style="font-size:18px;font-weight:800;color:var(--accent)">'+p.pts+'<span style="font-size:11px;color:rgba(255,255,255,0.5)"> pts</span></div>' +
 '</div>';
@@ -3842,7 +3996,7 @@ shareText += '\n\nPosted via GolfSoc \u26f3';
 openModal('Results posted!',
 '<div style="background:var(--primary);border-radius:var(--radius-lg);padding:16px;margin-bottom:14px">' +
 '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.1)">' +
-'<div style="font-size:22px">⛳</div>' +
+'<div style="width:32px;height:32px;border-radius:8px;background:rgba(201,168,76,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="13" r="2" fill="#C9A84C"/><line x1="8" y1="11" x2="8" y2="2" stroke="#C9A84C" stroke-width="1.5"/><path d="M8 2 L13 5 L8 8" fill="#C9A84C"/></svg></div>' +
 '<div><div style="font-size:15px;font-weight:700;color:white">'+(ev.course_name||'Event')+'</div>' +
 '<div style="font-size:11px;color:rgba(255,255,255,0.45)">'+fmtDate(ev.event_date)+'</div></div>' +
 '</div>' +
@@ -3874,15 +4028,26 @@ renderWizThemes(); wizStep(1);
 
 function renderWizThemes() {
 document.getElementById('wiz-theme-grid').innerHTML = THEMES.map(function(t) {
-return '<div class="theme-opt '+(wizData.themeId===t.id?'selected':'')+'" onclick="selectWizTheme(\''+t.id+'\')"><div class="theme-preview"><div style="flex:2;background:'+t.primary+'"></div><div style="flex:1;background:'+t.accent+'"></div></div><div class="theme-label">'+t.name+'</div></div>';
+var sel = wizData.themeId===t.id ? 'selected' : '';
+var onclick = 'selectWizTheme(\'' + t.id + '\')';
+return '<div class="theme-opt '+sel+'" onclick="'+onclick+'">'
++ '<div class="theme-preview" style="background:'+t.bg+'">'
++ '<div style="flex:2;background:'+t.primary+'"></div>'
++ '<div style="flex:1;background:'+t.accent+'"></div>'
++ '</div>'
++ '<div class="theme-label">'+t.name+'</div>'
++ '<div style="font-size:9px;color:rgba(255,255,255,0.4);margin-top:1px">'+t.desc+'</div>'
++ '</div>';
 }).join('');
 }
-
 function wizStep(n) {
 document.querySelectorAll('.wiz-step').forEach(function(s){ s.classList.remove('active'); });
 var step = document.getElementById('wiz-'+n);
 if (step) step.classList.add('active');
 document.querySelectorAll('.wiz-dot').forEach(function(d,i){ d.classList.toggle('done', i < n); });
+// Scroll to top of wizard
+var wiz = document.getElementById('setup-wizard');
+if (wiz) wiz.scrollTop = 0;
 }
 
 function wizNext(n) {
@@ -3892,19 +4057,56 @@ wizData.homeCourse = document.getElementById('wiz-home-course').value.trim();
 if (!wizData.societyName) { toast('Enter your society name', 'error'); return; }
 }
 if (n === 3 && !wizData.hcpMode) { toast('Select a handicap mode', 'error'); return; }
+if (n === 4) {
+// Save league points from step 4
+wizData.leaguePts = {};
+for (var i=1; i<=10; i++) {
+var el = document.getElementById('wiz-pts-'+i);
+wizData.leaguePts[i] = el ? (parseInt(el.value)||0) : 0;
+}
+}
 wizStep(n + 1);
 }
 
 function selectWizTheme(id) {
 wizData.themeId = id;
-var t = THEMES.filter(function(x){ return x.id === id; })[0];
-if (t) { document.documentElement.style.setProperty('--primary', t.primary); document.documentElement.style.setProperty('--accent', t.accent); }
+var appT = APP_THEMES[id] || APP_THEMES.classic;
+var r = document.documentElement.style;
+r.setProperty('--primary', appT.primary);
+r.setProperty('--accent', appT.accent);
 document.querySelectorAll('#wiz-theme-grid .theme-opt').forEach(function(el){ el.classList.toggle('selected', el.getAttribute('onclick').indexOf("'" + id + "'") > -1); });
+}
+
+function formatJoinCode(el) {
+var val = el.value.toUpperCase().replace(/[^A-Z0-9-]/g, '');
+// Auto-insert hyphen after the letters part if user hasn't typed one yet
+if (!val.includes('-') && val.length >= 2) {
+  // Check if last char is a digit — insert hyphen before it
+  var match = val.match(/^([A-Z]+)(\d+)$/);
+  if (match) val = match[1] + '-' + match[2];
+}
+el.value = val;
+}
+
+function suggestInviteCode() {
+var name = document.getElementById('wiz-society-name').value.trim();
+var codeEl = document.getElementById('wiz-invite-code-input');
+if (!codeEl || codeEl.value) return; // Don't overwrite if already typed
+// Generate suggestion from initials
+var initials = name.split(' ')
+  .filter(function(w){ return w.length > 2; })
+  .map(function(w){ return w[0]; })
+  .join('').toUpperCase().slice(0,6);
+if (initials.length >= 2) codeEl.value = initials;
 }
 
 function selectHcpMode(mode) {
 wizData.hcpMode = mode;
 ['bhgs','gui','custom'].forEach(function(m){ var el = document.getElementById('hm-'+m); if(el) el.classList.toggle('selected', m === mode); });
+var podium = document.getElementById('wiz-podium-cuts');
+var custom = document.getElementById('wiz-custom-cuts');
+if (podium) podium.style.display = mode === 'bhgs' ? 'block' : 'none';
+if (custom) custom.style.display = mode === 'custom' ? 'block' : 'none';
 }
 
 function previewWizLogo(event) {
@@ -3923,22 +4125,101 @@ r.readAsDataURL(file);
 async function finishWizard() {
 toast('Setting up your society...');
 try {
-var theme = THEMES.filter(function(t){ return t.id === wizData.themeId; })[0] || THEMES[0];
-var inviteCode = (wizData.societyName||'GOLF').replace(/[^A-Z0-9]/gi,'').toUpperCase().slice(0,6) + '-' + Math.random().toString(36).slice(2,6).toUpperCase();
+var appTheme = APP_THEMES[wizData.themeId] || APP_THEMES.classic;
+var theme = { primary: appTheme.primary, accent: appTheme.accent };
+// Generate invite code: initials + sequential number e.g. BHGS-1, BHGS-2
+var initials = (wizData.societyName||'GOLF').split(' ')
+  .filter(function(w){ return w.length > 1; })
+  .map(function(w){ return w[0]; })
+  .join('').toUpperCase().slice(0,6);
+if (!initials) initials = (wizData.societyName||'GOLF').replace(/[^A-Z0-9]/gi,'').toUpperCase().slice(0,4);
+// Find next available number suffix
+var inviteCode = initials + '-1';
+try {
+var codeCheck = await fetch(SUPABASE_URL + '/rest/v1/societies?invite_code=like.' + initials + '-*&select=invite_code', {
+headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Prefer': '' }
+});
+var existingCodes = codeCheck.ok ? await codeCheck.json() : [];
+var nums = existingCodes.map(function(s){
+  var m = s.invite_code.replace(initials+'-','');
+  return parseInt(m)||0;
+}).filter(function(n){ return n > 0; });
+var nextNum = nums.length ? Math.max.apply(null,nums)+1 : 1;
+inviteCode = initials + '-' + nextNum;
+} catch(e) {}
 var h = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + currentUser.access_token, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
 var sRes = await fetch(SUPABASE_URL + '/rest/v1/societies', { method: 'POST', headers: h, body: JSON.stringify({ name: wizData.societyName, invite_code: inviteCode, contact_email: currentUser.email, subscription_status: 'trial', trial_ends_at: new Date(Date.now()+30*86400000).toISOString() }) });
 if (!sRes.ok) throw new Error('Society: ' + await sRes.text());
 var sid = (await sRes.json())[0].id;
-await fetch(SUPABASE_URL + '/rest/v1/society_settings', { method: 'POST', headers: h, body: JSON.stringify({ society_id: sid, society_name: wizData.societyName, home_course: wizData.homeCourse||'', primary_colour: theme.primary, secondary_colour: theme.accent, theme_preset: wizData.themeId, handicap_mode: wizData.hcpMode||'bhgs', cut_1st: -1, cut_2nd: -0.5, cut_3rd: -0.2, add_non_podium: 0.2, max_handicap: 36, provisional_rounds: 3, league_pts_mode: 'bhgs', holes_per_round: 9 }) });
+// Handicap cuts
+var cut1, cut2, cut3, cut4, cut5, cutOther;
+if (wizData.hcpMode === 'custom') {
+  cut1 = parseFloat(document.getElementById('wiz-cut-1c').value) || -1;
+  cut2 = parseFloat(document.getElementById('wiz-cut-2c').value) || -0.5;
+  cut3 = parseFloat(document.getElementById('wiz-cut-3c').value) || -0.2;
+  cut4 = parseFloat(document.getElementById('wiz-cut-4c').value) || 0;
+  cut5 = parseFloat(document.getElementById('wiz-cut-5c').value) || 0;
+  cutOther = parseFloat(document.getElementById('wiz-cut-otherc').value) || 0.2;
+} else if (wizData.hcpMode === 'bhgs') {
+  cut1 = parseFloat(document.getElementById('wiz-cut-1').value) || -1;
+  cut2 = parseFloat(document.getElementById('wiz-cut-2').value) || -0.5;
+  cut3 = parseFloat(document.getElementById('wiz-cut-3').value) || -0.2;
+  cut4 = 0; cut5 = 0;
+  cutOther = parseFloat(document.getElementById('wiz-cut-other').value) || 0.2;
+} else {
+  cut1=-1; cut2=-0.5; cut3=-0.2; cut4=0; cut5=0; cutOther=0.2;
+}
+// League points
+var lp = wizData.leaguePts || {1:20,2:17,3:15,4:13,5:11,6:10,7:9,8:8,9:7,10:6};
+await fetch(SUPABASE_URL + '/rest/v1/society_settings', { method: 'POST', headers: h, body: JSON.stringify({ society_id: sid, society_name: wizData.societyName, home_course: wizData.homeCourse||'', primary_colour: theme.primary, secondary_colour: theme.accent, theme_preset: wizData.themeId, handicap_mode: wizData.hcpMode||'bhgs', cut_1st: cut1, cut_2nd: cut2, cut_3rd: cut3, cut_4th: cut4, cut_5th: cut5, add_non_podium: cutOther, max_handicap: 36, provisional_rounds: 3, league_pts_mode: 'custom', league_pts_table: lp, holes_per_round: 9 }) });
 await fetch(SUPABASE_URL + '/rest/v1/players', { method: 'POST', headers: h, body: JSON.stringify({ society_id: sid, user_id: currentUser.id, name: (currentUser.user_metadata&&currentUser.user_metadata.full_name)||currentUser.email, email: currentUser.email, handicap_index: 18, role: 'admin' }) });
 await fetch(SUPABASE_URL + '/auth/v1/user', { method: 'PUT', headers: h, body: JSON.stringify({ data: { full_name: (currentUser.user_metadata&&currentUser.user_metadata.full_name)||'', society_id: sid, role: 'admin' } }) });
 currentUser.user_metadata = Object.assign({}, currentUser.user_metadata, { society_id: sid, role: 'admin' });
 societySettings = { society_id: sid, society_name: wizData.societyName, home_course: wizData.homeCourse, primary_colour: theme.primary, secondary_colour: theme.accent, invite_code: inviteCode, subscription_status: 'trial' };
+// Upload logo if provided
+if (wizData.logoFile && sid) {
+try {
+var ext = wizData.logoFile.name.split('.').pop();
+var logoPath = sid + '/logo.' + ext;
+var logoRes = await fetch(SUPABASE_URL + '/storage/v1/object/society-logos/' + logoPath, {
+method: 'POST',
+headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + currentUser.access_token, 'Content-Type': wizData.logoFile.type, 'x-upsert': 'true' },
+body: wizData.logoFile
+});
+if (logoRes.ok) {
+var logoUrl = SUPABASE_URL + '/storage/v1/object/public/society-logos/' + logoPath + '?t=' + Date.now();
+await fetch(SUPABASE_URL + '/rest/v1/society_settings?society_id=eq.' + sid, { method: 'PATCH', headers: h, body: JSON.stringify({ logo_url: logoUrl }) });
+societySettings.logo_url = logoUrl;
+}
+} catch(logoErr) { console.warn('Logo upload failed:', logoErr); }
+}
+// Store invite code for step 6
+window._wizInviteCode = inviteCode;
+// Apply theme and branding
 applyTheme(societySettings); updateBranding(societySettings);
-document.getElementById('setup-wizard').style.display = 'none';
-await loadAll(); renderAll(); showApp();
+// Load data in background
+await loadAll(); renderAll();
+// Show step 6 with invite code
+var codeEl = document.getElementById('wiz-invite-code');
+if (codeEl) codeEl.textContent = inviteCode;
+wizStep(6);
 toast('Society created! Welcome to GolfSoc', 'success');
 } catch(e) { console.error(e); toast('Setup failed: ' + e.message, 'error'); }
+}
+
+function completeWizard() {
+document.getElementById('setup-wizard').style.display = 'none';
+showApp();
+}
+
+function copyInviteCode() {
+var code = window._wizInviteCode || (document.getElementById('wiz-invite-code') && document.getElementById('wiz-invite-code').textContent);
+if (!code || code === '—') return;
+navigator.clipboard.writeText(code).then(function(){
+  toast('Invite code copied!', 'success');
+}).catch(function(){
+  toast(code, 'success');
+});
 }
 
 // Toast
