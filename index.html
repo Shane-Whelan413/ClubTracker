@@ -1217,6 +1217,9 @@ function buildResultCard(post) {
     (prizeRows ? '<div style="padding:8px 14px 10px 13px;border-top:0.5px solid var(--border);background:var(--bg)">' +
       '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-3);margin-bottom:6px">Extra prizes</div>' +
       prizeRows+'</div>' : '') +
+    '<div style="padding:10px 14px 12px">' +
+      '<button onclick="openEventResults(\'' + postId + '\')" style="width:100%;padding:10px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);color:var(--text-2);font-size:13px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif">View full results</button>' +
+    '</div>' +
     '</div>';
 }
 
