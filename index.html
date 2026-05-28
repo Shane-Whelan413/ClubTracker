@@ -390,6 +390,7 @@ input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px;
 <div class="wiz-dot"></div>
 <div class="wiz-dot"></div>
 <div class="wiz-dot"></div>
+<div class="wiz-dot"></div>
 </div>
 <div class="wiz-step active" id="wiz-1">
 <div class="wiz-title">What's your society called?</div>
@@ -409,32 +410,66 @@ input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px;
 </div>
 <div class="wiz-step" id="wiz-3">
 <div class="wiz-title">Handicap rules</div>
-<div class="wiz-sub">How do you calculate handicap changes after each round?</div>
+<div class="wiz-sub">How are handicaps adjusted after each round?</div>
 <div class="wiz-option" onclick="selectHcpMode('bhgs')" id="hm-bhgs">
-<div><div class="wiz-option-title">Points-based</div><div class="wiz-option-sub">1st -1.0, 2nd -0.5, 3rd -0.2, others +0.2</div></div>
+<div><div class="wiz-option-title">Points-based</div><div class="wiz-option-sub">Podium cuts: 1st −1.0 · 2nd −0.5 · 3rd −0.2 · others +0.2</div></div>
 <div class="wiz-check">&#10003;</div>
 </div>
 <div class="wiz-option" onclick="selectHcpMode('gui')" id="hm-gui">
-<div><div class="wiz-option-title">GUI standard</div><div class="wiz-option-sub">Golfing Union of Ireland rules</div></div>
+<div><div class="wiz-option-title">GUI standard</div><div class="wiz-option-sub">Golfing Union of Ireland rules — automatic</div></div>
 <div class="wiz-check">&#10003;</div>
 </div>
 <div class="wiz-option" onclick="selectHcpMode('custom')" id="hm-custom">
-<div><div class="wiz-option-title">Custom</div><div class="wiz-option-sub">Set your own cuts per position</div></div>
+<div><div class="wiz-option-title">Custom</div><div class="wiz-option-sub">Set your own cuts for every position</div></div>
 <div class="wiz-check">&#10003;</div>
 </div>
+
+<!-- Points-based: podium cuts only -->
+<div id="wiz-podium-cuts" style="display:none;background:rgba(255,255,255,0.06);border-radius:12px;padding:14px;margin-top:10px">
+  <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.5);margin-bottom:10px">Podium cuts (negative = reduction)</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+    <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">1st</div><input id="wiz-cut-1" type="number" step="0.1" value="-1.0" inputmode="decimal" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+    <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">2nd</div><input id="wiz-cut-2" type="number" step="0.1" value="-0.5" inputmode="decimal" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+    <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">3rd</div><input id="wiz-cut-3" type="number" step="0.1" value="-0.2" inputmode="decimal" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+  </div>
+  <div style="margin-top:8px"><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">All others (addition)</div><input id="wiz-cut-other" type="number" step="0.1" value="0.2" inputmode="decimal" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+</div>
+
+<!-- Custom: full 5-position scope -->
 <div id="wiz-custom-cuts" style="display:none;background:rgba(255,255,255,0.06);border-radius:12px;padding:14px;margin-top:10px">
-  <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.5);margin-bottom:10px">Handicap cuts (negative = reduction)</div>
+  <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.5);margin-bottom:10px">Cuts per position (negative = reduction)</div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-    <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">1st place</div><input id="wiz-cut-1" type="number" step="0.1" value="-1.0" style="width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:14px;font-family:DM Sans,sans-serif"></div>
-    <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">2nd place</div><input id="wiz-cut-2" type="number" step="0.1" value="-0.5" style="width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:14px;font-family:DM Sans,sans-serif"></div>
-    <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">3rd place</div><input id="wiz-cut-3" type="number" step="0.1" value="-0.2" style="width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:14px;font-family:DM Sans,sans-serif"></div>
-    <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">Others</div><input id="wiz-cut-other" type="number" step="0.1" value="0.2" style="width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:14px;font-family:DM Sans,sans-serif"></div>
+    <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">1st place</div><input id="wiz-cut-1c" type="number" step="0.1" value="-1.0" inputmode="decimal" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+    <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">2nd place</div><input id="wiz-cut-2c" type="number" step="0.1" value="-0.5" inputmode="decimal" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+    <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">3rd place</div><input id="wiz-cut-3c" type="number" step="0.1" value="-0.2" inputmode="decimal" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+    <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">4th place</div><input id="wiz-cut-4c" type="number" step="0.1" value="0" inputmode="decimal" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+    <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">5th place</div><input id="wiz-cut-5c" type="number" step="0.1" value="0" inputmode="decimal" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+    <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">Others (addition)</div><input id="wiz-cut-otherc" type="number" step="0.1" value="0.2" inputmode="decimal" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
   </div>
 </div>
 <button class="wiz-btn" onclick="wizNext(3)" style="margin-top:16px">Continue</button>
 <button class="wiz-btn-back" onclick="wizStep(2)">Back</button>
 </div>
 <div class="wiz-step" id="wiz-4">
+<div class="wiz-title">League points</div>
+<div class="wiz-sub">Points awarded per position each round. Adjust to match your society's rules.</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+  <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">1st place</div><input id="wiz-pts-1" type="number" value="20" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+  <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">2nd place</div><input id="wiz-pts-2" type="number" value="17" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+  <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">3rd place</div><input id="wiz-pts-3" type="number" value="15" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+  <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">4th place</div><input id="wiz-pts-4" type="number" value="13" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+  <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">5th place</div><input id="wiz-pts-5" type="number" value="11" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+  <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">6th place</div><input id="wiz-pts-6" type="number" value="10" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+  <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">7th place</div><input id="wiz-pts-7" type="number" value="9" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+  <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">8th place</div><input id="wiz-pts-8" type="number" value="8" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+  <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">9th place</div><input id="wiz-pts-9" type="number" value="7" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+  <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">10th place</div><input id="wiz-pts-10" type="number" value="6" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+</div>
+<button class="wiz-btn" onclick="wizNext(4)">Continue</button>
+<button class="wiz-btn-back" onclick="wizStep(3)">Back</button>
+</div>
+
+<div class="wiz-step" id="wiz-5">
 <div class="wiz-title">Upload your logo</div>
 <div class="wiz-sub">Optional - you can add this later in Settings.</div>
 <div style="border:2px dashed rgba(255,255,255,0.2);border-radius:14px;padding:32px;text-align:center;cursor:pointer;margin-bottom:16px" onclick="document.getElementById('wiz-logo-input').click()">
@@ -444,11 +479,11 @@ input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px;
 <div style="font-size:13px;color:rgba(255,255,255,0.4)">Tap to upload club crest</div>
 </div>
 <button class="wiz-btn" onclick="finishWizard()">Finish setup</button>
-<button class="wiz-btn-back" onclick="wizStep(3)">Back</button>
+<button class="wiz-btn-back" onclick="wizStep(4)">Back</button>
 </div>
 
 <!-- Step 5: All set -->
-<div class="wiz-step" id="wiz-5">
+<div class="wiz-step" id="wiz-6">
 <div class="wiz-title">You're all set!</div>
 <div class="wiz-sub">Your society is live. Here's your member invite code:</div>
 <div id="wiz-invite-block" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);border-radius:14px;padding:20px;text-align:center;margin:16px 0">
@@ -3992,15 +4027,26 @@ renderWizThemes(); wizStep(1);
 
 function renderWizThemes() {
 document.getElementById('wiz-theme-grid').innerHTML = THEMES.map(function(t) {
-return '<div class="theme-opt '+(wizData.themeId===t.id?'selected':'')+'" onclick="selectWizTheme(\''+t.id+'\')"><div class="theme-preview"><div style="flex:2;background:'+t.primary+'"></div><div style="flex:1;background:'+t.accent+'"></div></div><div class="theme-label">'+t.name+'</div></div>';
+var sel = wizData.themeId===t.id ? 'selected' : '';
+var onclick = 'selectWizTheme(\'' + t.id + '\')';
+return '<div class="theme-opt '+sel+'" onclick="'+onclick+'">'
++ '<div class="theme-preview" style="background:'+t.bg+'">'
++ '<div style="flex:2;background:'+t.primary+'"></div>'
++ '<div style="flex:1;background:'+t.accent+'"></div>'
++ '</div>'
++ '<div class="theme-label">'+t.name+'</div>'
++ '<div style="font-size:9px;color:rgba(255,255,255,0.4);margin-top:1px">'+t.desc+'</div>'
++ '</div>';
 }).join('');
 }
-
 function wizStep(n) {
 document.querySelectorAll('.wiz-step').forEach(function(s){ s.classList.remove('active'); });
 var step = document.getElementById('wiz-'+n);
 if (step) step.classList.add('active');
 document.querySelectorAll('.wiz-dot').forEach(function(d,i){ d.classList.toggle('done', i < n); });
+// Scroll to top of wizard
+var wiz = document.getElementById('setup-wizard');
+if (wiz) wiz.scrollTop = 0;
 }
 
 function wizNext(n) {
@@ -4010,21 +4056,33 @@ wizData.homeCourse = document.getElementById('wiz-home-course').value.trim();
 if (!wizData.societyName) { toast('Enter your society name', 'error'); return; }
 }
 if (n === 3 && !wizData.hcpMode) { toast('Select a handicap mode', 'error'); return; }
+if (n === 4) {
+// Save league points from step 4
+wizData.leaguePts = {};
+for (var i=1; i<=10; i++) {
+var el = document.getElementById('wiz-pts-'+i);
+wizData.leaguePts[i] = el ? (parseInt(el.value)||0) : 0;
+}
+}
 wizStep(n + 1);
 }
 
 function selectWizTheme(id) {
 wizData.themeId = id;
-var t = THEMES.filter(function(x){ return x.id === id; })[0];
-if (t) { document.documentElement.style.setProperty('--primary', t.primary); document.documentElement.style.setProperty('--accent', t.accent); }
+var appT = APP_THEMES[id] || APP_THEMES.classic;
+var r = document.documentElement.style;
+r.setProperty('--primary', appT.primary);
+r.setProperty('--accent', appT.accent);
 document.querySelectorAll('#wiz-theme-grid .theme-opt').forEach(function(el){ el.classList.toggle('selected', el.getAttribute('onclick').indexOf("'" + id + "'") > -1); });
 }
 
 function selectHcpMode(mode) {
 wizData.hcpMode = mode;
 ['bhgs','gui','custom'].forEach(function(m){ var el = document.getElementById('hm-'+m); if(el) el.classList.toggle('selected', m === mode); });
-var cuts = document.getElementById('wiz-custom-cuts');
-if (cuts) cuts.style.display = mode === 'custom' ? 'block' : 'none';
+var podium = document.getElementById('wiz-podium-cuts');
+var custom = document.getElementById('wiz-custom-cuts');
+if (podium) podium.style.display = mode === 'bhgs' ? 'block' : 'none';
+if (custom) custom.style.display = mode === 'custom' ? 'block' : 'none';
 }
 
 function previewWizLogo(event) {
@@ -4043,31 +4101,65 @@ r.readAsDataURL(file);
 async function finishWizard() {
 toast('Setting up your society...');
 try {
-var theme = THEMES.filter(function(t){ return t.id === wizData.themeId; })[0] || THEMES[0];
+var appTheme = APP_THEMES[wizData.themeId] || APP_THEMES.classic;
+var theme = { primary: appTheme.primary, accent: appTheme.accent };
 var inviteCode = (wizData.societyName||'GOLF').replace(/[^A-Z0-9]/gi,'').toUpperCase().slice(0,6) + '-' + Math.random().toString(36).slice(2,6).toUpperCase();
 var h = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + currentUser.access_token, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
 var sRes = await fetch(SUPABASE_URL + '/rest/v1/societies', { method: 'POST', headers: h, body: JSON.stringify({ name: wizData.societyName, invite_code: inviteCode, contact_email: currentUser.email, subscription_status: 'trial', trial_ends_at: new Date(Date.now()+30*86400000).toISOString() }) });
 if (!sRes.ok) throw new Error('Society: ' + await sRes.text());
 var sid = (await sRes.json())[0].id;
-var cut1 = wizData.hcpMode === 'custom' ? parseFloat(document.getElementById('wiz-cut-1').value||-1) : -1;
-var cut2 = wizData.hcpMode === 'custom' ? parseFloat(document.getElementById('wiz-cut-2').value||-0.5) : -0.5;
-var cut3 = wizData.hcpMode === 'custom' ? parseFloat(document.getElementById('wiz-cut-3').value||-0.2) : -0.2;
-var cutOther = wizData.hcpMode === 'custom' ? parseFloat(document.getElementById('wiz-cut-other').value||0.2) : 0.2;
-await fetch(SUPABASE_URL + '/rest/v1/society_settings', { method: 'POST', headers: h, body: JSON.stringify({ society_id: sid, society_name: wizData.societyName, home_course: wizData.homeCourse||'', primary_colour: theme.primary, secondary_colour: theme.accent, theme_preset: wizData.themeId, handicap_mode: wizData.hcpMode||'bhgs', cut_1st: cut1, cut_2nd: cut2, cut_3rd: cut3, add_non_podium: cutOther, max_handicap: 36, provisional_rounds: 3, league_pts_mode: 'bhgs', holes_per_round: 9 }) });
+// Handicap cuts
+var cut1, cut2, cut3, cut4, cut5, cutOther;
+if (wizData.hcpMode === 'custom') {
+  cut1 = parseFloat(document.getElementById('wiz-cut-1c').value) || -1;
+  cut2 = parseFloat(document.getElementById('wiz-cut-2c').value) || -0.5;
+  cut3 = parseFloat(document.getElementById('wiz-cut-3c').value) || -0.2;
+  cut4 = parseFloat(document.getElementById('wiz-cut-4c').value) || 0;
+  cut5 = parseFloat(document.getElementById('wiz-cut-5c').value) || 0;
+  cutOther = parseFloat(document.getElementById('wiz-cut-otherc').value) || 0.2;
+} else if (wizData.hcpMode === 'bhgs') {
+  cut1 = parseFloat(document.getElementById('wiz-cut-1').value) || -1;
+  cut2 = parseFloat(document.getElementById('wiz-cut-2').value) || -0.5;
+  cut3 = parseFloat(document.getElementById('wiz-cut-3').value) || -0.2;
+  cut4 = 0; cut5 = 0;
+  cutOther = parseFloat(document.getElementById('wiz-cut-other').value) || 0.2;
+} else {
+  cut1=-1; cut2=-0.5; cut3=-0.2; cut4=0; cut5=0; cutOther=0.2;
+}
+// League points
+var lp = wizData.leaguePts || {1:20,2:17,3:15,4:13,5:11,6:10,7:9,8:8,9:7,10:6};
+await fetch(SUPABASE_URL + '/rest/v1/society_settings', { method: 'POST', headers: h, body: JSON.stringify({ society_id: sid, society_name: wizData.societyName, home_course: wizData.homeCourse||'', primary_colour: theme.primary, secondary_colour: theme.accent, theme_preset: wizData.themeId, handicap_mode: wizData.hcpMode||'bhgs', cut_1st: cut1, cut_2nd: cut2, cut_3rd: cut3, cut_4th: cut4, cut_5th: cut5, add_non_podium: cutOther, max_handicap: 36, provisional_rounds: 3, league_pts_mode: 'custom', league_pts_table: lp, holes_per_round: 9 }) });
 await fetch(SUPABASE_URL + '/rest/v1/players', { method: 'POST', headers: h, body: JSON.stringify({ society_id: sid, user_id: currentUser.id, name: (currentUser.user_metadata&&currentUser.user_metadata.full_name)||currentUser.email, email: currentUser.email, handicap_index: 18, role: 'admin' }) });
 await fetch(SUPABASE_URL + '/auth/v1/user', { method: 'PUT', headers: h, body: JSON.stringify({ data: { full_name: (currentUser.user_metadata&&currentUser.user_metadata.full_name)||'', society_id: sid, role: 'admin' } }) });
 currentUser.user_metadata = Object.assign({}, currentUser.user_metadata, { society_id: sid, role: 'admin' });
 societySettings = { society_id: sid, society_name: wizData.societyName, home_course: wizData.homeCourse, primary_colour: theme.primary, secondary_colour: theme.accent, invite_code: inviteCode, subscription_status: 'trial' };
-// Store invite code for step 5
+// Upload logo if provided
+if (wizData.logoFile && sid) {
+try {
+var ext = wizData.logoFile.name.split('.').pop();
+var logoPath = sid + '/logo.' + ext;
+var logoRes = await fetch(SUPABASE_URL + '/storage/v1/object/society-logos/' + logoPath, {
+method: 'POST',
+headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + currentUser.access_token, 'Content-Type': wizData.logoFile.type, 'x-upsert': 'true' },
+body: wizData.logoFile
+});
+if (logoRes.ok) {
+var logoUrl = SUPABASE_URL + '/storage/v1/object/public/society-logos/' + logoPath + '?t=' + Date.now();
+await fetch(SUPABASE_URL + '/rest/v1/society_settings?society_id=eq.' + sid, { method: 'PATCH', headers: h, body: JSON.stringify({ logo_url: logoUrl }) });
+societySettings.logo_url = logoUrl;
+}
+} catch(logoErr) { console.warn('Logo upload failed:', logoErr); }
+}
+// Store invite code for step 6
 window._wizInviteCode = inviteCode;
 // Apply theme and branding
 applyTheme(societySettings); updateBranding(societySettings);
 // Load data in background
 await loadAll(); renderAll();
-// Show step 5 with invite code
+// Show step 6 with invite code
 var codeEl = document.getElementById('wiz-invite-code');
 if (codeEl) codeEl.textContent = inviteCode;
-wizStep(5);
+wizStep(6);
 toast('Society created! Welcome to GolfSoc', 'success');
 } catch(e) { console.error(e); toast('Setup failed: ' + e.message, 'error'); }
 }
