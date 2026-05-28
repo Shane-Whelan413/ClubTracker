@@ -2425,7 +2425,12 @@ var sid = currentUser && currentUser.user_metadata ? currentUser.user_metadata.s
 var primary = document.getElementById('ph').value;
 var accent = document.getElementById('ah').value;
 try {
-await apiPatch('society_settings?society_id=eq.' + sid, { primary_colour: primary, secondary_colour: accent });
+var h = apiHeaders();
+h['Prefer'] = 'resolution=merge-duplicates,return=representation';
+await fetch(SUPABASE_URL + '/rest/v1/society_settings', {
+method: 'POST', headers: h,
+body: JSON.stringify({ society_id: sid, primary_colour: primary, secondary_colour: accent })
+});
 societySettings = Object.assign({}, societySettings, { primary_colour: primary, secondary_colour: accent });
 applyTheme(societySettings); toast('Theme saved!', 'success'); closeModal(); renderSettings();
 } catch(e) { toast('Error: ' + e.message, 'error'); }
@@ -2443,12 +2448,16 @@ toast('Uploading...');
 try {
 var ext = file.name.split('.').pop();
 var path = sid + '/logo.' + ext;
+// Try upsert first, fall back to POST
 var res = await fetch(SUPABASE_URL + '/storage/v1/object/society-logos/' + path, {
 method: 'POST',
-headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + currentUser.access_token, 'Content-Type': file.type },
+headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + (currentUser.access_token || SUPABASE_KEY), 'Content-Type': file.type, 'x-upsert': 'true' },
 body: file
 });
-if (!res.ok) throw new Error('Upload failed');
+if (!res.ok) {
+var errText = await res.text();
+throw new Error('Upload failed: ' + errText);
+}
 var url = SUPABASE_URL + '/storage/v1/object/public/society-logos/' + path;
 await apiPatch('society_settings?society_id=eq.' + sid, { logo_url: url });
 societySettings = Object.assign({}, societySettings, { logo_url: url });
@@ -2579,7 +2588,7 @@ var role = document.getElementById('ap-role').value;
 var provisional = document.getElementById('ap-prov').checked;
 if (!name) { toast('Enter a name', 'error'); return; }
 try {
-var res = await apiPost('players', { society_id: sid, name: name, email: email||null, handicap_index: hcp, role: role, provisional: provisional });
+var res = await apiPost('players', { society_id: sid, name: name, email: email||null, handicap_index: hcp, role: role, provisional: provisional, status: 'active' });
 db.players.push(res[0]);
 db.players.sort(function(a,b){ return a.name.localeCompare(b.name); });
 toast(name + ' added!', 'success'); openMembersModal(); renderAll();
@@ -2772,7 +2781,18 @@ return shuffled;
 
 var defaultPars = prevEvent ? (typeof prevEvent.hole_pars==='string'?JSON.parse(prevEvent.hole_pars):prevEvent.hole_pars) : genPars(holes, totalPar);
 // Default SI: 1-9 or 1-18
-var defaultSIs = prevEvent && prevEvent.hole_sis ? (typeof prevEvent.hole_sis==='string'?JSON.parse(prevEvent.hole_sis):prevEvent.hole_sis) : Array.from({length:holes},function(_,i){return i+1;});
+// Default SI: for 18 holes, odd SIs to front 9, even to back 9 (standard distribution)
+// For 9 holes, 1-9 sequential is correct
+var defaultSIsRaw;
+if (prevEvent && prevEvent.hole_sis) {
+  defaultSIsRaw = typeof prevEvent.hole_sis==='string'?JSON.parse(prevEvent.hole_sis):prevEvent.hole_sis;
+} else if (holes === 18) {
+  // Standard 18-hole SI: odd numbers on front 9, even on back 9
+  defaultSIsRaw = [1,3,5,7,9,11,13,15,17, 2,4,6,8,10,12,14,16,18];
+} else {
+  defaultSIsRaw = [1,2,3,4,5,6,7,8,9];
+}
+var defaultSIs = defaultSIsRaw;
 
 // Store for later
 window._ceData = { date:date, courseName:courseName, type:type, slope:slope, cr:cr, totalPar:totalPar, holes:holes, pars:defaultPars, sis:defaultSIs };
@@ -2904,8 +2924,8 @@ holes: cd.holes,
 slope_rating: cd.slope,
 course_rating: cd.cr,
 par: cd.totalPar,
-hole_pars: cd.pars,
-hole_sis: cd.sis,
+hole_pars: JSON.stringify(cd.pars),
+hole_sis: JSON.stringify(cd.sis),
 published: false
 });
 db.events.push(res[0]);
@@ -3351,7 +3371,8 @@ totalPts += Math.max(0, 2 - (sc - par - strokes));
 var existing = db.rounds.filter(function(r){ return r.event_id===eid && r.player_id===pid; })[0];
 var payload = {
 society_id: sid, event_id: eid, player_id: pid,
-hole_scores: scores, par_values: pars,
+hole_scores: JSON.stringify(scores),
+par_values: JSON.stringify(pars),
 stableford_points: totalPts, gross_score: totalGross,
 course_handicap: courseHcp,
 handicap_before: parseFloat(player.handicap_index||0),
@@ -3368,7 +3389,7 @@ if (idx >= 0) db.rounds[idx] = Object.assign({}, db.rounds[idx], payload, {id:ex
 res = await apiPost('rounds', payload);
 db.rounds.push(res[0]);
 }
-toast(verify ? '&#10003; '+player.name+' verified — '+totalPts+' pts' : 'Score saved', 'success');
+toast('Score saved — '+totalPts+' pts', 'success');
 window._scoreEntry = null;
 document.getElementById('score-screen').style.display = 'none';
 openScoreEntry(eid);
@@ -3694,7 +3715,8 @@ var leaguePts = lbPts[pos] || 0;
 var player = db.players.filter(function(p){ return p.id===r.player_id; })[0];
 if (!player) continue;
 var currentHcp = parseFloat(player.handicap_index||0);
-var hcpChange = cutMap[pos]!==undefined&&cutMap[pos]!==0?cutMap[pos]:addition;
+// If cut is defined and non-zero use it; if cut is 0 (no change), use 0; otherwise use addition
+var hcpChange = cutMap[pos]!==undefined ? (cutMap[pos]!==0 ? cutMap[pos] : 0) : addition;
 var newHcp = Math.min(maxHcp, Math.max(0, currentHcp+hcpChange));
 await apiPatch('rounds?id=eq.'+r.id, { league_points: leaguePts, handicap_after: newHcp, verified: true });
 await apiPatch('players?id=eq.'+r.player_id, { handicap_index: newHcp });
