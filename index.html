@@ -389,6 +389,7 @@ input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px;
 <div class="wiz-dot"></div>
 <div class="wiz-dot"></div>
 <div class="wiz-dot"></div>
+<div class="wiz-dot"></div>
 </div>
 <div class="wiz-step active" id="wiz-1">
 <div class="wiz-title">What's your society called?</div>
@@ -421,6 +422,15 @@ input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px;
 <div><div class="wiz-option-title">Custom</div><div class="wiz-option-sub">Set your own cuts per position</div></div>
 <div class="wiz-check">&#10003;</div>
 </div>
+<div id="wiz-custom-cuts" style="display:none;background:rgba(255,255,255,0.06);border-radius:12px;padding:14px;margin-top:10px">
+  <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.5);margin-bottom:10px">Handicap cuts (negative = reduction)</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+    <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">1st place</div><input id="wiz-cut-1" type="number" step="0.1" value="-1.0" style="width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:14px;font-family:DM Sans,sans-serif"></div>
+    <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">2nd place</div><input id="wiz-cut-2" type="number" step="0.1" value="-0.5" style="width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:14px;font-family:DM Sans,sans-serif"></div>
+    <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">3rd place</div><input id="wiz-cut-3" type="number" step="0.1" value="-0.2" style="width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:14px;font-family:DM Sans,sans-serif"></div>
+    <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">Others</div><input id="wiz-cut-other" type="number" step="0.1" value="0.2" style="width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:14px;font-family:DM Sans,sans-serif"></div>
+  </div>
+</div>
 <button class="wiz-btn" onclick="wizNext(3)" style="margin-top:16px">Continue</button>
 <button class="wiz-btn-back" onclick="wizStep(2)">Back</button>
 </div>
@@ -436,6 +446,40 @@ input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px;
 <button class="wiz-btn" onclick="finishWizard()">Finish setup</button>
 <button class="wiz-btn-back" onclick="wizStep(3)">Back</button>
 </div>
+
+<!-- Step 5: All set -->
+<div class="wiz-step" id="wiz-5">
+<div class="wiz-title">You're all set!</div>
+<div class="wiz-sub">Your society is live. Here's your member invite code:</div>
+<div id="wiz-invite-block" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);border-radius:14px;padding:20px;text-align:center;margin:16px 0">
+  <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,0.45);margin-bottom:8px">Invite code</div>
+  <div id="wiz-invite-code" style="font-family:monospace;font-size:28px;font-weight:800;color:white;letter-spacing:.08em;margin-bottom:12px">—</div>
+  <button onclick="copyInviteCode()" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:8px;padding:8px 20px;color:white;font-size:13px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif">Copy code</button>
+</div>
+<div style="background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.25);border-radius:12px;padding:14px;margin-bottom:16px">
+  <div style="font-size:12px;font-weight:700;color:rgba(201,168,76,0.9);margin-bottom:4px">30-day free trial active</div>
+  <div style="font-size:12px;color:rgba(255,255,255,0.5)">No payment needed now. We'll remind you before your trial ends.</div>
+</div>
+<div style="text-align:left;margin-bottom:20px">
+  <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">What to do next</div>
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.06);border-radius:10px;padding:10px 12px">
+      <div style="width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--primary);font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">1</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.8)">Add your members in the Members tab</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.06);border-radius:10px;padding:10px 12px">
+      <div style="width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--primary);font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">2</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.8)">Create your first event in the Schedule tab</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.06);border-radius:10px;padding:10px 12px">
+      <div style="width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--primary);font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">3</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.8)">Share the invite code so members can join</div>
+    </div>
+  </div>
+</div>
+<button class="wiz-btn" onclick="completeWizard()">Go to my society</button>
+</div>
+
 </div>
 
 <!-- Topbar — always rendered, hidden via CSS when auth showing -->
@@ -3980,6 +4024,8 @@ document.querySelectorAll('#wiz-theme-grid .theme-opt').forEach(function(el){ el
 function selectHcpMode(mode) {
 wizData.hcpMode = mode;
 ['bhgs','gui','custom'].forEach(function(m){ var el = document.getElementById('hm-'+m); if(el) el.classList.toggle('selected', m === mode); });
+var cuts = document.getElementById('wiz-custom-cuts');
+if (cuts) cuts.style.display = mode === 'custom' ? 'block' : 'none';
 }
 
 function previewWizLogo(event) {
@@ -4004,16 +4050,42 @@ var h = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + currentUser.acces
 var sRes = await fetch(SUPABASE_URL + '/rest/v1/societies', { method: 'POST', headers: h, body: JSON.stringify({ name: wizData.societyName, invite_code: inviteCode, contact_email: currentUser.email, subscription_status: 'trial', trial_ends_at: new Date(Date.now()+30*86400000).toISOString() }) });
 if (!sRes.ok) throw new Error('Society: ' + await sRes.text());
 var sid = (await sRes.json())[0].id;
-await fetch(SUPABASE_URL + '/rest/v1/society_settings', { method: 'POST', headers: h, body: JSON.stringify({ society_id: sid, society_name: wizData.societyName, home_course: wizData.homeCourse||'', primary_colour: theme.primary, secondary_colour: theme.accent, theme_preset: wizData.themeId, handicap_mode: wizData.hcpMode||'bhgs', cut_1st: -1, cut_2nd: -0.5, cut_3rd: -0.2, add_non_podium: 0.2, max_handicap: 36, provisional_rounds: 3, league_pts_mode: 'bhgs', holes_per_round: 9 }) });
+var cut1 = wizData.hcpMode === 'custom' ? parseFloat(document.getElementById('wiz-cut-1').value||-1) : -1;
+var cut2 = wizData.hcpMode === 'custom' ? parseFloat(document.getElementById('wiz-cut-2').value||-0.5) : -0.5;
+var cut3 = wizData.hcpMode === 'custom' ? parseFloat(document.getElementById('wiz-cut-3').value||-0.2) : -0.2;
+var cutOther = wizData.hcpMode === 'custom' ? parseFloat(document.getElementById('wiz-cut-other').value||0.2) : 0.2;
+await fetch(SUPABASE_URL + '/rest/v1/society_settings', { method: 'POST', headers: h, body: JSON.stringify({ society_id: sid, society_name: wizData.societyName, home_course: wizData.homeCourse||'', primary_colour: theme.primary, secondary_colour: theme.accent, theme_preset: wizData.themeId, handicap_mode: wizData.hcpMode||'bhgs', cut_1st: cut1, cut_2nd: cut2, cut_3rd: cut3, add_non_podium: cutOther, max_handicap: 36, provisional_rounds: 3, league_pts_mode: 'bhgs', holes_per_round: 9 }) });
 await fetch(SUPABASE_URL + '/rest/v1/players', { method: 'POST', headers: h, body: JSON.stringify({ society_id: sid, user_id: currentUser.id, name: (currentUser.user_metadata&&currentUser.user_metadata.full_name)||currentUser.email, email: currentUser.email, handicap_index: 18, role: 'admin' }) });
 await fetch(SUPABASE_URL + '/auth/v1/user', { method: 'PUT', headers: h, body: JSON.stringify({ data: { full_name: (currentUser.user_metadata&&currentUser.user_metadata.full_name)||'', society_id: sid, role: 'admin' } }) });
 currentUser.user_metadata = Object.assign({}, currentUser.user_metadata, { society_id: sid, role: 'admin' });
 societySettings = { society_id: sid, society_name: wizData.societyName, home_course: wizData.homeCourse, primary_colour: theme.primary, secondary_colour: theme.accent, invite_code: inviteCode, subscription_status: 'trial' };
+// Store invite code for step 5
+window._wizInviteCode = inviteCode;
+// Apply theme and branding
 applyTheme(societySettings); updateBranding(societySettings);
-document.getElementById('setup-wizard').style.display = 'none';
-await loadAll(); renderAll(); showApp();
+// Load data in background
+await loadAll(); renderAll();
+// Show step 5 with invite code
+var codeEl = document.getElementById('wiz-invite-code');
+if (codeEl) codeEl.textContent = inviteCode;
+wizStep(5);
 toast('Society created! Welcome to GolfSoc', 'success');
 } catch(e) { console.error(e); toast('Setup failed: ' + e.message, 'error'); }
+}
+
+function completeWizard() {
+document.getElementById('setup-wizard').style.display = 'none';
+showApp();
+}
+
+function copyInviteCode() {
+var code = window._wizInviteCode || (document.getElementById('wiz-invite-code') && document.getElementById('wiz-invite-code').textContent);
+if (!code || code === '—') return;
+navigator.clipboard.writeText(code).then(function(){
+  toast('Invite code copied!', 'success');
+}).catch(function(){
+  toast(code, 'success');
+});
 }
 
 // Toast
