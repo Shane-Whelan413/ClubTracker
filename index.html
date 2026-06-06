@@ -486,33 +486,39 @@ input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px;
 
 <!-- Step 5: All set -->
 <div class="wiz-step" id="wiz-6">
-<div class="wiz-title">You're all set!</div>
-<div class="wiz-sub">Your society is live. Here's your member invite code:</div>
+<div class="wiz-title">You're all set! 🎉</div>
+<div class="wiz-sub">Your society is live. Share your invite code with members.</div>
 <div id="wiz-invite-block" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);border-radius:14px;padding:20px;text-align:center;margin:16px 0">
   <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,0.45);margin-bottom:8px">Invite code</div>
   <div id="wiz-invite-code" style="font-family:monospace;font-size:28px;font-weight:800;color:white;letter-spacing:.08em;margin-bottom:12px">—</div>
-  <button onclick="copyInviteCode()" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:8px;padding:8px 20px;color:white;font-size:13px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif">Copy code</button>
+  <div style="display:flex;gap:8px;justify-content:center">
+    <button onclick="copyInviteCode()" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:8px;padding:8px 16px;color:white;font-size:13px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif">📋 Copy</button>
+    <button onclick="shareInviteCode()" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:8px;padding:8px 16px;color:white;font-size:13px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif">📤 Share</button>
+  </div>
 </div>
 <div style="background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.25);border-radius:12px;padding:14px;margin-bottom:16px">
   <div style="font-size:12px;font-weight:700;color:rgba(201,168,76,0.9);margin-bottom:4px">30-day free trial active</div>
   <div style="font-size:12px;color:rgba(255,255,255,0.5)">No payment needed now. We'll remind you before your trial ends.</div>
 </div>
-<div style="text-align:left;margin-bottom:20px">
-  <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">What to do next</div>
+<div style="text-align:left;margin-bottom:16px">
+  <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">How members join</div>
   <div style="display:flex;flex-direction:column;gap:8px">
-    <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.06);border-radius:10px;padding:10px 12px">
+    <div style="display:flex;align-items:flex-start;gap:10px;background:rgba(255,255,255,0.06);border-radius:10px;padding:10px 12px">
       <div style="width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--primary);font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">1</div>
-      <div style="font-size:13px;color:rgba(255,255,255,0.8)">Add your members in the Members tab</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.8)">Send members this link: <span style="color:var(--accent);font-weight:600">golfsoc.ie</span> — they tap <strong>Join a society</strong></div>
     </div>
-    <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.06);border-radius:10px;padding:10px 12px">
+    <div style="display:flex;align-items:flex-start;gap:10px;background:rgba(255,255,255,0.06);border-radius:10px;padding:10px 12px">
       <div style="width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--primary);font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">2</div>
-      <div style="font-size:13px;color:rgba(255,255,255,0.8)">Create your first event in the Schedule tab</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.8)">They enter your invite code and their name + current handicap</div>
     </div>
-    <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.06);border-radius:10px;padding:10px 12px">
+    <div style="display:flex;align-items:flex-start;gap:10px;background:rgba(255,255,255,0.06);border-radius:10px;padding:10px 12px">
       <div style="width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--primary);font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">3</div>
-      <div style="font-size:13px;color:rgba(255,255,255,0.8)">Share the invite code so members can join</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.8)">You <strong>verify their handicap</strong> in Settings → Members before they appear on the leaderboard</div>
     </div>
   </div>
+</div>
+<div style="background:rgba(255,255,255,0.06);border-radius:12px;padding:12px;margin-bottom:16px;font-size:12px;color:rgba(255,255,255,0.6)">
+  💡 <strong style="color:rgba(255,255,255,0.8)">Handicap tip:</strong> Members enter their GUI handicap when joining. You can verify or adjust this in Settings → Members. Unverified handicaps show with a ⚠️ flag.
 </div>
 <button class="wiz-btn" onclick="completeWizard()">Go to my society</button>
 </div>
@@ -1104,12 +1110,14 @@ var results = await Promise.all([
 safe('players?society_id=eq.' + sid + '&order=name&select=*'),
 safe('events?society_id=eq.' + sid + '&order=event_date'),
 safe('rounds?society_id=eq.' + sid + '&order=created_at'),
-safe('noticeboard?society_id=eq.' + sid + '&order=created_at.desc')
+safe('noticeboard?society_id=eq.' + sid + '&order=created_at.desc'),
+safe('courses?select=id,name,par,slope_rating,course_rating,holes,hole_pars,hole_sis&order=name&limit=300')
 ]);
 db.players = results[0];
 db.events = results[1];
 db.rounds = results[2];
 db.noticeboard = results[3];
+db.courses = results[4] || [];
 if (pill) { pill.textContent = 'Connected'; pill.className = 'conn-pill ok'; setTimeout(function(){ pill.style.opacity = '0'; }, 2000); }
 } catch(e) {
 if (pill) { pill.textContent = 'Offline'; pill.className = 'conn-pill err'; }
@@ -3084,12 +3092,15 @@ return '<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border
 }
 
 var rows = active.map(function(p) {
+var hcpVerified = p.handicap_verified !== false;
+var verifyFlag = !hcpVerified ? '<span style="color:#f59e0b;font-size:11px">⚠️ Unverified</span>' : '';
 return '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border)">'+avHtml(p,36,12)+
-'<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:500">'+p.name+'</div>' +
-'<div style="font-size:11px;color:var(--text-3)">Hcp '+parseFloat(p.handicap_index||0).toFixed(1)+' &middot; '+(p.role==='admin'?'Admin':'Member')+(p.pin?' &middot; PIN: '+p.pin:'')+'</div></div>' +
+'<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:500">'+p.name+' '+verifyFlag+'</div>' +
+'<div style="font-size:11px;color:var(--text-3)">Hcp '+parseFloat(p.handicap_index||0).toFixed(1)+(!hcpVerified?' (unverified)':'')+' &middot; '+(p.role==='admin'?'Admin':'Member')+(p.provisional?' &middot; Provisional':'')+'</div></div>' +
 '<div style="display:flex;gap:6px">' +
-'<button onclick="editPlayer(\''+p.id+'\')" class="btn sm">Edit</button>' +
-'<button onclick="removePlayer(\''+p.id+'\',\''+p.name.replace(/'/g,"\\'")+'\')" class="btn sm danger">&#x2715;</button>' +
+(!hcpVerified ? '<button onclick="verifyHandicap(\''+ p.id +'\')" style="background:#f59e0b;border:none;border-radius:6px;padding:5px 8px;color:white;font-size:11px;font-weight:700;cursor:pointer">Verify hcp</button>' : '') +
+'<button onclick="editPlayer(\''+ p.id +'\')" class="btn sm">Edit</button>' +
+'<button onclick="removePlayer(\''+ p.id +'\',\''+ p.name.replace(/'/g,"\\'") +'\')" class="btn sm danger">&#x2715;</button>' +
 '</div></div>';
 }).join('');
 
@@ -3114,7 +3125,7 @@ var role = document.getElementById('ap-role').value;
 var provisional = document.getElementById('ap-prov').checked;
 if (!name) { toast('Enter a name', 'error'); return; }
 try {
-var res = await apiPost('players', { society_id: sid, name: name, email: email||null, handicap_index: hcp, starting_handicap: hcp, role: role, provisional: provisional, status: 'active' });
+var res = await apiPost('players', { society_id: sid, name: name, email: email||null, handicap_index: hcp, starting_handicap: hcp, role: role, provisional: provisional, status: 'active', handicap_verified: false });
 db.players.push(res[0]);
 db.players.sort(function(a,b){ return a.name.localeCompare(b.name); });
 toast(name + ' added!', 'success'); openMembersModal(); renderAll();
@@ -4770,6 +4781,39 @@ document.getElementById('setup-wizard').style.display = 'none';
 showApp();
 }
 
+async function verifyHandicap(pid) {
+  var p = db.players.find(function(x){ return x.id === pid; });
+  if (!p) return;
+  openModal('Verify handicap — ' + p.name,
+    '<p style="font-size:13px;color:var(--text-2);margin-bottom:16px">' + p.name + ' entered a handicap of <strong>' + parseFloat(p.handicap_index||0).toFixed(1) + '</strong> when joining. Verify or adjust before confirming.</p>' +
+    '<div class="field"><label>Handicap index</label><input type="number" id="vh-hcp" value="' + parseFloat(p.handicap_index||0).toFixed(1) + '" step="0.1" min="0" max="54"></div>' +
+    '<div style="display:flex;gap:8px"><button onclick="closeModal();openMembersModal()" class="btn">Cancel</button><button onclick="confirmVerifyHandicap(\'' + pid + '\')" class="btn accent" style="flex:1">✓ Verify & confirm</button></div>'
+  );
+}
+
+async function confirmVerifyHandicap(pid) {
+  var hcp = parseFloat(document.getElementById('vh-hcp').value) || 0;
+  try {
+    await apiPatch('players?id=eq.' + pid, { handicap_index: hcp, starting_handicap: hcp, handicap_verified: true });
+    var pIdx = db.players.findIndex(function(x){ return x.id === pid; });
+    if (pIdx >= 0) { db.players[pIdx].handicap_index = hcp; db.players[pIdx].handicap_verified = true; }
+    toast('Handicap verified!', 'success');
+    closeModal();
+    openMembersModal();
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+function shareInviteCode() {
+  var code = window._wizInviteCode || (document.getElementById('wiz-invite-code') && document.getElementById('wiz-invite-code').textContent);
+  var societyName = (societySettings && societySettings.society_name) || 'our golf society';
+  var text = 'Join ' + societyName + ' on GolfSoc! Download at golfsoc.ie and enter invite code: ' + code;
+  if (navigator.share) {
+    navigator.share({ title: 'Join ' + societyName, text: text }).catch(function(){});
+  } else {
+    navigator.clipboard && navigator.clipboard.writeText(text);
+    toast('Share text copied to clipboard!', 'success');
+  }
+}
 function copyInviteCode() {
 var code = window._wizInviteCode || (document.getElementById('wiz-invite-code') && document.getElementById('wiz-invite-code').textContent);
 if (!code || code === '—') return;
