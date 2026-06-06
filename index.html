@@ -5100,35 +5100,39 @@ if (e) e.style.display = 'block';
 var memberId = localStorage.getItem('gs_member_id');
 var memberSociety = localStorage.getItem('gs_member_society');
 if (memberId && memberSociety) {
-try {
-var h = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Prefer': '' };
-var res = await fetch(SUPABASE_URL + '/rest/v1/players?id=eq.' + memberId + '&select=*', { headers: h });
-var players = await res.json();
-if (players && players.length && players[0].status !== 'pending') {
-var p = players[0];
-currentUser = {
-id: p.id,
-isMemberSession: true,
-user_metadata: { society_id: p.society_id, role: p.role || 'member', full_name: p.name }
-};
-await afterLogin();
-return;
-}
-} catch(e) {
-// Network error — restore session from localStorage anyway
-// Don't log them out just because of a network issue
-currentUser = {
-id: memberId,
-isMemberSession: true,
-user_metadata: { society_id: memberSociety, role: localStorage.getItem('gs_member_role') || 'member', full_name: localStorage.getItem('gs_member_name') || '' }
-};
-await afterLogin();
-return;
-}
-localStorage.removeItem('gs_member_id');
-localStorage.removeItem('gs_member_society');
-showAuth();
-return;
+  try {
+    var h = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Prefer': '' };
+    var res = await fetch(SUPABASE_URL + '/rest/v1/players?id=eq.' + memberId + '&select=*', { headers: h });
+    if (res.ok) {
+      var players = await res.json();
+      if (players && players.length && players[0].status !== 'pending') {
+        var p = players[0];
+        // Update stored details in case anything changed
+        localStorage.setItem('gs_member_name', p.name);
+        localStorage.setItem('gs_member_role', p.role || 'member');
+        currentUser = {
+          id: p.id,
+          isMemberSession: true,
+          user_metadata: { society_id: p.society_id, role: p.role || 'member', full_name: p.name }
+        };
+        await afterLogin();
+        return;
+      }
+      // Got a valid response but player not found — genuinely invalid session
+      localStorage.removeItem('gs_member_id');
+      localStorage.removeItem('gs_member_society');
+      showAuth();
+      return;
+    }
+  } catch(e) {}
+  // Network error or any other failure — restore from localStorage, don't log out
+  currentUser = {
+    id: memberId,
+    isMemberSession: true,
+    user_metadata: { society_id: memberSociety, role: localStorage.getItem('gs_member_role') || 'member', full_name: localStorage.getItem('gs_member_name') || '' }
+  };
+  await afterLogin();
+  return;
 }
 
 var token = localStorage.getItem('gs_token');
@@ -5138,55 +5142,60 @@ if (!token && !refresh) { showAuth(); return; }
 
 // 20 second hard timeout
 var bailTimer = setTimeout(function() {
-if (_appReady) return;
-localStorage.removeItem('gs_token');
-localStorage.removeItem('gs_refresh');
-showAuth();
+  if (_appReady) return;
+  // On timeout, try restoring from token anyway rather than logging out
+  showAuth();
 }, 20000);
 
 try {
-var accessToken = token;
-var res = await fetch(SUPABASE_URL + '/auth/v1/user', {
-headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + (token||'') }
-});
+  var accessToken = token;
+  var res = await fetch(SUPABASE_URL + '/auth/v1/user', {
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + (token||'') }
+  });
 
-if (!res.ok && refresh) {
-var rr = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=refresh_token', {
-method: 'POST',
-headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
-body: JSON.stringify({ refresh_token: refresh })
-});
-if (rr.ok) {
-var rd = await rr.json();
-accessToken = rd.access_token;
-localStorage.setItem('gs_token', rd.access_token);
-if (rd.refresh_token) localStorage.setItem('gs_refresh', rd.refresh_token);
-res = await fetch(SUPABASE_URL + '/auth/v1/user', {
-headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + accessToken }
-});
-}
-}
+  if (!res.ok && refresh) {
+    var rr = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=refresh_token', {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh_token: refresh })
+    });
+    if (rr.ok) {
+      var rd = await rr.json();
+      accessToken = rd.access_token;
+      localStorage.setItem('gs_token', rd.access_token);
+      if (rd.refresh_token) localStorage.setItem('gs_refresh', rd.refresh_token);
+      res = await fetch(SUPABASE_URL + '/auth/v1/user', {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + accessToken }
+      });
+    }
+  }
 
-if (_appReady) return;
-clearTimeout(bailTimer);
+  if (_appReady) return;
+  clearTimeout(bailTimer);
 
-if (!res.ok) {
-localStorage.removeItem('gs_token');
-localStorage.removeItem('gs_refresh');
-showAuth(); return;
-}
+  if (!res.ok) {
+    // Only clear session on explicit auth failure (401/403), not network errors
+    if (res.status === 401 || res.status === 403) {
+      localStorage.removeItem('gs_token');
+      localStorage.removeItem('gs_refresh');
+    }
+    showAuth(); return;
+  }
 
-var user = await res.json();
-if (!user || !user.id) { localStorage.removeItem('gs_token'); localStorage.removeItem('gs_refresh'); showAuth(); return; }
-currentUser = Object.assign({}, user, { access_token: accessToken });
-await afterLogin();
+  var user = await res.json();
+  if (!user || !user.id) {
+    localStorage.removeItem('gs_token');
+    localStorage.removeItem('gs_refresh');
+    showAuth(); return;
+  }
+  currentUser = Object.assign({}, user, { access_token: accessToken });
+  await afterLogin();
 
 } catch(e) {
-if (_appReady) return;
-clearTimeout(bailTimer);
-localStorage.removeItem('gs_token');
-localStorage.removeItem('gs_refresh');
-showAuth();
+  // Network error — don't wipe the session, just show auth so they can retry
+  if (_appReady) return;
+  clearTimeout(bailTimer);
+  showAuth();
 }
 }
 
