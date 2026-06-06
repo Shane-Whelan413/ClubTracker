@@ -518,58 +518,60 @@ input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px;
 <div class="wiz-title">League points</div>
 <div class="wiz-sub">How points are awarded each round.</div>
 
-<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:6px" id="wiz-preset-row-1">
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:6px">
   <div onclick="applyWizPtsPreset('top3')" id="wiz-preset-top3" style="border:2px solid var(--wiz-border,rgba(255,255,255,0.15));border-radius:10px;padding:10px 6px;text-align:center;cursor:pointer;-webkit-tap-highlight-color:transparent">
     <div style="font-size:12px;font-weight:700;color:var(--wiz-title,white)">Top 3</div>
-    <div style="font-size:9px;color:var(--wiz-sub,rgba(255,255,255,0.5));margin-top:2px">10, 6, 3 · rest 0</div>
+    <div style="font-size:9px;color:var(--wiz-sub,rgba(255,255,255,0.5));margin-top:2px">only top 3 score</div>
   </div>
   <div onclick="applyWizPtsPreset('top5')" id="wiz-preset-top5" style="border:2px solid var(--wiz-border,rgba(255,255,255,0.15));border-radius:10px;padding:10px 6px;text-align:center;cursor:pointer;-webkit-tap-highlight-color:transparent">
     <div style="font-size:12px;font-weight:700;color:var(--wiz-title,white)">Top 5</div>
-    <div style="font-size:9px;color:var(--wiz-sub,rgba(255,255,255,0.5));margin-top:2px">10, 8, 6, 4, 2 · rest 0</div>
+    <div style="font-size:9px;color:var(--wiz-sub,rgba(255,255,255,0.5));margin-top:2px">only top 5 score</div>
   </div>
   <div onclick="applyWizPtsPreset('standard')" id="wiz-preset-standard" style="border:2px solid var(--wiz-accent,#C9A84C);border-radius:10px;padding:10px 6px;text-align:center;cursor:pointer;-webkit-tap-highlight-color:transparent">
     <div style="font-size:12px;font-weight:700;color:var(--wiz-title,white)">Standard</div>
-    <div style="font-size:9px;color:var(--wiz-sub,rgba(255,255,255,0.5));margin-top:2px">20, 17, 15... rest 0</div>
+    <div style="font-size:9px;color:var(--wiz-sub,rgba(255,255,255,0.5));margin-top:2px">top 10 score</div>
   </div>
 </div>
-<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:14px" id="wiz-preset-row-2">
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:14px">
   <div onclick="applyWizPtsPreset('descending')" id="wiz-preset-descending" style="border:2px solid var(--wiz-border,rgba(255,255,255,0.15));border-radius:10px;padding:10px 6px;text-align:center;cursor:pointer;-webkit-tap-highlight-color:transparent">
     <div style="font-size:12px;font-weight:700;color:var(--wiz-title,white)">Descending</div>
     <div style="font-size:9px;color:var(--wiz-sub,rgba(255,255,255,0.5));margin-top:2px">N, N-1, N-2...</div>
   </div>
   <div onclick="applyWizPtsPreset('participation')" id="wiz-preset-participation" style="border:2px solid var(--wiz-border,rgba(255,255,255,0.15));border-radius:10px;padding:10px 6px;text-align:center;cursor:pointer;-webkit-tap-highlight-color:transparent">
     <div style="font-size:12px;font-weight:700;color:var(--wiz-title,white)">Participation</div>
-    <div style="font-size:9px;color:var(--wiz-sub,rgba(255,255,255,0.5));margin-top:2px">Top 10 + bonus pts</div>
+    <div style="font-size:9px;color:var(--wiz-sub,rgba(255,255,255,0.5));margin-top:2px">top 10 + all score</div>
   </div>
   <div onclick="applyWizPtsPreset('custom')" id="wiz-preset-custom" style="border:2px solid var(--wiz-border,rgba(255,255,255,0.15));border-radius:10px;padding:10px 6px;text-align:center;cursor:pointer;-webkit-tap-highlight-color:transparent">
     <div style="font-size:12px;font-weight:700;color:var(--wiz-title,white)">Custom</div>
-    <div style="font-size:9px;color:var(--wiz-sub,rgba(255,255,255,0.5));margin-top:2px">Set your own</div>
+    <div style="font-size:9px;color:var(--wiz-sub,rgba(255,255,255,0.5));margin-top:2px">set your own</div>
   </div>
 </div>
 
-<div id="wiz-pts-participation-row" style="display:none;margin-bottom:10px">
-  <div style="font-size:11px;color:var(--wiz-sub,rgba(255,255,255,0.4));margin-bottom:4px">Points for showing up (all other positions)</div>
+<div id="wiz-pts-descending-row" style="display:none;margin-bottom:12px">
+  <div style="font-size:11px;color:var(--wiz-sub,rgba(255,255,255,0.4));margin-bottom:4px">Starting points (counts down by 1 per place)</div>
+  <input id="wiz-pts-desc-start" type="number" value="20" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid var(--wiz-border,rgba(255,255,255,0.15));background:var(--wiz-input-bg,rgba(255,255,255,0.08));color:var(--wiz-title,white);font-size:16px;font-family:DM Sans,sans-serif;text-align:center">
+</div>
+
+<div id="wiz-pts-participation-row" style="display:none;margin-bottom:12px">
+  <div style="font-size:11px;color:var(--wiz-sub,rgba(255,255,255,0.4));margin-bottom:4px">Points for showing up (everyone else)</div>
   <input id="wiz-pts-participation" type="number" value="1" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid var(--wiz-border,rgba(255,255,255,0.15));background:var(--wiz-input-bg,rgba(255,255,255,0.08));color:var(--wiz-title,white);font-size:16px;font-family:DM Sans,sans-serif;text-align:center">
 </div>
 
-<div id="wiz-pts-descending-note" style="display:none;background:rgba(255,255,255,0.06);border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:12px;color:var(--wiz-sub,rgba(255,255,255,0.5))">
-  Points are calculated automatically each round based on the number of players. 1st gets N points, 2nd gets N-1, and so on down to 1 point for last place.
+<div id="wiz-pts-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+  <div id="wiz-pts-row-1"><div style="font-size:11px;color:var(--wiz-sub,rgba(255,255,255,0.4));margin-bottom:4px">1st place</div><input id="wiz-pts-1" type="number" value="20" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid var(--wiz-border,rgba(255,255,255,0.15));background:var(--wiz-input-bg,rgba(255,255,255,0.08));color:var(--wiz-title,white);font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+  <div id="wiz-pts-row-2"><div style="font-size:11px;color:var(--wiz-sub,rgba(255,255,255,0.4));margin-bottom:4px">2nd place</div><input id="wiz-pts-2" type="number" value="17" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid var(--wiz-border,rgba(255,255,255,0.15));background:var(--wiz-input-bg,rgba(255,255,255,0.08));color:var(--wiz-title,white);font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+  <div id="wiz-pts-row-3"><div style="font-size:11px;color:var(--wiz-sub,rgba(255,255,255,0.4));margin-bottom:4px">3rd place</div><input id="wiz-pts-3" type="number" value="15" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid var(--wiz-border,rgba(255,255,255,0.15));background:var(--wiz-input-bg,rgba(255,255,255,0.08));color:var(--wiz-title,white);font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+  <div id="wiz-pts-row-4"><div style="font-size:11px;color:var(--wiz-sub,rgba(255,255,255,0.4));margin-bottom:4px">4th place</div><input id="wiz-pts-4" type="number" value="13" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid var(--wiz-border,rgba(255,255,255,0.15));background:var(--wiz-input-bg,rgba(255,255,255,0.08));color:var(--wiz-title,white);font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+  <div id="wiz-pts-row-5"><div style="font-size:11px;color:var(--wiz-sub,rgba(255,255,255,0.4));margin-bottom:4px">5th place</div><input id="wiz-pts-5" type="number" value="11" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid var(--wiz-border,rgba(255,255,255,0.15));background:var(--wiz-input-bg,rgba(255,255,255,0.08));color:var(--wiz-title,white);font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+  <div id="wiz-pts-row-6"><div style="font-size:11px;color:var(--wiz-sub,rgba(255,255,255,0.4));margin-bottom:4px">6th place</div><input id="wiz-pts-6" type="number" value="10" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid var(--wiz-border,rgba(255,255,255,0.15));background:var(--wiz-input-bg,rgba(255,255,255,0.08));color:var(--wiz-title,white);font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+  <div id="wiz-pts-row-7"><div style="font-size:11px;color:var(--wiz-sub,rgba(255,255,255,0.4));margin-bottom:4px">7th place</div><input id="wiz-pts-7" type="number" value="9" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid var(--wiz-border,rgba(255,255,255,0.15));background:var(--wiz-input-bg,rgba(255,255,255,0.08));color:var(--wiz-title,white);font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+  <div id="wiz-pts-row-8"><div style="font-size:11px;color:var(--wiz-sub,rgba(255,255,255,0.4));margin-bottom:4px">8th place</div><input id="wiz-pts-8" type="number" value="8" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid var(--wiz-border,rgba(255,255,255,0.15));background:var(--wiz-input-bg,rgba(255,255,255,0.08));color:var(--wiz-title,white);font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+  <div id="wiz-pts-row-9"><div style="font-size:11px;color:var(--wiz-sub,rgba(255,255,255,0.4));margin-bottom:4px">9th place</div><input id="wiz-pts-9" type="number" value="7" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid var(--wiz-border,rgba(255,255,255,0.15));background:var(--wiz-input-bg,rgba(255,255,255,0.08));color:var(--wiz-title,white);font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+  <div id="wiz-pts-row-10"><div style="font-size:11px;color:var(--wiz-sub,rgba(255,255,255,0.4));margin-bottom:4px">10th place</div><input id="wiz-pts-10" type="number" value="6" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid var(--wiz-border,rgba(255,255,255,0.15));background:var(--wiz-input-bg,rgba(255,255,255,0.08));color:var(--wiz-title,white);font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
 </div>
 
-<div id="wiz-pts-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
-  <div><div style="font-size:11px;color:var(--wiz-sub,rgba(255,255,255,0.4));margin-bottom:4px">1st place</div><input id="wiz-pts-1" type="number" value="20" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid var(--wiz-border,rgba(255,255,255,0.15));background:var(--wiz-input-bg,rgba(255,255,255,0.08));color:var(--wiz-title,white);font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
-  <div><div style="font-size:11px;color:var(--wiz-sub,rgba(255,255,255,0.4));margin-bottom:4px">2nd place</div><input id="wiz-pts-2" type="number" value="17" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid var(--wiz-border,rgba(255,255,255,0.15));background:var(--wiz-input-bg,rgba(255,255,255,0.08));color:var(--wiz-title,white);font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
-  <div><div style="font-size:11px;color:var(--wiz-sub,rgba(255,255,255,0.4));margin-bottom:4px">3rd place</div><input id="wiz-pts-3" type="number" value="15" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid var(--wiz-border,rgba(255,255,255,0.15));background:var(--wiz-input-bg,rgba(255,255,255,0.08));color:var(--wiz-title,white);font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
-  <div><div style="font-size:11px;color:var(--wiz-sub,rgba(255,255,255,0.4));margin-bottom:4px">4th place</div><input id="wiz-pts-4" type="number" value="13" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid var(--wiz-border,rgba(255,255,255,0.15));background:var(--wiz-input-bg,rgba(255,255,255,0.08));color:var(--wiz-title,white);font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
-  <div><div style="font-size:11px;color:var(--wiz-sub,rgba(255,255,255,0.4));margin-bottom:4px">5th place</div><input id="wiz-pts-5" type="number" value="11" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid var(--wiz-border,rgba(255,255,255,0.15));background:var(--wiz-input-bg,rgba(255,255,255,0.08));color:var(--wiz-title,white);font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
-  <div><div style="font-size:11px;color:var(--wiz-sub,rgba(255,255,255,0.4));margin-bottom:4px">6th place</div><input id="wiz-pts-6" type="number" value="10" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid var(--wiz-border,rgba(255,255,255,0.15));background:var(--wiz-input-bg,rgba(255,255,255,0.08));color:var(--wiz-title,white);font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
-  <div><div style="font-size:11px;color:var(--wiz-sub,rgba(255,255,255,0.4));margin-bottom:4px">7th place</div><input id="wiz-pts-7" type="number" value="9" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid var(--wiz-border,rgba(255,255,255,0.15));background:var(--wiz-input-bg,rgba(255,255,255,0.08));color:var(--wiz-title,white);font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
-  <div><div style="font-size:11px;color:var(--wiz-sub,rgba(255,255,255,0.4));margin-bottom:4px">8th place</div><input id="wiz-pts-8" type="number" value="8" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid var(--wiz-border,rgba(255,255,255,0.15));background:var(--wiz-input-bg,rgba(255,255,255,0.08));color:var(--wiz-title,white);font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
-  <div><div style="font-size:11px;color:var(--wiz-sub,rgba(255,255,255,0.4));margin-bottom:4px">9th place</div><input id="wiz-pts-9" type="number" value="7" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid var(--wiz-border,rgba(255,255,255,0.15));background:var(--wiz-input-bg,rgba(255,255,255,0.08));color:var(--wiz-title,white);font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
-  <div><div style="font-size:11px;color:var(--wiz-sub,rgba(255,255,255,0.4));margin-bottom:4px">10th place</div><input id="wiz-pts-10" type="number" value="6" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid var(--wiz-border,rgba(255,255,255,0.15));background:var(--wiz-input-bg,rgba(255,255,255,0.08));color:var(--wiz-title,white);font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
-</div>
 <div id="wiz-pts-rest-row" style="margin-bottom:8px">
-  <div style="font-size:11px;color:var(--wiz-sub,rgba(255,255,255,0.4));margin-bottom:4px" id="wiz-pts-rest-label">Everyone else</div>
+  <div style="font-size:11px;color:var(--wiz-sub,rgba(255,255,255,0.4));margin-bottom:4px">Everyone else</div>
   <input id="wiz-pts-rest" type="number" value="0" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid var(--wiz-border,rgba(255,255,255,0.15));background:var(--wiz-input-bg,rgba(255,255,255,0.08));color:var(--wiz-title,white);font-size:16px;font-family:DM Sans,sans-serif;text-align:center">
 </div>
 
@@ -3248,38 +3250,49 @@ var LEAGUE_PRESETS = {
 };
 
 function _applyPtsPreset(preset, prefix) {
-  // prefix is 'wiz' or 'sp'
   var isWiz = prefix === 'wiz';
-  var presetIds = ['top3','top5','standard','descending','participation','custom'];
   var accentBorder = isWiz ? 'var(--wiz-accent,#C9A84C)' : 'var(--accent)';
   var dimBorder = isWiz ? 'var(--wiz-border,rgba(255,255,255,0.15))' : 'var(--border)';
 
-  presetIds.forEach(function(p) {
+  ['top3','top5','standard','descending','participation','custom'].forEach(function(p) {
     var el = document.getElementById(prefix+'-preset-'+p);
     if (el) el.style.borderColor = p === preset ? accentBorder : dimBorder;
   });
 
   var grid = document.getElementById(prefix+'-pts-grid');
   var partRow = document.getElementById(prefix+'-pts-participation-row');
-  var descNote = document.getElementById(prefix+'-pts-descending-note');
+  var descRow = document.getElementById(prefix+'-pts-descending-row');
   var restRow = document.getElementById(prefix+'-pts-rest-row');
 
   // Show/hide sections
-  if (descNote) descNote.style.display = preset === 'descending' ? 'block' : 'none';
+  if (descRow) descRow.style.display = preset === 'descending' ? 'block' : 'none';
   if (partRow) partRow.style.display = preset === 'participation' ? 'block' : 'none';
-  if (grid) grid.style.display = preset === 'descending' ? 'none' : 'grid';
-  if (restRow) restRow.style.display = (preset === 'descending') ? 'none' : 'block';
+  if (restRow) restRow.style.display = (preset === 'participation' || preset === 'descending') ? 'none' : 'block';
+  if (grid) grid.style.display = preset === 'descending' ? 'none' : 'block';
+
+  // Show/hide individual rows based on preset
+  if (preset !== 'descending') {
+    var showCount = preset === 'top3' ? 3 : preset === 'top5' ? 5 : 10;
+    for (var i = 1; i <= 10; i++) {
+      var row = document.getElementById(prefix+'-pts-row-'+i);
+      if (row) row.style.display = i <= showCount ? '' : 'none';
+    }
+  }
 
   if (preset === 'descending' || preset === 'custom') return;
 
-  var vals = LEAGUE_PRESETS[preset] || LEAGUE_PRESETS.standard;
-  for (var i = 1; i <= 10; i++) {
-    var el = document.getElementById(prefix+'-pts-'+i);
-    if (el) el.value = vals[i] !== undefined ? vals[i] : 0;
+  // Fill values
+  var vals = {
+    top3: {1:10,2:6,3:3},
+    top5: {1:10,2:8,3:6,4:4,5:2},
+    standard: {1:20,2:17,3:15,4:13,5:11,6:10,7:9,8:8,9:7,10:6},
+    participation: {1:20,2:17,3:15,4:13,5:11,6:10,7:9,8:8,9:7,10:6}
+  }[preset] || {};
+
+  for (var j = 1; j <= 10; j++) {
+    var el = document.getElementById(prefix+'-pts-'+j);
+    if (el) el.value = vals[j] !== undefined ? vals[j] : 0;
   }
-  // Set rest points
-  var restEl = document.getElementById(prefix+'-pts-rest');
-  if (restEl) restEl.value = (preset === 'participation') ? '' : 0;
 }
 
 function applyWizPtsPreset(preset) { _applyPtsPreset(preset, 'wiz'); }
@@ -3289,50 +3302,75 @@ function openLeaguePtsModal() {
 var s = societySettings || {};
 var pts = s.league_pts_table || {1:20,2:17,3:15,4:13,5:11,6:10,7:9,8:8,9:7,10:6};
 var restPts = s.league_pts_rest !== undefined ? s.league_pts_rest : 0;
-var mode = s.league_pts_mode || 'standard';
-var IS = 'width:100%;padding:10px 8px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:15px;font-family:DM Sans,sans-serif;text-align:center';
+var descStart = s.league_pts_descending_start || 20;
+var IS = 'width:80px;padding:10px 8px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:15px;font-family:DM Sans,sans-serif;text-align:center';
+var ISFU = 'width:100%;padding:10px 8px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:15px;font-family:DM Sans,sans-serif;text-align:center';
+
 var rows = [1,2,3,4,5,6,7,8,9,10].map(function(p){
-  return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--border)">'
+  return '<div id="sp-pts-row-'+p+'" style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--border)">'
     + '<div style="font-size:13px;color:var(--text-2)">'+p+(p===1?'st':p===2?'nd':p===3?'rd':'th')+' place</div>'
-    + '<input type="number" id="lp-'+p+'" value="'+(pts[p]||0)+'" style="width:80px;'+IS+'">'
+    + '<input type="number" id="lp-'+p+'" value="'+(pts[p]||0)+'" style="'+IS+'">'
     + '</div>';
 }).join('');
 
 var presets =
   '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:6px">'
-  + '<div id="sp-preset-top3" onclick="applySettingsPtsPreset(\'top3\')" style="border:2px solid var(--border);border-radius:8px;padding:9px 4px;text-align:center;cursor:pointer"><div style="font-size:12px;font-weight:700;color:var(--text)">Top 3</div><div style="font-size:9px;color:var(--text-3)">10, 6, 3</div></div>'
-  + '<div id="sp-preset-top5" onclick="applySettingsPtsPreset(\'top5\')" style="border:2px solid var(--border);border-radius:8px;padding:9px 4px;text-align:center;cursor:pointer"><div style="font-size:12px;font-weight:700;color:var(--text)">Top 5</div><div style="font-size:9px;color:var(--text-3)">10, 8, 6, 4, 2</div></div>'
-  + '<div id="sp-preset-standard" onclick="applySettingsPtsPreset(\'standard\')" style="border:2px solid var(--accent);border-radius:8px;padding:9px 4px;text-align:center;cursor:pointer"><div style="font-size:12px;font-weight:700;color:var(--text)">Standard</div><div style="font-size:9px;color:var(--text-3)">20, 17, 15...</div></div>'
+  + '<div id="sp-preset-top3" onclick="applySettingsPtsPreset(\'top3\')" style="border:2px solid var(--border);border-radius:8px;padding:9px 4px;text-align:center;cursor:pointer;-webkit-tap-highlight-color:transparent"><div style="font-size:12px;font-weight:700;color:var(--text)">Top 3</div><div style="font-size:9px;color:var(--text-3)">only top 3 score</div></div>'
+  + '<div id="sp-preset-top5" onclick="applySettingsPtsPreset(\'top5\')" style="border:2px solid var(--border);border-radius:8px;padding:9px 4px;text-align:center;cursor:pointer;-webkit-tap-highlight-color:transparent"><div style="font-size:12px;font-weight:700;color:var(--text)">Top 5</div><div style="font-size:9px;color:var(--text-3)">only top 5 score</div></div>'
+  + '<div id="sp-preset-standard" onclick="applySettingsPtsPreset(\'standard\')" style="border:2px solid var(--accent);border-radius:8px;padding:9px 4px;text-align:center;cursor:pointer;-webkit-tap-highlight-color:transparent"><div style="font-size:12px;font-weight:700;color:var(--text)">Standard</div><div style="font-size:9px;color:var(--text-3)">top 10 score</div></div>'
   + '</div>'
   + '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:14px">'
-  + '<div id="sp-preset-descending" onclick="applySettingsPtsPreset(\'descending\')" style="border:2px solid var(--border);border-radius:8px;padding:9px 4px;text-align:center;cursor:pointer"><div style="font-size:12px;font-weight:700;color:var(--text)">Descending</div><div style="font-size:9px;color:var(--text-3)">N, N-1...</div></div>'
-  + '<div id="sp-preset-participation" onclick="applySettingsPtsPreset(\'participation\')" style="border:2px solid var(--border);border-radius:8px;padding:9px 4px;text-align:center;cursor:pointer"><div style="font-size:12px;font-weight:700;color:var(--text)">Participation</div><div style="font-size:9px;color:var(--text-3)">Top 10 + bonus</div></div>'
-  + '<div id="sp-preset-custom" onclick="applySettingsPtsPreset(\'custom\')" style="border:2px solid var(--border);border-radius:8px;padding:9px 4px;text-align:center;cursor:pointer"><div style="font-size:12px;font-weight:700;color:var(--text)">Custom</div><div style="font-size:9px;color:var(--text-3)">Set your own</div></div>'
+  + '<div id="sp-preset-descending" onclick="applySettingsPtsPreset(\'descending\')" style="border:2px solid var(--border);border-radius:8px;padding:9px 4px;text-align:center;cursor:pointer;-webkit-tap-highlight-color:transparent"><div style="font-size:12px;font-weight:700;color:var(--text)">Descending</div><div style="font-size:9px;color:var(--text-3)">N, N-1, N-2...</div></div>'
+  + '<div id="sp-preset-participation" onclick="applySettingsPtsPreset(\'participation\')" style="border:2px solid var(--border);border-radius:8px;padding:9px 4px;text-align:center;cursor:pointer;-webkit-tap-highlight-color:transparent"><div style="font-size:12px;font-weight:700;color:var(--text)">Participation</div><div style="font-size:9px;color:var(--text-3)">top 10 + all score</div></div>'
+  + '<div id="sp-preset-custom" onclick="applySettingsPtsPreset(\'custom\')" style="border:2px solid var(--border);border-radius:8px;padding:9px 4px;text-align:center;cursor:pointer;-webkit-tap-highlight-color:transparent"><div style="font-size:12px;font-weight:700;color:var(--text)">Custom</div><div style="font-size:9px;color:var(--text-3)">set your own</div></div>'
   + '</div>';
 
-var descNote = '<div id="sp-pts-descending-note" style="display:none;background:var(--bg);border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:12px;color:var(--text-3)">Points calculated automatically each round based on player count. 1st gets N points, counting down to 1 for last place.</div>';
-var partRow = '<div id="sp-pts-participation-row" style="display:none;margin-bottom:10px"><div style="font-size:12px;color:var(--text-3);margin-bottom:4px">Points for showing up (all other positions)</div><input id="sp-pts-participation" type="number" value="1" style="'+IS+'"></div>';
-var restRow = '<div id="sp-pts-rest-row" style="margin-bottom:12px"><div style="font-size:12px;color:var(--text-3);margin-bottom:4px">Everyone else</div><input id="lp-rest" type="number" value="'+restPts+'" style="'+IS+'"></div>';
+var descRow = '<div id="sp-pts-descending-row" style="display:none;margin-bottom:12px">'
+  + '<div style="font-size:12px;color:var(--text-3);margin-bottom:4px">Starting points (counts down by 1 per place)</div>'
+  + '<input id="sp-pts-desc-start" type="number" value="'+descStart+'" style="'+ISFU+'"></div>';
 
-openModal('League points', presets + descNote + partRow + '<div id="sp-pts-grid" style="background:var(--bg);border-radius:var(--radius);padding:12px 14px;margin-bottom:10px">'+rows+'</div>' + restRow + '<button class="btn accent full" onclick="saveLeaguePts()">Save</button>');
+var partRow = '<div id="sp-pts-participation-row" style="display:none;margin-bottom:12px">'
+  + '<div style="font-size:12px;color:var(--text-3);margin-bottom:4px">Points for showing up (everyone else)</div>'
+  + '<input id="sp-pts-participation" type="number" value="'+restPts+'" style="'+ISFU+'"></div>';
+
+var restRow = '<div id="sp-pts-rest-row" style="margin-bottom:12px">'
+  + '<div style="font-size:12px;color:var(--text-3);margin-bottom:4px">Everyone else</div>'
+  + '<input id="lp-rest" type="number" value="'+restPts+'" style="'+ISFU+'"></div>';
+
+openModal('League points', presets + descRow + partRow
+  + '<div id="sp-pts-grid" style="background:var(--bg);border-radius:var(--radius);padding:12px 14px;margin-bottom:10px">'+rows+'</div>'
+  + restRow
+  + '<button class="btn accent full" onclick="saveLeaguePts()">Save</button>');
 }
 
 async function saveLeaguePts() {
 var sid = currentUser && currentUser.user_metadata ? currentUser.user_metadata.society_id : null;
 var table = {};
-var descEl = document.getElementById('sp-pts-descending-note');
-var isDescending = descEl && descEl.style.display !== 'none';
+var descRow = document.getElementById('sp-pts-descending-row');
+var partRow = document.getElementById('sp-pts-participation-row');
+var isDescending = descRow && descRow.style.display !== 'none';
+var isParticipation = partRow && partRow.style.display !== 'none';
 var mode = isDescending ? 'descending' : 'custom';
-[1,2,3,4,5,6,7,8,9,10].forEach(function(p){ var el = document.getElementById('lp-'+p); table[p] = el ? (parseInt(el.value)||0) : 0; });
-var restEl = document.getElementById('lp-rest');
-var restPts = restEl ? (parseInt(restEl.value)||0) : 0;
-var partEl = document.getElementById('sp-pts-participation');
-if (partEl && partEl.closest && document.getElementById('sp-pts-participation-row').style.display !== 'none') {
-  restPts = parseInt(partEl.value)||0;
+var patch = { league_pts_mode: mode };
+
+if (isDescending) {
+  var descStart = parseInt(document.getElementById('sp-pts-desc-start').value) || 20;
+  patch.league_pts_descending_start = descStart;
+  patch.league_pts_table = {};
+  patch.league_pts_rest = 0;
+} else {
+  [1,2,3,4,5,6,7,8,9,10].forEach(function(p){ var el = document.getElementById('lp-'+p); table[p] = el ? (parseInt(el.value)||0) : 0; });
+  patch.league_pts_table = table;
+  if (isParticipation) {
+    patch.league_pts_rest = parseInt(document.getElementById('sp-pts-participation').value)||0;
+  } else {
+    var restEl = document.getElementById('lp-rest');
+    patch.league_pts_rest = restEl ? (parseInt(restEl.value)||0) : 0;
+  }
 }
 try {
-  await apiPatch('society_settings?society_id=eq.' + sid, { league_pts_mode: mode, league_pts_table: table, league_pts_rest: restPts });
-  societySettings = Object.assign({}, societySettings, { league_pts_mode: mode, league_pts_table: table, league_pts_rest: restPts });
+  await apiPatch('society_settings?society_id=eq.' + sid, patch);
+  societySettings = Object.assign({}, societySettings, patch);
   toast('Saved!', 'success'); closeModal(); renderSettings();
 } catch(e) { toast('Error: ' + e.message, 'error'); }
 }
@@ -5112,21 +5150,23 @@ if (!wizData.societyName) { toast('Enter your society name', 'error'); return; }
 }
 if (n === 3 && !wizData.hcpMode) { toast('Select a handicap mode', 'error'); return; }
 if (n === 4) {
-// Save league points from step 4
-var descNote = document.getElementById('wiz-pts-descending-note');
-var isDescending = descNote && descNote.style.display !== 'none';
+var descRow = document.getElementById('wiz-pts-descending-row');
+var partRow = document.getElementById('wiz-pts-participation-row');
+var isDescending = descRow && descRow.style.display !== 'none';
+var isParticipation = partRow && partRow.style.display !== 'none';
 wizData.leaguePtsMode = isDescending ? 'descending' : 'custom';
 wizData.leaguePts = {};
 for (var i=1; i<=10; i++) {
 var el = document.getElementById('wiz-pts-'+i);
 wizData.leaguePts[i] = el ? (parseInt(el.value)||0) : 0;
 }
-var restEl = document.getElementById('wiz-pts-rest');
-var partEl = document.getElementById('wiz-pts-participation');
-var partRow = document.getElementById('wiz-pts-participation-row');
-if (partRow && partRow.style.display !== 'none' && partEl) {
-  wizData.leaguePtsRest = parseInt(partEl.value)||0;
+if (isDescending) {
+  wizData.leaguePtsDescStart = parseInt(document.getElementById('wiz-pts-desc-start').value)||20;
+  wizData.leaguePtsRest = 0;
+} else if (isParticipation) {
+  wizData.leaguePtsRest = parseInt(document.getElementById('wiz-pts-participation').value)||0;
 } else {
+  var restEl = document.getElementById('wiz-pts-rest');
   wizData.leaguePtsRest = restEl ? (parseInt(restEl.value)||0) : 0;
 }
 }
