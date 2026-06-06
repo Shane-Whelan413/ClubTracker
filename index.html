@@ -2474,47 +2474,75 @@ function buildProgressionCharts(rounds, player) {
 
   var html = '';
 
-  if (hcpData.length >= 2) {
-    var hcpLast = hcpData[hcpData.length-1];
-    var hcpFirst = hcpData[0];
-    var hcpDiff = Math.abs(hcpLast - hcpFirst).toFixed(1);
-    var hcpImproved = hcpLast < hcpFirst;
-    html +=
-      '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:12px">' +
-        '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px">' +
-          '<div><div style="font-size:13px;font-weight:700;color:var(--text)">Handicap progression</div>' +
-          '<div style="font-size:11px;color:var(--text-3);margin-top:2px">'+hcpData.length+' rounds tracked</div></div>' +
-          '<div style="text-align:right">' +
-            '<div style="font-size:28px;font-weight:800;color:var(--text);line-height:1">'+hcpLast.toFixed(1)+'</div>' +
-            '<div style="font-size:12px;font-weight:700;color:'+(hcpImproved?'#16a34a':'#dc2626')+'">'+(hcpImproved?'▼ ':'▲ ')+hcpDiff+' this season</div>' +
-          '</div>' +
-        '</div>' +
-        '<canvas id="hcp_'+uid+'" style="width:100%;height:90px;display:block"></canvas>' +
-      '</div>';
-  } else if (hcpData.length === 1) {
-    html +=
-      '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:12px">' +
-        '<div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">Handicap</div>' +
-        '<div style="font-size:32px;font-weight:800;color:var(--accent)">'+hcpData[0].toFixed(1)+'</div>' +
-        '<div style="font-size:11px;color:var(--text-3);margin-top:4px">Play more rounds to see progression</div>' +
-      '</div>';
+  // ── STAT TILES ──
+  var hcpNow = hcpData.length ? hcpData[hcpData.length-1].toFixed(1) : '--';
+  var ptsAvg = ptsData.length ? (ptsData.reduce(function(s,v){return s+v;},0)/ptsData.length).toFixed(1) : '--';
+  var ptsBest = ptsData.length ? Math.max.apply(null, ptsData) : '--';
+  var hcpFirst = hcpData.length ? hcpData[0] : null;
+  var hcpLast = hcpData.length ? hcpData[hcpData.length-1] : null;
+  var hcpDiff = (hcpFirst !== null && hcpLast !== null) ? Math.abs(hcpLast - hcpFirst).toFixed(1) : null;
+  var hcpImproved = hcpFirst !== null && hcpLast !== null && hcpLast < hcpFirst;
+
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin-bottom:12px">';
+  html += _statTile('Handicap', hcpNow);
+  html += _statTile('Avg pts', ptsAvg);
+  html += _statTile('Best', ptsBest !== '--' ? ptsBest+' pts' : '--');
+  html += _statTile('Rounds', sorted.length);
+  html += '</div>';
+
+  // ── LAST 5 FORM GUIDE ──
+  var last5 = ptsData.slice(-5);
+  if (last5.length) {
+    var maxPts = Math.max.apply(null, ptsData);
+    var avgPts = ptsData.reduce(function(s,v){return s+v;},0)/ptsData.length;
+    html += '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;margin-bottom:10px">';
+    html += '<div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px">Last '+last5.length+' rounds</div>';
+    html += '<div style="display:flex;gap:5px">';
+    last5.forEach(function(pts) {
+      var isGreen = pts >= maxPts * 0.9;
+      var isRed = pts < avgPts * 0.85;
+      var bg = isGreen ? '#16a34a' : isRed ? '#dc2626' : 'rgba(201,168,76,0.25)';
+      var col = isGreen ? 'white' : isRed ? 'white' : '#C9A84C';
+      html += '<div style="flex:1;background:'+bg+';border-radius:8px;padding:10px 4px;text-align:center">';
+      html += '<div style="font-size:18px;font-weight:800;color:'+col+';line-height:1">'+pts+'</div>';
+      html += '<div style="font-size:9px;font-weight:600;color:'+(isGreen||isRed?'rgba(255,255,255,0.6)':'rgba(201,168,76,0.6)')+';margin-top:3px">pts</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+    html += '<div style="font-size:10px;color:var(--text-3);text-align:center;margin-top:6px">← oldest · newest →</div>';
+    html += '</div>';
   }
 
-  if (ptsData.length >= 1) {
-    var ptsAvg = (ptsData.reduce(function(s,v){return s+v;},0)/ptsData.length).toFixed(1);
-    var ptsBest = Math.max.apply(null, ptsData);
-    html +=
-      '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:12px">' +
-        '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px">' +
-          '<div><div style="font-size:13px;font-weight:700;color:var(--text)">Points per round</div>' +
-          '<div style="font-size:11px;color:var(--text-3);margin-top:2px">'+ptsData.length+' rounds played</div></div>' +
-          '<div style="text-align:right">' +
-            '<div style="font-size:28px;font-weight:800;color:var(--accent);line-height:1">'+ptsAvg+'</div>' +
-            '<div style="font-size:11px;color:var(--text-3)">avg · best '+ptsBest+' pts</div>' +
-          '</div>' +
-        '</div>' +
-        (ptsData.length >= 2 ? '<canvas id="pts_'+uid+'" style="width:100%;height:90px;display:block"></canvas>' : '') +
-      '</div>';
+  // ── HANDICAP CHART ──
+  if (hcpData.length >= 2) {
+    html += '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;margin-bottom:10px">';
+    html += '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px">';
+    html += '<div><div style="font-size:13px;font-weight:700;color:var(--text)">Handicap progression</div>';
+    html += '<div style="font-size:11px;color:var(--text-3);margin-top:2px">'+hcpData.length+' rounds tracked</div></div>';
+    html += '<div style="text-align:right"><div style="font-size:24px;font-weight:800;color:var(--text);line-height:1">'+hcpNow+'</div>';
+    if (hcpDiff) html += '<div style="font-size:11px;font-weight:700;color:'+(hcpImproved?'#16a34a':'#ef4444')+'">'+(hcpImproved?'▼ ':'▲ ')+hcpDiff+' this season</div>';
+    html += '</div></div>';
+    html += '<canvas id="hcp_'+uid+'" style="width:100%;height:80px;display:block"></canvas>';
+    html += '</div>';
+  } else if (hcpData.length === 1) {
+    html += '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;margin-bottom:10px">';
+    html += '<div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">Handicap</div>';
+    html += '<div style="font-size:32px;font-weight:800;color:var(--accent)">'+hcpNow+'</div>';
+    html += '<div style="font-size:11px;color:var(--text-3);margin-top:4px">Play more rounds to see progression</div>';
+    html += '</div>';
+  }
+
+  // ── POINTS CHART ──
+  if (ptsData.length >= 2) {
+    html += '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;margin-bottom:10px">';
+    html += '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px">';
+    html += '<div><div style="font-size:13px;font-weight:700;color:var(--text)">Points per round</div>';
+    html += '<div style="font-size:11px;color:var(--text-3);margin-top:2px">'+ptsData.length+' rounds played</div></div>';
+    html += '<div style="text-align:right"><div style="font-size:24px;font-weight:800;color:var(--accent);line-height:1">'+ptsAvg+'</div>';
+    html += '<div style="font-size:11px;color:var(--text-3)">avg · best '+ptsBest+'</div>';
+    html += '</div></div>';
+    html += '<canvas id="pts_'+uid+'" style="width:100%;height:80px;display:block"></canvas>';
+    html += '</div>';
   }
 
   html += '<div id="chart_trigger_'+uid+'" data-uid="'+uid+'" style="display:none"></div>';
