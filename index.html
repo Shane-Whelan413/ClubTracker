@@ -343,6 +343,15 @@ input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px;
   <symbol id="ico-create" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></symbol>
   <symbol id="ico-join" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></symbol>
   <symbol id="ico-signin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></symbol>
+  <symbol id="ico-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
+  <symbol id="ico-share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></symbol>
+  <symbol id="ico-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></symbol>
+  <symbol id="ico-golf" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v14"/><path d="M12 2l6 4-6 4"/><ellipse cx="12" cy="19" rx="4" ry="2"/></symbol>
+  <symbol id="ico-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
+  <symbol id="ico-check-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></symbol>
+  <symbol id="ico-lightning" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></symbol>
+  <symbol id="ico-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></symbol>
+  <symbol id="ico-star" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></symbol>
 </svg>
 
 <!-- Splash -->
@@ -593,14 +602,14 @@ input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px;
 
 <!-- Step 5: All set -->
 <div class="wiz-step" id="wiz-6">
-<div class="wiz-title">You're all set! 🎉</div>
+<div class="wiz-title">You're all set!</div>
 <div class="wiz-sub">Your society is live. Share your invite code with members.</div>
 <div id="wiz-invite-block" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);border-radius:14px;padding:20px;text-align:center;margin:16px 0">
   <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,0.45);margin-bottom:8px">Invite code</div>
   <div id="wiz-invite-code" style="font-family:monospace;font-size:28px;font-weight:800;color:white;letter-spacing:.08em;margin-bottom:12px">—</div>
   <div style="display:flex;gap:8px;justify-content:center">
-    <button onclick="copyInviteCode()" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:8px;padding:8px 16px;color:white;font-size:13px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif">📋 Copy</button>
-    <button onclick="shareInviteCode()" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:8px;padding:8px 16px;color:white;font-size:13px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif">📤 Share</button>
+    <button onclick="copyInviteCode()" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:8px;padding:8px 16px;color:white;font-size:13px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif"><svg style="width:15px;height:15px;display:inline-block;vertical-align:middle;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#ico-copy"/></svg> Copy</button>
+    <button onclick="shareInviteCode()" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:8px;padding:8px 16px;color:white;font-size:13px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif"><svg style="width:15px;height:15px;display:inline-block;vertical-align:middle;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#ico-share"/></svg> Share</button>
   </div>
 </div>
 <div style="background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.25);border-radius:12px;padding:14px;margin-bottom:16px">
@@ -625,7 +634,7 @@ input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px;
   </div>
 </div>
 <div style="background:rgba(255,255,255,0.06);border-radius:12px;padding:12px;margin-bottom:16px;font-size:12px;color:rgba(255,255,255,0.6)">
-  💡 <strong style="color:rgba(255,255,255,0.8)">Handicap tip:</strong> Members enter their GUI handicap when joining. You can verify or adjust this in Settings → Members. Unverified handicaps show with a ⚠️ flag.
+  <svg style="width:14px;height:14px;display:inline-block;vertical-align:middle;flex-shrink:0;stroke:rgba(255,255,255,0.7)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#ico-info"/></svg> <strong style="color:rgba(255,255,255,0.8)">Handicap tip:</strong> Members enter their GUI handicap when joining. You can verify or adjust this in Settings → Members. Unverified handicaps show with a ⚠️ flag.
 </div>
 <button class="wiz-btn" onclick="completeWizard()">Go to my society</button>
 </div>
@@ -1217,7 +1226,7 @@ function showHomeScreenPrompt() {
   overlay.innerHTML =
     '<div style="background:var(--bg);border-radius:20px 20px 0 0;padding:24px 24px 32px;width:100%;max-width:480px;box-shadow:0 -8px 40px rgba(0,0,0,0.4)">' +
       '<div style="width:40px;height:4px;border-radius:99px;background:var(--border);margin:0 auto 20px"></div>' +
-      '<div style="font-size:22px;margin-bottom:6px">📱</div>' +
+      '<div style="margin-bottom:6px"><svg style="width:32px;height:32px;display:inline-block;vertical-align:middle;flex-shrink:0;stroke:var(--primary)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#ico-phone"/></svg></div>' +
       '<div style="font-size:18px;font-weight:800;color:var(--text);margin-bottom:6px">Add to your home screen</div>' +
       '<div style="font-size:13px;color:var(--text-3);margin-bottom:20px">Get the full app experience — tap your score, check the leaderboard and get results instantly.</div>' +
       instructions +
@@ -1414,7 +1423,7 @@ function checkSubscriptionStatus() {
       showSubPaywall();
     } else if (daysLeft <= 7) {
       // Countdown warning
-      showSubBanner('⏳ Your free trial ends in ' + daysLeft + ' day' + (daysLeft === 1 ? '' : 's') + '. Subscribe to keep access.', '#C9A84C', true);
+      showSubBanner('<svg style="width:14px;height:14px;display:inline-block;vertical-align:middle;flex-shrink:0;stroke:currentColor;margin-right:4px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#ico-clock"/></svg> Your free trial ends in ' + daysLeft + ' day' + (daysLeft === 1 ? '' : 's') + '. Subscribe to keep access.', '#C9A84C', true);
     }
   }
 }
@@ -1437,7 +1446,7 @@ function showSubPaywall() {
   el.id = 'sub-paywall';
   el.style.cssText = 'position:fixed;inset:0;z-index:9000;background:#0a1628;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;font-family:DM Sans,sans-serif';
   el.innerHTML =
-    '<div style="font-size:48px;margin-bottom:16px">🏌️</div>' +
+    '<div style="margin-bottom:16px"><svg style="width:48px;height:48px;display:inline-block;vertical-align:middle;flex-shrink:0;stroke:var(--accent)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#ico-golf"/></svg></div>' +
     '<div style="font-size:22px;font-weight:800;color:white;margin-bottom:8px">Your trial has ended</div>' +
     '<div style="font-size:14px;color:rgba(255,255,255,0.5);margin-bottom:32px;max-width:280px">Subscribe to GolfSoc to continue managing your society</div>' +
     '<div style="background:#1a3050;border-radius:16px;padding:24px;margin-bottom:16px;width:100%;max-width:320px">' +
@@ -1445,7 +1454,7 @@ function showSubPaywall() {
       '<div style="font-size:40px;font-weight:800;color:#C9A84C">€50<span style="font-size:16px;font-weight:400;color:rgba(255,255,255,0.4)">/year</span></div>' +
       '<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:4px">Lock in forever. €200/year after.</div>' +
     '</div>' +
-    '<button onclick="startStripeCheckout(\'founders\')" style="width:100%;max-width:320px;padding:16px;border-radius:99px;border:none;background:#C9A84C;color:#0a1628;font-size:16px;font-weight:700;cursor:pointer;margin-bottom:10px;font-family:DM Sans,sans-serif">⚡ Subscribe €50/year</button>' +
+    '<button onclick="startStripeCheckout(\'founders\')" style="width:100%;max-width:320px;padding:16px;border-radius:99px;border:none;background:#C9A84C;color:#0a1628;font-size:16px;font-weight:700;cursor:pointer;margin-bottom:10px;font-family:DM Sans,sans-serif"><svg style="width:15px;height:15px;display:inline-block;vertical-align:middle;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#ico-lightning"/></svg> Subscribe €50/year</button>' +
     '<button onclick="startStripeCheckout(\'monthly\')" style="width:100%;max-width:320px;padding:14px;border-radius:99px;border:1px solid rgba(255,255,255,0.2);background:transparent;color:rgba(255,255,255,0.6);font-size:14px;font-weight:600;cursor:pointer;margin-bottom:24px;font-family:DM Sans,sans-serif">€20/month</button>' +
     '<button onclick="signOut()" style="font-size:12px;color:rgba(255,255,255,0.3);background:none;border:none;cursor:pointer;font-family:DM Sans,sans-serif">Sign out</button>';
   document.body.appendChild(el);
@@ -4491,7 +4500,7 @@ closeModal();
 // Notify about provisional graduations
 if (provCompleted.length) {
   var names = provCompleted.map(function(p){ return p.name + ' (' + p.hcp.toFixed(1) + ')'; }).join(', ');
-  toast('🎉 Provisional complete: ' + names, 'success');
+  toast('Provisional complete: ' + names, 'success');
   // Show banner in settings if admin is there
   setTimeout(function(){
     showNotifBanner('Provisional handicaps assigned', provCompleted.length + ' player' + (provCompleted.length>1?'s have':'has') + ' completed provisional rounds. Review in Members.');
@@ -5013,7 +5022,7 @@ function openBillingModal() {
     ? '<div style="display:inline-block;padding:4px 12px;border-radius:99px;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#f87171;font-size:12px;font-weight:600">⚠ Payment failed</div>'
     : isExpired
     ? '<div style="display:inline-block;padding:4px 12px;border-radius:99px;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#f87171;font-size:12px;font-weight:600">✕ Expired</div>'
-    : '<div style="display:inline-block;padding:4px 12px;border-radius:99px;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.3);color:#C9A84C;font-size:12px;font-weight:600">⏳ Trial</div>';
+    : '<div style="display:inline-block;padding:4px 12px;border-radius:99px;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.3);color:#C9A84C;font-size:12px;font-weight:600">Trial</div>';
 
   var content = '<div style="text-align:center;margin-bottom:20px">' + statusBadge + '</div>';
 
@@ -5030,7 +5039,7 @@ function openBillingModal() {
       '<button onclick="startStripeCheckout(\'founders\')" style="width:100%;margin-bottom:12px;padding:0;border:2px solid var(--accent);border-radius:14px;background:var(--primary);cursor:pointer;font-family:DM Sans,sans-serif;text-align:left;display:block;-webkit-tap-highlight-color:transparent;transition:opacity .1s" ontouchstart="this.style.opacity=\'0.75\'" ontouchend="this.style.opacity=\'1\'">' +
         '<div style="padding:18px 18px 14px">' +
           '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">' +
-            '<div style="font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.07em;font-weight:700">⚡ Founders rate</div>' +
+            '<div style="font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:.07em;font-weight:700"><svg style="width:13px;height:13px;display:inline-block;vertical-align:middle;flex-shrink:0;stroke:var(--accent)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#ico-lightning"/></svg> Founders rate</div>' +
             '<div style="background:var(--accent);color:var(--primary);font-size:10px;font-weight:800;padding:3px 8px;border-radius:99px">BEST VALUE</div>' +
           '</div>' +
           '<div style="font-size:38px;font-weight:800;color:white;line-height:1">€50<span style="font-size:16px;font-weight:400;color:rgba(255,255,255,0.45)">/year</span></div>' +
