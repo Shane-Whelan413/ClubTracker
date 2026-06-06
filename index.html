@@ -2481,8 +2481,7 @@ var s = societySettings || {};
 openModal('Branding',
 '<div class="settings-row" onclick="closeModal();setTimeout(openBrandingModal,150)"><div class="settings-row-label">Society name</div><div class="settings-row-value">'+(s.society_name||s.name||'--')+' &#8250;</div></div>' +
 '<div class="settings-row" onclick="closeModal();setTimeout(openLogoModal,150)"><div class="settings-row-label">Logo</div><div class="settings-row-value">'+(s.logo_url?'Uploaded':'Not set')+' &#8250;</div></div>' +
-'<div class="settings-row" onclick="closeModal();setTimeout(openThemeModal,150)"><div class="settings-row-label">Theme &amp; colours</div><div class="settings-row-value"><div class="colour-dot" style="background:'+(s.primary_colour||'#0a1628')+'"></div><div class="colour-dot" style="background:'+(s.secondary_colour||'#C9A84C')+'"></div> &#8250;</div></div>' +
-'<div class="settings-row" onclick="closeModal();setTimeout(openAppearanceModal,150)"><div class="settings-row-label">App theme</div><div class="settings-row-value" style="font-size:12px;color:var(--text-3)">'+(({classic:'Classic',white:'White',dark:'Dark',navy:'Navy'})[s.bg_style]||'Classic')+' &#8250;</div></div>'
+'<div class="settings-row" onclick="closeModal();setTimeout(openAppearanceModal,150)"><div class="settings-row-label">Appearance</div><div class="settings-row-value" style="font-size:12px;color:var(--text-3)">'+(s.colour_mode==="scheme"?'Colour scheme':({classic:'Classic',white:'White',dark:'Dark',navy:'Navy'})[s.bg_style]||'Classic')+' &#8250;</div></div>'
 );
 }
 
@@ -2884,6 +2883,7 @@ toast('Saved!', 'success'); closeModal(); renderSettings();
 
 function openAppearanceModal() {
   var s = societySettings || {};
+  var colourMode = s.colour_mode || 'theme'; // 'theme' or 'scheme'
   var curTheme = s.bg_style || 'classic';
   window._previewTheme = curTheme;
 
@@ -2894,7 +2894,7 @@ function openAppearanceModal() {
     { id:'navy',    label:'Navy',    desc:'Navy & gold',    p:['#0a1628','#f0f4f8','#ffffff','#C9A84C'] }
   ];
 
-  var tiles = themeList.map(function(t) {
+  var themeTiles = themeList.map(function(t) {
     var active = curTheme === t.id;
     return '<button onclick="previewTheme(\''+t.id+'\')" id="th-'+t.id+'" style="border-radius:var(--radius-lg);border:'+(active?'2.5px solid var(--primary)':'1px solid var(--border)')+';background:'+(active?'var(--primary)':'var(--surface)')+';padding:0;cursor:pointer;overflow:hidden;text-align:left;font-family:DM Sans,sans-serif;width:100%">' +
       '<div style="height:44px;display:flex;overflow:hidden">' +
@@ -2905,32 +2905,64 @@ function openAppearanceModal() {
           '<div style="height:4px;border-radius:2px;background:'+t.p[3]+';width:30%"></div>' +
         '</div>' +
       '</div>' +
-      '<div style="padding:8px 12px;background:'+(active?'transparent':'var(--surface)')+'">' +
+      '<div style="padding:8px 12px">' +
         '<div style="font-size:13px;font-weight:700;color:'+(active?'var(--accent)':'var(--text)')+'">'+t.label+'</div>' +
         '<div style="font-size:11px;color:'+(active?'rgba(255,255,255,0.5)':'var(--text-3)')+'">'+t.desc+'</div>' +
       '</div>' +
     '</button>';
   }).join('');
 
-  openModal('App theme',
-    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">'+tiles+'</div>' +
-    '<button class="btn accent full" onclick="saveAppearance()">Apply theme</button>'
-  );
+  var presets = THEMES.map(function(t) {
+    return '<div class="theme-opt" onclick="applyThemePreset(\''+t.id+'\')" id="to-'+t.id+'"><div class="theme-preview"><div style="flex:2;background:'+t.primary+'"></div><div style="flex:1;background:'+t.accent+'"></div></div><div class="theme-label">'+t.name+'</div></div>';
+  }).join('');
+
+  var primary = s.primary_colour || '#0a1628';
+  var accent = s.secondary_colour || '#C9A84C';
+
+  var themeSection = '<div id="app-theme-section" style="'+(colourMode==='scheme'?'opacity:0.4;pointer-events:none':'')+'">' +
+    '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);margin-bottom:10px">App theme</div>' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">'+themeTiles+'</div>' +
+    '</div>';
+
+  var schemeSection = '<div id="colour-scheme-section" style="'+(colourMode==='theme'?'opacity:0.4;pointer-events:none':'')+'">' +
+    '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);margin-bottom:10px">Colour scheme</div>' +
+    '<div class="field"><label>Preset palettes</label><div class="theme-grid">'+presets+'</div></div>' +
+    '<div class="field"><label>Primary colour</label><div class="colour-picker-wrap"><div class="colour-preview" id="pp" style="background:'+primary+'"></div><input type="color" id="pc" value="'+primary+'" oninput="document.getElementById(\'pp\').style.background=this.value;document.getElementById(\'ph\').value=this.value;document.documentElement.style.setProperty(\'--primary\',this.value)"><input type="text" id="ph" value="'+primary+'" style="flex:1;padding:8px 10px;border-radius:8px;border:1px solid var(--border-strong)"></div></div>' +
+    '<div class="field"><label>Accent colour</label><div class="colour-picker-wrap"><div class="colour-preview" id="ap" style="background:'+accent+'"></div><input type="color" id="ac" value="'+accent+'" oninput="document.getElementById(\'ap\').style.background=this.value;document.getElementById(\'ah\').value=this.value;document.documentElement.style.setProperty(\'--accent\',this.value)"><input type="text" id="ah" value="'+accent+'" style="flex:1;padding:8px 10px;border-radius:8px;border:1px solid var(--border-strong)"></div></div>' +
+    '</div>';
+
+  // Toggle switch HTML
+  var toggle =
+    '<div style="display:flex;gap:8px;margin-bottom:20px">' +
+      '<button id="mode-theme-btn" onclick="setColourMode(\'theme\')" style="flex:1;padding:10px;border-radius:var(--radius);font-size:13px;font-weight:700;font-family:DM Sans,sans-serif;cursor:pointer;border:'+(colourMode==='theme'?'none':'1px solid var(--border)')+';background:'+(colourMode==='theme'?'var(--primary)':'var(--surface)')+';color:'+(colourMode==='theme'?'white':'var(--text)')+'">App theme</button>' +
+      '<button id="mode-scheme-btn" onclick="setColourMode(\'scheme\')" style="flex:1;padding:10px;border-radius:var(--radius);font-size:13px;font-weight:700;font-family:DM Sans,sans-serif;cursor:pointer;border:'+(colourMode==='scheme'?'none':'1px solid var(--border)')+';background:'+(colourMode==='scheme'?'var(--primary)':'var(--surface)')+';color:'+(colourMode==='scheme'?'white':'var(--text)')+'">Colour scheme</button>' +
+    '</div>';
+
+  openModal('Appearance', toggle + themeSection + schemeSection + '<button class="btn accent full" style="margin-top:8px" onclick="saveAppearance()">Save</button>');
+}
+
+function setColourMode(mode) {
+  var themeSection = document.getElementById('app-theme-section');
+  var schemeSection = document.getElementById('colour-scheme-section');
+  var themeBtn = document.getElementById('mode-theme-btn');
+  var schemeBtn = document.getElementById('mode-scheme-btn');
+  if (themeSection) { themeSection.style.opacity = mode === 'theme' ? '1' : '0.4'; themeSection.style.pointerEvents = mode === 'theme' ? '' : 'none'; }
+  if (schemeSection) { schemeSection.style.opacity = mode === 'scheme' ? '1' : '0.4'; schemeSection.style.pointerEvents = mode === 'scheme' ? '' : 'none'; }
+  if (themeBtn) { themeBtn.style.background = mode === 'theme' ? 'var(--primary)' : 'var(--surface)'; themeBtn.style.color = mode === 'theme' ? 'white' : 'var(--text)'; themeBtn.style.border = mode === 'theme' ? 'none' : '1px solid var(--border)'; }
+  if (schemeBtn) { schemeBtn.style.background = mode === 'scheme' ? 'var(--primary)' : 'var(--surface)'; schemeBtn.style.color = mode === 'scheme' ? 'white' : 'var(--text)'; schemeBtn.style.border = mode === 'scheme' ? 'none' : '1px solid var(--border)'; }
+  window._colourMode = mode;
 }
 
 function previewTheme(id) {
   window._previewTheme = id;
-  var s = Object.assign({}, societySettings, { bg_style: id });
+  var s = Object.assign({}, societySettings, { bg_style: id, colour_mode: 'theme' });
   applyTheme(s);
-  var themeList = ['classic','white','dark','navy'];
-  themeList.forEach(function(tid) {
+  ['classic','white','dark','navy'].forEach(function(tid) {
     var b = document.getElementById('th-'+tid);
     if (!b) return;
     var active = tid === id;
     b.style.border = active ? '2.5px solid var(--primary)' : '1px solid var(--border)';
     b.style.background = active ? 'var(--primary)' : 'var(--surface)';
-    var inner = b.querySelector('div:last-child');
-    if (inner) inner.style.background = active ? 'transparent' : 'var(--surface)';
     var nameEl = b.querySelector('div:last-child > div:first-child');
     var descEl = b.querySelector('div:last-child > div:last-child');
     if (nameEl) nameEl.style.color = active ? 'var(--accent)' : 'var(--text)';
@@ -2941,23 +2973,35 @@ function previewTheme(id) {
 async function saveAppearance() {
   var sid = currentUser && currentUser.user_metadata ? currentUser.user_metadata.society_id : null;
   if (!sid) return;
-  var themeId = window._previewTheme || 'classic';
+  var mode = window._colourMode || (societySettings && societySettings.colour_mode) || 'theme';
+  var patch = { colour_mode: mode };
+  if (mode === 'theme') {
+    patch.bg_style = window._previewTheme || 'classic';
+  } else {
+    var ph = document.getElementById('ph');
+    var ah = document.getElementById('ah');
+    if (ph) patch.primary_colour = ph.value;
+    if (ah) patch.secondary_colour = ah.value;
+  }
   try {
-    await apiPatch('society_settings?society_id=eq.'+sid, { bg_style: themeId });
-    societySettings = Object.assign({}, societySettings, { bg_style: themeId });
+    await apiPatch('society_settings?society_id=eq.'+sid, patch);
+    societySettings = Object.assign({}, societySettings, patch);
     applyTheme(societySettings);
-    toast('Theme saved!', 'success');
+    toast('Saved!', 'success');
     closeModal(); renderSettings();
   } catch(e) { toast('Error: '+e.message, 'error'); }
 }
 
-function openThemeModal() {
-var s = societySettings || {};
-var presets = THEMES.map(function(t) {
-return '<div class="theme-opt" onclick="applyThemePreset(\''+t.id+'\')" id="to-'+t.id+'"><div class="theme-preview"><div style="flex:2;background:'+t.primary+'"></div><div style="flex:1;background:'+t.accent+'"></div></div><div class="theme-label">'+t.name+'</div></div>';
-}).join('');
-openModal('Theme', '<div class="field"><label>Preset themes</label><div class="theme-grid">'+presets+'</div></div><div class="field"><label>Primary colour</label><div class="colour-picker-wrap"><div class="colour-preview" id="pp" style="background:'+(s.primary_colour||'#0a1628')+'"></div><input type="color" id="pc" value="'+(s.primary_colour||'#0a1628')+'" oninput="document.getElementById(\'pp\').style.background=this.value;document.getElementById(\'ph\').value=this.value;document.documentElement.style.setProperty(\'--primary\',this.value)"><input type="text" id="ph" value="'+(s.primary_colour||'#0a1628')+'" style="flex:1;padding:8px 10px;border-radius:8px;border:1px solid var(--border-strong)"></div></div><div class="field"><label>Accent colour</label><div class="colour-picker-wrap"><div class="colour-preview" id="ap" style="background:'+(s.secondary_colour||'#C9A84C')+'"></div><input type="color" id="ac" value="'+(s.secondary_colour||'#C9A84C')+'" oninput="document.getElementById(\'ap\').style.background=this.value;document.getElementById(\'ah\').value=this.value;document.documentElement.style.setProperty(\'--accent\',this.value)"><input type="text" id="ah" value="'+(s.secondary_colour||'#C9A84C')+'" style="flex:1;padding:8px 10px;border-radius:8px;border:1px solid var(--border-strong)"></div></div><button class="btn accent full" onclick="saveTheme()">Save theme</button>');
+function applyThemePreset(id) {
+  var t = THEMES.filter(function(x){ return x.id === id; })[0];
+  if (!t) return;
+  document.getElementById('pc').value = t.primary; document.getElementById('ph').value = t.primary; document.getElementById('pp').style.background = t.primary;
+  document.getElementById('ac').value = t.accent; document.getElementById('ah').value = t.accent; document.getElementById('ap').style.background = t.accent;
+  document.documentElement.style.setProperty('--primary', t.primary);
+  document.documentElement.style.setProperty('--accent', t.accent);
+  document.querySelectorAll('.theme-opt').forEach(function(el){ el.classList.toggle('selected', el.id === 'to-'+id); });
 }
+
 
 function applyThemePreset(id) {
 var t = THEMES.filter(function(x){ return x.id === id; })[0];
@@ -2969,21 +3013,6 @@ document.documentElement.style.setProperty('--accent', t.accent);
 document.querySelectorAll('.theme-opt').forEach(function(el){ el.classList.toggle('selected', el.id === 'to-'+id); });
 }
 
-async function saveTheme() {
-var sid = currentUser && currentUser.user_metadata ? currentUser.user_metadata.society_id : null;
-var primary = document.getElementById('ph').value;
-var accent = document.getElementById('ah').value;
-try {
-var h = apiHeaders();
-h['Prefer'] = 'resolution=merge-duplicates,return=representation';
-await fetch(SUPABASE_URL + '/rest/v1/society_settings', {
-method: 'POST', headers: h,
-body: JSON.stringify({ society_id: sid, primary_colour: primary, secondary_colour: accent })
-});
-societySettings = Object.assign({}, societySettings, { primary_colour: primary, secondary_colour: accent });
-applyTheme(societySettings); toast('Theme saved!', 'success'); closeModal(); renderSettings();
-} catch(e) { toast('Error: ' + e.message, 'error'); }
-}
 
 function openLogoModal() {
 var s = societySettings || {};
