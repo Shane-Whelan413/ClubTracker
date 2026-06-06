@@ -4392,9 +4392,18 @@ var prizeFields = standardPrizes.length === 0
     var ctpWinners = (window._ctpWinners && window._ctpWinners.length) ? window._ctpWinners : [preselect];
     var ctpFields = ctpWinners.map(function(pid, ci) {
       var cOpts = playerOpts.replace('value="'+pid+'"', 'value="'+pid+'" selected');
-      return '<div style="display:flex;gap:6px;margin-bottom:6px" id="ctp-row-'+ci+'">'+
-        '<select id="ep-closest-'+ci+'" style="flex:1;padding:10px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);font-size:14px;font-family:DM Sans,sans-serif;color:var(--text)">'+cOpts+'</select>'+
-        (ci > 0 ? '<button onclick="removeCtpRow('+ci+')" style="padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text-3);cursor:pointer;font-size:16px">✕</button>' : '')+
+      var ctpDist = (window._ctpDistances && window._ctpDistances[ci]) || '';
+      return '<div style="margin-bottom:10px" id="ctp-row-'+ci+'">'+
+        '<div style="display:flex;gap:6px;margin-bottom:4px">'+
+          '<select id="ep-closest-'+ci+'" style="flex:1;padding:10px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);font-size:14px;font-family:DM Sans,sans-serif;color:var(--text)">'+cOpts+'</select>'+
+          (ci > 0 ? '<button onclick="removeCtpRow('+ci+')" style="padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text-3);cursor:pointer;font-size:16px">✕</button>' : '')+
+        '</div>'+
+        '<div style="display:flex;align-items:center;gap:6px">'+
+          '<input type="number" id="ep-ctp-ft-'+ci+'" placeholder="Feet" value="'+(ctpDist.ft||'')+'" style="flex:1;padding:8px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;font-family:DM Sans,sans-serif">'+
+          '<span style="font-size:12px;color:var(--text-3)">ft</span>'+
+          '<input type="number" id="ep-ctp-in-'+ci+'" placeholder="Inches" value="'+(ctpDist.inches||'')+'" style="flex:1;padding:8px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;font-family:DM Sans,sans-serif">'+
+          '<span style="font-size:12px;color:var(--text-3)">in</span>'+
+        '</div>'+
       '</div>';
     }).join('');
     fieldHtml = '<div id="ctp-fields">'+ctpFields+'</div>'+
@@ -4429,27 +4438,37 @@ document.getElementById('modal-overlay').classList.add('open');
 
 function addCtpRow() {
   if (!window._ctpWinners) window._ctpWinners = [''];
-  window._ctpWinners.push('');
-  // Save current selections before re-render
+  if (!window._ctpDistances) window._ctpDistances = [{}];
+  // Save current selections
   var i = 0;
   while (document.getElementById('ep-closest-'+i)) {
     window._ctpWinners[i] = document.getElementById('ep-closest-'+i).value;
+    window._ctpDistances[i] = {
+      ft: (document.getElementById('ep-ctp-ft-'+i)||{}).value || '',
+      inches: (document.getElementById('ep-ctp-in-'+i)||{}).value || ''
+    };
     i++;
   }
-  // Re-open to refresh
+  window._ctpWinners.push('');
+  window._ctpDistances.push({});
   var eid = window._currentExtraPrizesEid;
   if (eid) openExtraPrizes(eid);
 }
 
 function removeCtpRow(idx) {
   if (!window._ctpWinners) return;
-  // Save current before removing
   var i = 0;
   while (document.getElementById('ep-closest-'+i)) {
     window._ctpWinners[i] = document.getElementById('ep-closest-'+i).value;
+    window._ctpDistances = window._ctpDistances || [];
+    window._ctpDistances[i] = {
+      ft: (document.getElementById('ep-ctp-ft-'+i)||{}).value || '',
+      inches: (document.getElementById('ep-ctp-in-'+i)||{}).value || ''
+    };
     i++;
   }
   window._ctpWinners.splice(idx, 1);
+  if (window._ctpDistances) window._ctpDistances.splice(idx, 1);
   var eid = window._currentExtraPrizesEid;
   if (eid) openExtraPrizes(eid);
 }
@@ -4476,19 +4495,21 @@ var winners = {};
 var winnersById = {};
 standardPrizes.forEach(function(prize) {
   if (prize.id === 'closest') {
-    // Collect all CTP winners
     var ctpNames = [], ctpIds = [], ci = 0;
     while (document.getElementById('ep-closest-'+ci)) {
       var val = document.getElementById('ep-closest-'+ci).value;
       if (val) {
         var p = db.players.find(function(x){ return x.id === val; });
-        if (p) { ctpNames.push(p.name); ctpIds.push(val); }
+        var ft = (document.getElementById('ep-ctp-ft-'+ci)||{}).value || '';
+        var inches = (document.getElementById('ep-ctp-in-'+ci)||{}).value || '';
+        var dist = (ft||inches) ? ' — '+(ft?ft+'ft ':'')+(inches?inches+'in':'') : '';
+        if (p) { ctpNames.push(p.name+dist.trim()); ctpIds.push(val); }
       }
       ci++;
     }
     if (ctpNames.length) {
       winners['Closest to pin'] = ctpNames.join(', ');
-      winnersById['closest'] = ctpIds[0]; // primary
+      winnersById['closest'] = ctpIds[0];
       winnersById['closest_all'] = ctpIds;
     }
   } else if (prize.id === 'longdrive') {
@@ -4513,7 +4534,8 @@ standardPrizes.forEach(function(prize) {
 });
 window._extraPrizeWinners = winners;
 window._extraPrizeWinnersById = winnersById;
-window._ctpWinners = null; // reset
+window._ctpWinners = null;
+window._ctpDistances = null;
 window._ldDistance = null;
 await verifyAllAndPublish(eid);
 }
