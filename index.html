@@ -3971,6 +3971,7 @@ totalPts += Math.max(0, 2 - (sc - par - strokes));
 }
 
 var existing = db.rounds.filter(function(r){ return r.event_id===eid && r.player_id===pid; })[0];
+var existingId = existing ? existing.id : null;
 var payload = {
 society_id: sid, event_id: eid, player_id: pid,
 hole_scores: JSON.stringify(scores),
