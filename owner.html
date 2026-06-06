@@ -401,9 +401,10 @@ async function loadData() {
     var res = await fetch(SUPABASE_URL + '/rest/v1/societies?select=id,name,contact_email,subscription_status,trial_ends_at,created_at,stripe_customer_id&order=created_at.desc', { headers: h });
     var societies = await res.json();
 
-    // Fetch player counts per society
+    // Fetch player counts per society using count grouped by society_id
     var pcRes = await fetch(SUPABASE_URL + '/rest/v1/players?select=society_id&status=neq.pending', { headers: h });
-    var players = await pcRes.json();
+    var pcData = await pcRes.json();
+    var players = Array.isArray(pcData) ? pcData : [];
     var countBySociety = {};
     players.forEach(function(p) {
       countBySociety[p.society_id] = (countBySociety[p.society_id] || 0) + 1;
