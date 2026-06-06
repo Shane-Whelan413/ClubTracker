@@ -2365,48 +2365,56 @@ var subLabel = s.subscription_status==='active'?'Active':s.subscription_status==
 var pendingCount = db.players.filter(function(p){ return p.status === 'pending'; }).length;
 var activeMemberCount = db.players.filter(function(p){ return p.status !== 'pending'; }).length;
 
-function card(icon, title, subtitle, fn, badge) {
-return '<div onclick="'+fn+'()" style="display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:8px;cursor:pointer">' +
-'<div style="width:40px;height:40px;border-radius:10px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">'+icon+'</div>' +
-'<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600;color:var(--text)">'+title+'</div>' +
-'<div style="font-size:12px;color:var(--text-3);margin-top:1px">'+subtitle+'</div></div>' +
-(badge ? '<div style="background:var(--red);color:white;border-radius:99px;padding:2px 8px;font-size:11px;font-weight:700;flex-shrink:0">'+badge+'</div>' : '') +
-'<div style="color:var(--text-3);font-size:18px">&#8250;</div>' +
-'</div>';
+var icons = {
+  billing:  '<svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>',
+  branding: '<svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
+  members:  '<svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+  invite:   '<svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>',
+  handicap: '<svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>',
+  recalc:   '<svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>',
+  league:   '<svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
+  prizes:   '<svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>',
+  events:   '<svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+  signout:  '<svg viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>',
+};
+
+function card(iconKey, title, subtitle, fn, badge) {
+  return '<div onclick="'+fn+'()" style="display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:8px;cursor:pointer">' +
+    '<div style="width:42px;height:42px;border-radius:12px;background:var(--primary);display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:10px;box-sizing:border-box">'+icons[iconKey]+'</div>' +
+    '<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600;color:var(--text)">'+title+'</div>' +
+    '<div style="font-size:12px;color:var(--text-3);margin-top:1px">'+subtitle+'</div></div>' +
+    (badge ? '<div style="background:var(--red);color:white;border-radius:99px;padding:2px 8px;font-size:11px;font-weight:700;flex-shrink:0">'+badge+'</div>' : '') +
+    '<div style="color:var(--text-3);font-size:18px">&#8250;</div></div>';
 }
 
 function sectionTitle(t) {
-return '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-3);margin:16px 0 8px">'+t+'</div>';
+  return '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-3);margin:16px 0 8px">'+t+'</div>';
 }
 
 el.innerHTML =
-'<div style="display:flex;align-items:center;justify-content:space-between;background:var(--primary);border-radius:var(--radius);padding:12px 16px;margin-bottom:20px">' +
-'<div style="font-size:13px;font-weight:600;color:white">'+(s.society_name||s.name||'My Society')+'</div>' +
-'<span class="sub-pill '+subClass+'">'+subLabel+'</span>' +
-'</div>' +
-sectionTitle('Branding') +
-card('🎨', 'Appearance', 'Logo, colours &amp; theme', 'openBrandingGroup') +
-sectionTitle('Members') +
-card('👥', 'Manage members', activeMemberCount+' active members', 'openMembersModal', pendingCount > 0 ? pendingCount+' pending' : '') +
-card('🔗', 'Invite members', 'Share join link &amp; code', 'openInviteModal') +
-sectionTitle('Scoring') +
-card('🏌', 'Handicap rules', (s.handicap_mode==='gui'?'GUI standard':s.handicap_mode==='custom'?'Custom':'Points-based'), 'openHcpModal') +
-card('🔄', 'Recalculate handicaps', 'Rerun handicap cuts across all published results', 'confirmRecalcHandicaps') +
-card('🏆', 'League points', (s.league_pts_mode==='custom'?'Custom table':'BHGS style'), 'openLeaguePtsModal') +
-card('🎁', 'Extra prizes', (s.extra_prizes_enabled?'Enabled':'Disabled'), 'openExtraPrizesSettings') +
-sectionTitle('Events') +
-card('📅', 'Manage events', db.events.length+' events', 'openEventsModal') +
-sectionTitle('Display') +
-'<div style="display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:8px">' +
-'<div style="width:40px;height:40px;border-radius:10px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">👁️</div>' +
-'<div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--text)">Preview data</div>' +
-'<div style="font-size:12px;color:var(--text-3);margin-top:1px">Show example data for new societies</div></div>' +
-'<label class="toggle-switch"><input type="checkbox" '+(s.show_preview!==false?'checked':'')+' onchange="savePreviewToggle(this.checked)"><div class="toggle-slider"></div></label>' +
-'</div>' +
-sectionTitle('Subscription') +
-card('💳', 'Plan &amp; billing', subLabel+' plan', 'openBillingModal') +
-'<div style="height:16px"></div>' +
-'<button onclick="doLogout()" style="width:100%;padding:14px;border-radius:var(--radius);border:1.5px solid rgba(220,38,38,0.3);background:rgba(220,38,38,0.06);color:#dc2626;font-size:14px;font-weight:700;font-family:DM Sans,sans-serif;cursor:pointer;margin-bottom:20px">Sign out</button>';
+  '<div style="display:flex;align-items:center;justify-content:space-between;background:var(--primary);border-radius:var(--radius);padding:12px 16px;margin-bottom:20px">' +
+  '<div style="font-size:13px;font-weight:600;color:white">'+(s.society_name||s.name||'My Society')+'</div>' +
+  '<span class="sub-pill '+subClass+'">'+subLabel+'</span></div>' +
+  sectionTitle('Subscription') +
+  card('billing', 'Plan &amp; billing', subLabel+' plan', 'openBillingModal') +
+  sectionTitle('Branding') +
+  card('branding', 'Appearance', 'Logo, colours &amp; theme', 'openBrandingGroup') +
+  sectionTitle('Members') +
+  card('members', 'Manage members', activeMemberCount+' active members', 'openMembersModal', pendingCount > 0 ? pendingCount+' pending' : '') +
+  card('invite', 'Invite members', 'Share join link &amp; code', 'openInviteModal') +
+  sectionTitle('Scoring') +
+  card('handicap', 'Handicap rules', (s.handicap_mode==='gui'?'GUI standard':s.handicap_mode==='custom'?'Custom':'Points-based'), 'openHcpModal') +
+  card('recalc', 'Recalculate handicaps', 'Rerun handicap cuts across all results', 'confirmRecalcHandicaps') +
+  card('league', 'League points', (s.league_pts_mode==='custom'?'Custom table':'Standard'), 'openLeaguePtsModal') +
+  card('prizes', 'Extra prizes', (s.extra_prizes_enabled?'Enabled':'Disabled'), 'openExtraPrizesSettings') +
+  sectionTitle('Events') +
+  card('events', 'Manage events', db.events.length+' events', 'openEventsModal') +
+  '<div style="height:16px"></div>' +
+  '<div onclick="doLogout()" style="display:flex;align-items:center;gap:14px;background:rgba(220,38,38,0.06);border:1.5px solid rgba(220,38,38,0.2);border-radius:var(--radius);padding:14px 16px;margin-bottom:20px;cursor:pointer">' +
+  '<div style="width:42px;height:42px;border-radius:12px;background:rgba(220,38,38,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:10px;box-sizing:border-box">'+icons.signout+'</div>' +
+  '<div style="flex:1"><div style="font-size:14px;font-weight:600;color:#dc2626">Sign out</div>' +
+  '<div style="font-size:12px;color:rgba(220,38,38,0.6);margin-top:1px">Sign out of your account</div></div>' +
+  '<div style="color:rgba(220,38,38,0.4);font-size:18px">&#8250;</div></div>';
 }
 
 function openBrandingGroup() {
