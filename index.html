@@ -2768,8 +2768,7 @@ async function recalcAllHandicaps() {
       .filter(e => e.published)
       .sort((a, b) => new Date(a.event_date) - new Date(b.event_date));
 
-    // Reset all player handicaps to their original/starting handicap
-    // We'll track current hcp per player as we go through events chronologically
+    // Use starting_handicap as the clean baseline for every player
     const playerHcp = {};
     db.players.forEach(p => {
       playerHcp[p.id] = parseFloat(p.starting_handicap || p.handicap_index || 18);
@@ -2934,7 +2933,7 @@ var role = document.getElementById('ap-role').value;
 var provisional = document.getElementById('ap-prov').checked;
 if (!name) { toast('Enter a name', 'error'); return; }
 try {
-var res = await apiPost('players', { society_id: sid, name: name, email: email||null, handicap_index: hcp, role: role, provisional: provisional, status: 'active' });
+var res = await apiPost('players', { society_id: sid, name: name, email: email||null, handicap_index: hcp, starting_handicap: hcp, role: role, provisional: provisional, status: 'active' });
 db.players.push(res[0]);
 db.players.sort(function(a,b){ return a.name.localeCompare(b.name); });
 toast(name + ' added!', 'success'); openMembersModal(); renderAll();
@@ -4361,7 +4360,7 @@ if (wizData.hcpMode === 'custom') {
 // League points
 var lp = wizData.leaguePts || {1:20,2:17,3:15,4:13,5:11,6:10,7:9,8:8,9:7,10:6};
 await fetch(SUPABASE_URL + '/rest/v1/society_settings', { method: 'POST', headers: h, body: JSON.stringify({ society_id: sid, society_name: wizData.societyName, home_course: wizData.homeCourse||'', primary_colour: theme.primary, secondary_colour: theme.accent, theme_preset: wizData.themeId, handicap_mode: wizData.hcpMode||'bhgs', cut_1st: cut1, cut_2nd: cut2, cut_3rd: cut3, cut_4th: cut4, cut_5th: cut5, add_non_podium: cutOther, max_handicap: 36, provisional_rounds: 3, league_pts_mode: 'custom', league_pts_table: lp, holes_per_round: 9 }) });
-await fetch(SUPABASE_URL + '/rest/v1/players', { method: 'POST', headers: h, body: JSON.stringify({ society_id: sid, user_id: currentUser.id, name: (currentUser.user_metadata&&currentUser.user_metadata.full_name)||currentUser.email, email: currentUser.email, handicap_index: 18, role: 'admin' }) });
+await fetch(SUPABASE_URL + '/rest/v1/players', { method: 'POST', headers: h, body: JSON.stringify({ society_id: sid, user_id: currentUser.id, name: (currentUser.user_metadata&&currentUser.user_metadata.full_name)||currentUser.email, email: currentUser.email, handicap_index: 18, starting_handicap: 18, role: 'admin' }) });
 await fetch(SUPABASE_URL + '/auth/v1/user', { method: 'PUT', headers: h, body: JSON.stringify({ data: { full_name: (currentUser.user_metadata&&currentUser.user_metadata.full_name)||'', society_id: sid, role: 'admin' } }) });
 currentUser.user_metadata = Object.assign({}, currentUser.user_metadata, { society_id: sid, role: 'admin' });
 societySettings = { society_id: sid, society_name: wizData.societyName, home_course: wizData.homeCourse, primary_colour: theme.primary, secondary_colour: theme.accent, invite_code: inviteCode, subscription_status: 'trial' };
