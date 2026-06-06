@@ -604,37 +604,37 @@ input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px;
 <div class="wiz-step" id="wiz-6">
 <div class="wiz-title">You're all set!</div>
 <div class="wiz-sub">Your society is live. Share your invite code with members.</div>
-<div id="wiz-invite-block" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);border-radius:14px;padding:20px;text-align:center;margin:16px 0">
-  <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,0.45);margin-bottom:8px">Invite code</div>
-  <div id="wiz-invite-code" style="font-family:monospace;font-size:28px;font-weight:800;color:white;letter-spacing:.08em;margin-bottom:12px">—</div>
+<div style="background:var(--wiz-option-bg,rgba(255,255,255,0.08));border:1px solid var(--wiz-border,rgba(255,255,255,0.2));border-radius:14px;padding:20px;text-align:center;margin:16px 0">
+  <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--wiz-sub,rgba(255,255,255,0.45));margin-bottom:8px">Invite code</div>
+  <div id="wiz-invite-code" style="font-family:monospace;font-size:28px;font-weight:800;color:var(--wiz-title,white);letter-spacing:.08em;margin-bottom:12px">—</div>
   <div style="display:flex;gap:8px;justify-content:center">
-    <button onclick="copyInviteCode()" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:8px;padding:8px 16px;color:white;font-size:13px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif"><svg style="width:15px;height:15px;display:inline-block;vertical-align:middle;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#ico-copy"/></svg> Copy</button>
-    <button onclick="shareInviteCode()" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:8px;padding:8px 16px;color:white;font-size:13px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif"><svg style="width:15px;height:15px;display:inline-block;vertical-align:middle;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#ico-share"/></svg> Share</button>
+    <button onclick="copyInviteCode()" style="background:var(--wiz-option-bg,rgba(255,255,255,0.12));border:1px solid var(--wiz-border,rgba(255,255,255,0.2));border-radius:8px;padding:8px 16px;color:var(--wiz-title,white);font-size:13px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif"><svg style="width:15px;height:15px;display:inline-block;vertical-align:middle;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#ico-copy"/></svg> Copy</button>
+    <button onclick="shareInviteCode()" style="background:var(--wiz-option-bg,rgba(255,255,255,0.12));border:1px solid var(--wiz-border,rgba(255,255,255,0.2));border-radius:8px;padding:8px 16px;color:var(--wiz-title,white);font-size:13px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif"><svg style="width:15px;height:15px;display:inline-block;vertical-align:middle;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#ico-share"/></svg> Share</button>
   </div>
 </div>
-<div style="background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.25);border-radius:12px;padding:14px;margin-bottom:16px">
-  <div style="font-size:12px;font-weight:700;color:rgba(201,168,76,0.9);margin-bottom:4px">30-day free trial active</div>
-  <div style="font-size:12px;color:rgba(255,255,255,0.5)">No payment needed now. We'll remind you before your trial ends.</div>
+<div style="background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.3);border-radius:12px;padding:14px;margin-bottom:16px">
+  <div style="font-size:12px;font-weight:700;color:#C9A84C;margin-bottom:4px">30-day free trial active</div>
+  <div style="font-size:12px;color:var(--wiz-sub,rgba(255,255,255,0.5))">No payment needed now. We'll remind you before your trial ends.</div>
 </div>
 <div style="text-align:left;margin-bottom:16px">
-  <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">How members join</div>
+  <div style="font-size:12px;font-weight:700;color:var(--wiz-sub,rgba(255,255,255,0.5));text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">How members join</div>
   <div style="display:flex;flex-direction:column;gap:8px">
-    <div style="display:flex;align-items:flex-start;gap:10px;background:rgba(255,255,255,0.06);border-radius:10px;padding:10px 12px">
-      <div style="width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--primary);font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">1</div>
-      <div style="font-size:13px;color:rgba(255,255,255,0.8)">Send members this link: <span style="color:var(--accent);font-weight:600">golfsoc.ie</span> — they tap <strong>Join a society</strong></div>
+    <div style="display:flex;align-items:flex-start;gap:10px;background:var(--wiz-option-bg,rgba(255,255,255,0.06));border-radius:10px;padding:10px 12px">
+      <div style="width:24px;height:24px;border-radius:50%;background:var(--wiz-accent,#C9A84C);color:var(--wiz-btn-text,#0a1628);font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">1</div>
+      <div style="font-size:13px;color:var(--wiz-title,white)">Send members this link: <span style="color:var(--wiz-accent,#C9A84C);font-weight:600">golfsoc.ie</span> — they tap <strong>Join a society</strong></div>
     </div>
-    <div style="display:flex;align-items:flex-start;gap:10px;background:rgba(255,255,255,0.06);border-radius:10px;padding:10px 12px">
-      <div style="width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--primary);font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">2</div>
-      <div style="font-size:13px;color:rgba(255,255,255,0.8)">They enter your invite code and their name + current handicap</div>
+    <div style="display:flex;align-items:flex-start;gap:10px;background:var(--wiz-option-bg,rgba(255,255,255,0.06));border-radius:10px;padding:10px 12px">
+      <div style="width:24px;height:24px;border-radius:50%;background:var(--wiz-accent,#C9A84C);color:var(--wiz-btn-text,#0a1628);font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">2</div>
+      <div style="font-size:13px;color:var(--wiz-title,white)">They enter your invite code and their name + current handicap</div>
     </div>
-    <div style="display:flex;align-items:flex-start;gap:10px;background:rgba(255,255,255,0.06);border-radius:10px;padding:10px 12px">
-      <div style="width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--primary);font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">3</div>
-      <div style="font-size:13px;color:rgba(255,255,255,0.8)">You <strong>verify their handicap</strong> in Settings → Members before they appear on the leaderboard</div>
+    <div style="display:flex;align-items:flex-start;gap:10px;background:var(--wiz-option-bg,rgba(255,255,255,0.06));border-radius:10px;padding:10px 12px">
+      <div style="width:24px;height:24px;border-radius:50%;background:var(--wiz-accent,#C9A84C);color:var(--wiz-btn-text,#0a1628);font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">3</div>
+      <div style="font-size:13px;color:var(--wiz-title,white)">You <strong>verify their handicap</strong> in Settings → Members before they appear on the leaderboard</div>
     </div>
   </div>
 </div>
-<div style="background:rgba(255,255,255,0.06);border-radius:12px;padding:12px;margin-bottom:16px;font-size:12px;color:rgba(255,255,255,0.6)">
-  <svg style="width:14px;height:14px;display:inline-block;vertical-align:middle;flex-shrink:0;stroke:rgba(255,255,255,0.7)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#ico-info"/></svg> <strong style="color:rgba(255,255,255,0.8)">Handicap tip:</strong> Members enter their GUI handicap when joining. You can verify or adjust this in Settings → Members. Unverified handicaps show with a ⚠️ flag.
+<div style="background:var(--wiz-option-bg,rgba(255,255,255,0.06));border-radius:12px;padding:12px;margin-bottom:16px;font-size:12px;color:var(--wiz-sub,rgba(255,255,255,0.6))">
+  <svg style="width:14px;height:14px;display:inline-block;vertical-align:middle;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#ico-info"/></svg> <strong style="color:var(--wiz-title,white)">Handicap tip:</strong> Members enter their GUI handicap when joining. You can verify or adjust this in Settings → Members.
 </div>
 <button class="wiz-btn" onclick="completeWizard()">Go to my society</button>
 </div>
