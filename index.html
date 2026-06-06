@@ -2023,8 +2023,14 @@ function _ppTab(tid, idx) {
   }
   // Render charts when Stats tab (index 3) becomes visible
   if (idx === 3) {
-    var uidEl = document.getElementById('chart_uid');
-    if (uidEl) setTimeout(function(){ renderCharts(uidEl.getAttribute('data-uid')); }, 50);
+    var panel3 = document.getElementById(tid+'_panel3');
+    if (panel3) {
+      var uidEl = panel3.querySelector('[id^="chart_trigger_"]');
+      if (uidEl) {
+        var uid = uidEl.getAttribute('data-uid');
+        setTimeout(function(){ drawProfileCharts(uid); }, 50);
+      }
+    }
   }
 }
 
@@ -2153,86 +2159,11 @@ function renderProfile() {
     }).join('') + '</div>' :
     '<div style="text-align:center;padding:24px;color:var(--text-3);font-size:13px">No rounds yet</div>';
 
-  // ── STATS — score history chart ──
+  // ── STATS ──
   var avg = myRounds.length ? (myRounds.reduce(function(s,r){return s+(r.stableford_points||0);},0)/myRounds.length).toFixed(1) : '--';
   var totalGross = 0, roundsWithScores = 0;
   myRounds.forEach(function(r){ if(r.gross_score){totalGross+=r.gross_score;roundsWithScores++;} });
   var avgGross = roundsWithScores ? (totalGross/roundsWithScores).toFixed(1) : '--';
-
-  var chartHtml = '';
-  if (myRounds.length > 1) {
-    var scores = myRounds.map(function(r){ return r.stableford_points||0; });
-    var maxS = Math.max.apply(null, scores);
-    var minS = Math.min.apply(null, scores);
-    var range = maxS - minS || 1;
-    var chartId = 'sc_' + player.id.slice(0,6);
-    var pts_json = JSON.stringify(scores);
-    chartHtml =
-      '<div style="background:var(--bg);border-radius:var(--radius);padding:12px;margin-bottom:10px">' +
-      '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-3);margin-bottom:10px">Score history</div>' +
-      '<canvas id="'+chartId+'" height="80" style="width:100%;display:block"></canvas>' +
-      '</div>' +
-      '<script>' +
-      '(function(){' +
-      'var canvas=document.getElementById("'+chartId+'");' +
-      'if(!canvas)return;' +
-      'var ctx=canvas.getContext("2d");' +
-      'var scores='+pts_json+';' +
-      'var W=canvas.offsetWidth||280;canvas.width=W;canvas.height=80;' +
-      'var pad=10;var cW=W-pad*2;var cH=60;' +
-      'var maxS=Math.max.apply(null,scores);var minS=Math.min.apply(null,scores);var rng=maxS-minS||1;' +
-      'function x(i){return pad+i*(cW/(scores.length-1));}' +
-      'function y(v){return pad+cH-(((v-minS)/rng)*cH);}' +
-      'var cs=getComputedStyle(document.documentElement);' +
-      'var accent=cs.getPropertyValue("--accent").trim()||"#C9A84C";' +
-      'var text3=cs.getPropertyValue("--text-3").trim()||"#888";' +
-      // Draw gradient fill
-      'var grad=ctx.createLinearGradient(0,pad,0,pad+cH);' +
-      'grad.addColorStop(0,"rgba(201,168,76,0.25)");grad.addColorStop(1,"rgba(201,168,76,0)");' +
-      'ctx.beginPath();ctx.moveTo(x(0),y(scores[0]));' +
-      'for(var i=1;i<scores.length;i++){' +
-        'var cpx=(x(i-1)+x(i))/2;' +
-        'ctx.bezierCurveTo(cpx,y(scores[i-1]),cpx,y(scores[i]),x(i),y(scores[i]));' +
-      '}' +
-      'ctx.lineTo(x(scores.length-1),pad+cH);ctx.lineTo(x(0),pad+cH);ctx.closePath();' +
-      'ctx.fillStyle=grad;ctx.fill();' +
-      // Draw line
-      'ctx.beginPath();ctx.moveTo(x(0),y(scores[0]));' +
-      'for(var j=1;j<scores.length;j++){' +
-        'var cpx2=(x(j-1)+x(j))/2;' +
-        'ctx.bezierCurveTo(cpx2,y(scores[j-1]),cpx2,y(scores[j]),x(j),y(scores[j]));' +
-      '}' +
-      'ctx.strokeStyle=accent;ctx.lineWidth=2;ctx.stroke();' +
-      // Draw dots with animation
-      'var dotProgress=0;' +
-      'function drawDots(progress){' +
-        'for(var k=0;k<scores.length;k++){' +
-          'var p=Math.min(1,Math.max(0,(progress-k/scores.length)*scores.length));' +
-          'if(p<=0)continue;' +
-          'ctx.beginPath();ctx.arc(x(k),y(scores[k]),3*p,0,Math.PI*2);' +
-          'ctx.fillStyle=accent;ctx.fill();' +
-          'if(p>=1){ctx.fillStyle=text3;ctx.font="9px DM Sans,sans-serif";ctx.textAlign="center";ctx.fillText(scores[k],x(k),y(scores[k])-7);}' +
-        '}' +
-      '}' +
-      'function animate(ts){' +
-        'if(!animate.start)animate.start=ts;' +
-        'var prog=Math.min(1,(ts-animate.start)/800);' +
-        'ctx.clearRect(0,0,W,80);' +
-        // Redraw gradient
-        'ctx.beginPath();ctx.moveTo(x(0),y(scores[0]));' +
-        'for(var i2=1;i2<scores.length;i2++){var c2=(x(i2-1)+x(i2))/2;ctx.bezierCurveTo(c2,y(scores[i2-1]),c2,y(scores[i2]),x(i2),y(scores[i2]));}' +
-        'ctx.lineTo(x(scores.length-1),pad+cH);ctx.lineTo(x(0),pad+cH);ctx.closePath();ctx.fillStyle=grad;ctx.fill();' +
-        // Redraw line
-        'ctx.beginPath();ctx.moveTo(x(0),y(scores[0]));' +
-        'for(var i3=1;i3<scores.length;i3++){var c3=(x(i3-1)+x(i3))/2;ctx.bezierCurveTo(c3,y(scores[i3-1]),c3,y(scores[i3]),x(i3),y(scores[i3]));}' +
-        'ctx.strokeStyle=accent;ctx.lineWidth=2;ctx.stroke();' +
-        'drawDots(prog);' +
-        'if(prog<1)requestAnimationFrame(animate);' +
-      '}' +
-      'requestAnimationFrame(animate);' +
-      '})();' +
-      '<\/script>';
-  }
 
   var stats =
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">' +
@@ -2262,13 +2193,8 @@ function renderProfile() {
 
   el.innerHTML = tabContent;
 
-  // Trigger chart render after DOM is set
-  var scriptTags = el.querySelectorAll('script');
-  scriptTags.forEach(function(s){
-    var newScript = document.createElement('script');
-    newScript.textContent = s.textContent;
-    s.parentNode.replaceChild(newScript, s);
-  });
+  // Charts draw when Stats tab is clicked via _ppTab → drawProfileCharts
+  // No script tag execution needed
 }
 
 function openRoundDetail(rid) {
@@ -2539,52 +2465,120 @@ function buildProgressionCharts(rounds, player) {
   var uid = player.id.slice(0,6);
 
   var hcpData = sorted.filter(function(r){ return r.handicap_after != null; })
-    .map(function(r,i){ return { x:i, val:parseFloat(r.handicap_after) }; });
+    .map(function(r){ return parseFloat(r.handicap_after); });
   var ptsData = sorted.filter(function(r){ return r.stableford_points != null; })
-    .map(function(r,i){ return { x:i, val:r.stableford_points||0 }; });
+    .map(function(r){ return r.stableford_points||0; });
 
-  // Store data for deferred rendering when tab becomes visible
   window._chartData = window._chartData || {};
   window._chartData[uid] = { hcp: hcpData, pts: ptsData };
 
   var html = '';
 
   if (hcpData.length >= 2) {
-    var last = hcpData[hcpData.length-1].val;
-    var first = hcpData[0].val;
-    var diff = Math.abs(last - first).toFixed(1);
-    var improved = last < first;
+    var hcpLast = hcpData[hcpData.length-1];
+    var hcpFirst = hcpData[0];
+    var hcpDiff = Math.abs(hcpLast - hcpFirst).toFixed(1);
+    var hcpImproved = hcpLast < hcpFirst;
     html +=
       '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:12px">' +
-        '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px">' +
-          '<div><div style="font-size:13px;font-weight:700;color:var(--text)">Handicap</div>' +
-          '<div style="font-size:11px;color:var(--text-3);margin-top:2px">'+hcpData.length+' rounds</div></div>' +
+        '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px">' +
+          '<div><div style="font-size:13px;font-weight:700;color:var(--text)">Handicap progression</div>' +
+          '<div style="font-size:11px;color:var(--text-3);margin-top:2px">'+hcpData.length+' rounds tracked</div></div>' +
           '<div style="text-align:right">' +
-            '<div style="font-size:28px;font-weight:800;color:var(--text);line-height:1">'+last.toFixed(1)+'</div>' +
-            '<div style="font-size:12px;font-weight:700;color:'+(improved?'#16a34a':'#dc2626')+'">'+(improved?'▼ ':'▲ ')+diff+'</div>' +
+            '<div style="font-size:28px;font-weight:800;color:var(--text);line-height:1">'+hcpLast.toFixed(1)+'</div>' +
+            '<div style="font-size:12px;font-weight:700;color:'+(hcpImproved?'#16a34a':'#dc2626')+'">'+(hcpImproved?'▼ ':'▲ ')+hcpDiff+' this season</div>' +
           '</div>' +
         '</div>' +
         '<canvas id="hcp_'+uid+'" style="width:100%;height:90px;display:block"></canvas>' +
       '</div>';
-  }
-
-  if (ptsData.length >= 1) {
-    var avg = Math.round(ptsData.reduce(function(s,p){return s+p.val;},0)/ptsData.length);
-    var best = Math.max.apply(null, ptsData.map(function(p){return p.val;}));
+  } else if (hcpData.length === 1) {
     html +=
       '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:12px">' +
-        '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px">' +
-          '<div><div style="font-size:13px;font-weight:700;color:var(--text)">Points per round</div>' +
-          '<div style="font-size:11px;color:var(--text-3);margin-top:2px">Avg '+avg+' · Best '+best+' pts</div></div>' +
-        '</div>' +
-        '<canvas id="pts_'+uid+'" style="width:100%;height:90px;display:block"></canvas>' +
+        '<div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">Handicap</div>' +
+        '<div style="font-size:32px;font-weight:800;color:var(--accent)">'+hcpData[0].toFixed(1)+'</div>' +
+        '<div style="font-size:11px;color:var(--text-3);margin-top:4px">Play more rounds to see progression</div>' +
       '</div>';
   }
 
-  html += '<div id="chart_uid" data-uid="'+uid+'" style="display:none"></div>';
+  if (ptsData.length >= 1) {
+    var ptsAvg = (ptsData.reduce(function(s,v){return s+v;},0)/ptsData.length).toFixed(1);
+    var ptsBest = Math.max.apply(null, ptsData);
+    html +=
+      '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:12px">' +
+        '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px">' +
+          '<div><div style="font-size:13px;font-weight:700;color:var(--text)">Points per round</div>' +
+          '<div style="font-size:11px;color:var(--text-3);margin-top:2px">'+ptsData.length+' rounds played</div></div>' +
+          '<div style="text-align:right">' +
+            '<div style="font-size:28px;font-weight:800;color:var(--accent);line-height:1">'+ptsAvg+'</div>' +
+            '<div style="font-size:11px;color:var(--text-3)">avg · best '+ptsBest+' pts</div>' +
+          '</div>' +
+        '</div>' +
+        (ptsData.length >= 2 ? '<canvas id="pts_'+uid+'" style="width:100%;height:90px;display:block"></canvas>' : '') +
+      '</div>';
+  }
+
+  html += '<div id="chart_trigger_'+uid+'" data-uid="'+uid+'" style="display:none"></div>';
   return html || '<div style="padding:20px;text-align:center;color:var(--text-3)">Not enough data yet</div>';
 }
 
+function drawProfileCharts(uid) {
+  var data = window._chartData && window._chartData[uid];
+  if (!data) return;
+
+  function drawChart(canvasId, values) {
+    var canvas = document.getElementById(canvasId);
+    if (!canvas || values.length < 2) return;
+    var ctx = canvas.getContext('2d');
+    var W = canvas.offsetWidth || 280;
+    canvas.width = W; canvas.height = 90;
+    var pad = 12, cW = W - pad*2, cH = 62;
+    var maxV = Math.max.apply(null, values);
+    var minV = Math.min.apply(null, values);
+    var rng = maxV - minV || 1;
+    function xp(i){ return pad + i*(cW/(values.length-1)); }
+    function yp(v){ return pad + cH - ((v-minV)/rng)*cH; }
+    var cs = getComputedStyle(document.documentElement);
+    var accent = cs.getPropertyValue('--accent').trim() || '#C9A84C';
+
+    // Gradient fill
+    var grad = ctx.createLinearGradient(0, pad, 0, pad+cH);
+    grad.addColorStop(0, 'rgba(201,168,76,0.18)');
+    grad.addColorStop(1, 'rgba(201,168,76,0)');
+    ctx.beginPath();
+    ctx.moveTo(xp(0), yp(values[0]));
+    for (var i=1; i<values.length; i++) {
+      var cpx=(xp(i-1)+xp(i))/2;
+      ctx.bezierCurveTo(cpx,yp(values[i-1]),cpx,yp(values[i]),xp(i),yp(values[i]));
+    }
+    ctx.lineTo(xp(values.length-1),pad+cH);
+    ctx.lineTo(xp(0),pad+cH);
+    ctx.closePath();
+    ctx.fillStyle=grad; ctx.fill();
+
+    // Line
+    ctx.beginPath();
+    ctx.moveTo(xp(0),yp(values[0]));
+    for (var j=1; j<values.length; j++) {
+      var cpx2=(xp(j-1)+xp(j))/2;
+      ctx.bezierCurveTo(cpx2,yp(values[j-1]),cpx2,yp(values[j]),xp(j),yp(values[j]));
+    }
+    ctx.strokeStyle=accent; ctx.lineWidth=2.5; ctx.stroke();
+
+    // Dots + labels
+    for (var k=0; k<values.length; k++) {
+      ctx.beginPath();
+      ctx.arc(xp(k),yp(values[k]),3.5,0,Math.PI*2);
+      ctx.fillStyle=accent; ctx.fill();
+      ctx.fillStyle='rgba(240,244,255,0.5)';
+      ctx.font='9px DM Sans,sans-serif';
+      ctx.textAlign='center';
+      ctx.fillText(values[k],xp(k),yp(values[k])-8);
+    }
+  }
+
+  if (data.hcp && data.hcp.length >= 2) drawChart('hcp_'+uid, data.hcp);
+  if (data.pts && data.pts.length >= 2) drawChart('pts_'+uid, data.pts);
+}
 
 function openExtraPrizesSettings() {
 var s = societySettings || {};
