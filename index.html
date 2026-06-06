@@ -857,9 +857,9 @@ document.getElementById('topbar-name').textContent = name;
 document.getElementById('splash-name').textContent = name;
 document.getElementById('auth-title').textContent = 'Welcome back';
 document.getElementById('auth-sub').textContent = 'Sign in to ' + name;
-// Topbar always shows GolfSoc logo
-var gsLogoHtml = '<img src="'+GOLFSOC_DEFAULT_LOGO+'" style="width:100%;height:100%;object-fit:cover">';
-document.getElementById('topbar-logo').innerHTML = gsLogoHtml;
+// Topbar shows society logo if uploaded, otherwise GolfSoc default
+var topbarLogoHtml = '<img src="'+(logo || GOLFSOC_DEFAULT_LOGO)+'" style="width:100%;height:100%;object-fit:cover" id="topbar-logo-img">';
+document.getElementById('topbar-logo').innerHTML = topbarLogoHtml;
 // Splash and auth show society logo if uploaded, otherwise GolfSoc default
 var societyLogoHtml = '<img src="'+(logo || GOLFSOC_DEFAULT_LOGO)+'" style="width:100%;height:100%;object-fit:cover">';
 document.getElementById('splash-logo').innerHTML = societyLogoHtml;
