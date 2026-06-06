@@ -2761,7 +2761,7 @@ return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;borde
 '<label for="prize-'+p.replace(/ /g,'-')+'" style="font-size:13px;color:var(--text);cursor:pointer">'+p+'</label>' +
 '</div>';
 }).join('') +
-'<div style="margin-top:10px"><label style="font-size:12px;color:var(--text-2)">Custom prize</label><input type="text" id="ep-custom" placeholder="e.g. Best front 9" style="width:100%;margin-top:4px;padding:10px;border-radius:var(--radius);border:1px solid var(--border-strong);font-size:13px"></div>' +
+'<div style="margin-top:10px"><label style="font-size:12px;color:var(--text-2)">Custom prize</label><input type="text" id="ep-custom" placeholder="e.g. Nearest the pin, Birdie prize" style="width:100%;margin-top:4px;padding:10px;border-radius:var(--radius);border:1px solid var(--border-strong);font-size:13px"></div>' +
 '</div>' +
 '<button onclick="saveExtraPrizesSettings()" class="btn accent full" style="margin-top:14px">Save</button>'
 );
@@ -4631,14 +4631,18 @@ var playerOpts = '<option value="">— None —</option>' + db.players.map(funct
 // Only show prizes if extra prizes is enabled
 var standardPrizes = [];
 if (hasExtras) {
-  if (holes === 18) {
+  var builtInIds = ['closest','longdrive','bestgross','front9','back9'];
+  // front9/back9 only if 18 holes AND in configured prizes list
+  var configuredLower = configuredPrizes.map(function(p){ return p.toLowerCase().replace(/\s/g,''); });
+  if (holes === 18 && configuredLower.indexOf('bestfront9') > -1) {
     standardPrizes.push({ id: 'front9', label: 'Best front 9', auto: true });
+  }
+  if (holes === 18 && configuredLower.indexOf('bestback9') > -1) {
     standardPrizes.push({ id: 'back9', label: 'Best back 9', auto: true });
   }
   standardPrizes.push({ id: 'closest', label: 'Closest to pin', auto: false });
   standardPrizes.push({ id: 'longdrive', label: 'Long drive', auto: false });
   standardPrizes.push({ id: 'bestgross', label: 'Best gross', auto: true });
-  var builtInIds = ['closest','longdrive','bestgross','front9','back9'];
   configuredPrizes.forEach(function(p){
     if (builtInIds.indexOf(p.toLowerCase().replace(/ /g,'_')) === -1) {
       standardPrizes.push({ id: 'custom_'+p, label: p, auto: false });
@@ -4646,23 +4650,6 @@ if (hasExtras) {
   });
 }
 
-
-// Standard prizes — always shown
-var standardPrizes = [];
-if (holes === 18) {
-  standardPrizes.push({ id: 'front9', label: 'Best front 9', auto: true });
-  standardPrizes.push({ id: 'back9', label: 'Best back 9', auto: true });
-}
-standardPrizes.push({ id: 'closest', label: 'Closest to pin', auto: false });
-standardPrizes.push({ id: 'longdrive', label: 'Long drive', auto: false });
-standardPrizes.push({ id: 'bestgross', label: 'Best gross', auto: true });
-// Add custom prizes, deduplicate against built-ins
-var builtInIds = ['closest','longdrive','bestgross','front9','back9'];
-configuredPrizes.forEach(function(p){
-  if (builtInIds.indexOf(p.toLowerCase().replace(/ /g,'_')) === -1) {
-    standardPrizes.push({ id: 'custom_'+p, label: p, auto: false });
-  }
-});
 
 // Auto-calculate front 9, back 9, best gross from rounds
 var evRounds = db.rounds.filter(function(r){ return r.event_id===eid && r.stableford_points != null; });
