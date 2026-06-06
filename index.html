@@ -3215,11 +3215,11 @@ openModal('Handicap rules',
 '</div></div>' +
 '<div class="field"><label>Tiebreaker method</label>' +
 '<select id="hcp-tb">' +
-'<option value="back3" '+(tb==="back3"?"selected":"")+'>Back 3 holes (then back 4, 5, 6...)</option>' +
-'<option value="back9" '+(tb==="back9"?"selected":"")+'>Back 9 holes (then back 8, 7, 6...)</option>' +
-'<option value="back18" '+(tb==="back18"?"selected":"")+'>Back 18 holes (then 17, 16, 15...)</option>' +
+'<option value="back3" '+(tb==="back3"?"selected":"")+'>Last 3 holes — compare scores on holes 16, 17 & 18</option>' +
+'<option value="back9" '+(tb==="back9"?"selected":"")+'>Last 9 holes — compare scores on holes 10–18</option>' +
+'<option value="back18" '+(tb==="back18"?"selected":"")+'>Full 18 holes — compare total score across the whole round</option>' +
 '</select>' +
-'<div style="font-size:11px;color:var(--text-3);margin-top:6px">When scores are tied, compares points on the last X holes, working back one hole at a time until the tie is broken.</div>' +
+'<div style="font-size:11px;color:var(--text-3);margin-top:6px">If two players tie on points, this decides who finishes higher. The player with more points on those holes wins. If still level, it works back one hole at a time until the tie is broken.</div>' +
 '</div>' +
 '<button class="btn accent full" onclick="saveHcp()">Save rules</button>'
 );
