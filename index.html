@@ -2279,6 +2279,7 @@ card('👥', 'Manage members', activeMemberCount+' active members', 'openMembers
 card('🔗', 'Invite members', 'Share join link &amp; code', 'openInviteModal') +
 sectionTitle('Scoring') +
 card('🏌', 'Handicap rules', (s.handicap_mode==='gui'?'GUI standard':s.handicap_mode==='custom'?'Custom':'Points-based'), 'openHcpModal') +
+card('🔄', 'Recalculate handicaps', 'Rerun handicap cuts across all published results', 'confirmRecalcHandicaps') +
 card('🏆', 'League points', (s.league_pts_mode==='custom'?'Custom table':'BHGS style'), 'openLeaguePtsModal') +
 card('🎁', 'Extra prizes', (s.extra_prizes_enabled?'Enabled':'Disabled'), 'openExtraPrizesSettings') +
 sectionTitle('Events') +
@@ -2737,6 +2738,77 @@ updateBranding(societySettings);
 renderHome();
 toast('Logo updated!', 'success'); closeModal(); renderSettings();
 } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+function confirmRecalcHandicaps() {
+  openModal('Recalculate handicaps',
+    '<p style="font-size:13px;color:var(--text-2);margin-bottom:16px">This will rerun handicap cuts across all published results using your current rules. Player handicaps will be updated from scratch in chronological order.</p>' +
+    '<p style="font-size:12px;color:var(--text-3);margin-bottom:20px">⚠️ This cannot be undone. Make sure your handicap rules are correct before proceeding.</p>' +
+    '<div style="display:flex;gap:8px"><button onclick="closeModal()" class="btn">Cancel</button><button onclick="closeModal();recalcAllHandicaps()" class="btn accent" style="flex:1">Recalculate</button></div>'
+  );
+}
+
+async function recalcAllHandicaps() {
+  const s = societySettings || {};
+  const cutMap = {
+    1: parseFloat(s.cut_1st || -1.0),
+    2: parseFloat(s.cut_2nd || -0.5),
+    3: parseFloat(s.cut_3rd || -0.2),
+    4: parseFloat(s.cut_4th || 0),
+    5: parseFloat(s.cut_5th || 0)
+  };
+  const addition = parseFloat(s.add_non_podium || 0.2);
+  const maxHcp = parseFloat(s.max_handicap || 36);
+
+  try {
+    toast('Recalculating...', '');
+
+    // Get all published events sorted by date
+    const publishedEvents = db.events
+      .filter(e => e.published)
+      .sort((a, b) => new Date(a.event_date) - new Date(b.event_date));
+
+    // Reset all player handicaps to their original/starting handicap
+    // We'll track current hcp per player as we go through events chronologically
+    const playerHcp = {};
+    db.players.forEach(p => {
+      playerHcp[p.id] = parseFloat(p.starting_handicap || p.handicap_index || 18);
+    });
+
+    for (const ev of publishedEvents) {
+      const rounds = db.rounds
+        .filter(r => r.event_id === ev.id && r.stableford_points != null)
+        .sort((a, b) => b.stableford_points - a.stableford_points);
+
+      for (let i = 0; i < rounds.length; i++) {
+        const r = rounds[i];
+        const pos = i + 1;
+        const currentHcp = playerHcp[r.player_id] !== undefined ? playerHcp[r.player_id] : 18;
+        const cut = cutMap[pos] !== undefined ? cutMap[pos] : addition;
+        const newHcp = Math.min(maxHcp, Math.max(0, currentHcp + cut));
+
+        playerHcp[r.player_id] = newHcp;
+
+        // Update round
+        await apiPatch('rounds?id=eq.' + r.id, { handicap_before: currentHcp, handicap_after: newHcp });
+        const rIdx = db.rounds.findIndex(x => x.id === r.id);
+        if (rIdx >= 0) { db.rounds[rIdx].handicap_before = currentHcp; db.rounds[rIdx].handicap_after = newHcp; }
+      }
+    }
+
+    // Update all player handicaps to final calculated value
+    for (const [pid, hcp] of Object.entries(playerHcp)) {
+      await apiPatch('players?id=eq.' + pid, { handicap_index: hcp });
+      const pIdx = db.players.findIndex(p => p.id === pid);
+      if (pIdx >= 0) db.players[pIdx].handicap_index = hcp;
+    }
+
+    await loadAll();
+    renderAll();
+    toast('Handicaps recalculated successfully!', 'success');
+  } catch(e) {
+    toast('Error: ' + e.message, 'error');
+  }
 }
 
 function openHcpModal() {
