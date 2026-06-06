@@ -3411,32 +3411,89 @@ btn.style.color = selected ? 'var(--primary)' : 'var(--text)';
 }
 
 function filterCourses() {
-var q = document.getElementById('ce-course-search').value.trim().toLowerCase();
-var results = document.getElementById('ce-course-results');
-if (q.length < 2) { results.style.display = 'none'; return; }
-var matches = IRISH_COURSES.filter(function(c){
-return c.name.toLowerCase().indexOf(q) > -1 || c.county.toLowerCase().indexOf(q) > -1;
-}).slice(0, 8);
-if (!matches.length) { results.style.display = 'none'; return; }
-results.innerHTML = matches.map(function(c) {
-return '<div onclick="selectCourse(\''+c.name.replace(/'/g,"\\'")+'\')" style="padding:10px 12px;cursor:pointer;border-bottom:0.5px solid var(--border);font-size:13px" onmouseover="this.style.background=\'var(--bg)\'" onmouseout="this.style.background=\'\'">' +
-'<div style="font-weight:600;color:var(--text)">'+c.name+'</div>' +
-'<div style="font-size:11px;color:var(--text-3);margin-top:2px">'+c.county+' &middot; Par '+c.par+' &middot; Slope '+c.slope+' &middot; Rating '+c.rating+'</div>' +
-'</div>';
-}).join('');
-results.style.display = 'block';
+  var q = document.getElementById('ce-course-search').value.trim().toLowerCase();
+  var results = document.getElementById('ce-course-results');
+  if (q.length < 2) { results.style.display = 'none'; return; }
+
+  var allCourses = (db.courses && db.courses.length)
+    ? db.courses.map(function(c){ return { name: c.name, county: c.county||'', par: c.par, slope: c.slope_rating, rating: c.course_rating }; })
+    : IRISH_COURSES;
+
+  var matches = allCourses.filter(function(c){
+    return c.name.toLowerCase().indexOf(q) > -1 || (c.county||'').toLowerCase().indexOf(q) > -1;
+  }).slice(0, 8);
+
+  var html = matches.map(function(c) {
+    return '<div onclick="selectCourse(\'' + c.name.replace(/'/g, "\\'") + '\')" style="padding:10px 12px;cursor:pointer;border-bottom:0.5px solid var(--border);font-size:13px" onmouseover="this.style.background=\'var(--bg)\'" onmouseout="this.style.background=\'\'">' +
+      '<div style="font-weight:600;color:var(--text)">' + c.name + '</div>' +
+      '<div style="font-size:11px;color:var(--text-3);margin-top:2px">' + (c.county||'') + ' &middot; Par ' + c.par + ' &middot; Slope ' + c.slope + ' &middot; Rating ' + c.rating + '</div>' +
+      '</div>';
+  }).join('');
+
+  var typed = document.getElementById('ce-course-search').value.trim().replace(/'/g, "\\'");
+  html += '<div onclick="addNewCourse(\'' + typed + '\')" style="padding:10px 12px;cursor:pointer;font-size:13px;border-top:1px solid var(--border);display:flex;align-items:center;gap:8px" onmouseover="this.style.background=\'var(--bg)\'" onmouseout="this.style.background=\'\'">' +
+    '<div style="width:22px;height:22px;border-radius:50%;background:var(--accent);color:var(--primary);font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">+</div>' +
+    '<div><div style="font-weight:600;color:var(--accent)">Add this course to directory</div>' +
+    '<div style="font-size:11px;color:var(--text-3)">Save it for all societies to use</div></div></div>';
+
+  results.innerHTML = html;
+  results.style.display = 'block';
 }
 
 function selectCourse(name) {
-var course = IRISH_COURSES.filter(function(c){ return c.name === name; })[0];
-if (!course) return;
-document.getElementById('ce-course-search').value = course.name;
-document.getElementById('ce-course-name').value = course.name;
-document.getElementById('ce-course-results').style.display = 'none';
-document.getElementById('ce-par').value = course.par;
-document.getElementById('ce-slope').value = course.slope;
-document.getElementById('ce-cr').value = course.rating;
-document.getElementById('ce-course-details').style.display = 'block';
+  var course = null;
+  if (db.courses && db.courses.length) {
+    var dbC = db.courses.find(function(c){ return c.name === name; });
+    if (dbC) course = { name: dbC.name, county: dbC.county, par: dbC.par, slope: dbC.slope_rating, rating: dbC.course_rating };
+  }
+  if (!course) course = IRISH_COURSES.find(function(c){ return c.name === name; });
+  if (!course) return;
+  document.getElementById('ce-course-search').value = course.name;
+  document.getElementById('ce-course-name').value = course.name;
+  document.getElementById('ce-course-results').style.display = 'none';
+  document.getElementById('ce-par').value = course.par;
+  document.getElementById('ce-slope').value = course.slope || course.slope_rating;
+  document.getElementById('ce-cr').value = course.rating || course.course_rating;
+  document.getElementById('ce-course-details').style.display = 'block';
+}
+
+function addNewCourse(name) {
+  document.getElementById('ce-course-results').style.display = 'none';
+  if (!name) return;
+  openModal('Add course to directory',
+    '<p style="font-size:13px;color:var(--text-2);margin-bottom:16px">Add <strong>' + name + '</strong> to the shared directory so all societies can find it.</p>' +
+    '<div class="field"><label>Course name</label><input type="text" id="nc-name" value="' + name + '"></div>' +
+    '<div class="field"><label>County</label><input type="text" id="nc-county" placeholder="e.g. Dublin"></div>' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px">' +
+      '<div><label style="font-size:12px;font-weight:600;color:var(--text-2);display:block;margin-bottom:4px">Par</label><input type="number" id="nc-par" value="72" style="width:100%;padding:10px 8px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface);color:var(--text);font-size:16px;text-align:center;font-family:DM Sans,sans-serif"></div>' +
+      '<div><label style="font-size:12px;font-weight:600;color:var(--text-2);display:block;margin-bottom:4px">Slope</label><input type="number" id="nc-slope" value="113" style="width:100%;padding:10px 8px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface);color:var(--text);font-size:16px;text-align:center;font-family:DM Sans,sans-serif"></div>' +
+      '<div><label style="font-size:12px;font-weight:600;color:var(--text-2);display:block;margin-bottom:4px">Rating</label><input type="number" id="nc-rating" step="0.1" value="70.0" style="width:100%;padding:10px 8px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface);color:var(--text);font-size:16px;text-align:center;font-family:DM Sans,sans-serif"></div>' +
+    '</div>' +
+    '<div class="field"><label>Holes</label><select id="nc-holes" style="width:100%;padding:10px 12px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface);color:var(--text);font-size:14px;font-family:DM Sans,sans-serif"><option value="18">18 holes</option><option value="9">9 holes</option></select></div>' +
+    '<div style="display:flex;gap:8px"><button onclick="closeModal()" class="btn">Cancel</button><button onclick="saveCourseToDirectory()" class="btn accent" style="flex:1">Add to directory</button></div>'
+  );
+}
+
+async function saveCourseToDirectory() {
+  var name = document.getElementById('nc-name').value.trim();
+  var county = document.getElementById('nc-county').value.trim();
+  var par = parseInt(document.getElementById('nc-par').value) || 72;
+  var slope = parseFloat(document.getElementById('nc-slope').value) || 113;
+  var rating = parseFloat(document.getElementById('nc-rating').value) || 70.0;
+  var holes = parseInt(document.getElementById('nc-holes').value) || 18;
+  if (!name) { toast('Please enter a course name', 'error'); return; }
+  try {
+    var res = await apiPost('courses', { name: name, county: county, holes: holes, par: par, slope_rating: slope, course_rating: rating });
+    if (res && res[0]) db.courses.push(res[0]);
+    toast(name + ' added to directory!', 'success');
+    closeModal();
+    document.getElementById('ce-course-search').value = name;
+    document.getElementById('ce-course-name').value = name;
+    document.getElementById('ce-par').value = par;
+    document.getElementById('ce-slope').value = slope;
+    document.getElementById('ce-cr').value = rating;
+    document.getElementById('ce-course-details').style.display = 'block';
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
 }
 
 async function saveNewEvent() {
