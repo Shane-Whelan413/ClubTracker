@@ -2513,21 +2513,21 @@ el.innerHTML =
   sectionTitle('Events') +
   card('events', 'Manage events', db.events.length+' events', 'openEventsModal') +
   '<div style="height:16px"></div>' +
-  '<div onclick="doLogout()" style="display:flex;align-items:center;gap:14px;background:rgba(220,38,38,0.06);border:1.5px solid rgba(220,38,38,0.2);border-radius:var(--radius);padding:14px 16px;margin-bottom:8px;cursor:pointer">' +
-  '<div class="setting-icon danger"><svg><use href="#ico-signout"/></svg></div>' +
-  '<div style="flex:1"><div style="font-size:14px;font-weight:600;color:#dc2626">Sign out</div>' +
-  '<div style="font-size:12px;color:rgba(220,38,38,0.6);margin-top:1px">Sign out of your account</div></div>' +
-  '<div style="color:rgba(220,38,38,0.4);font-size:18px">&#8250;</div></div>' +
   '<a href="mailto:hello@golfsoc.ie" style="display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:8px;cursor:pointer;text-decoration:none">' +
   '<div class="setting-icon"><svg><use href="#ico-info"/></svg></div>' +
   '<div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--text)">Contact support</div>' +
   '<div style="font-size:12px;color:var(--text-3);margin-top:1px">hello@golfsoc.ie</div></div>' +
   '<div style="color:var(--text-3);font-size:18px">&#8250;</div></a>' +
-  '<a href="mailto:hello@golfsoc.ie?subject=GolfSoc%20Feedback" style="display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:20px;cursor:pointer;text-decoration:none">' +
+  '<a href="mailto:hello@golfsoc.ie?subject=GolfSoc%20Feedback" style="display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:8px;cursor:pointer;text-decoration:none">' +
   '<div class="setting-icon"><svg><use href="#ico-star"/></svg></div>' +
   '<div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--text)">Give us feedback</div>' +
   '<div style="font-size:12px;color:var(--text-3);margin-top:1px">Help us improve GolfSoc</div></div>' +
-  '<div style="color:var(--text-3);font-size:18px">&#8250;</div></a>';
+  '<div style="color:var(--text-3);font-size:18px">&#8250;</div></a>' +
+  '<div onclick="doLogout()" style="display:flex;align-items:center;gap:14px;background:rgba(220,38,38,0.06);border:1.5px solid rgba(220,38,38,0.2);border-radius:var(--radius);padding:14px 16px;margin-bottom:20px;cursor:pointer">' +
+  '<div class="setting-icon danger"><svg><use href="#ico-signout"/></svg></div>' +
+  '<div style="flex:1"><div style="font-size:14px;font-weight:600;color:#dc2626">Sign out</div>' +
+  '<div style="font-size:12px;color:rgba(220,38,38,0.6);margin-top:1px">Sign out of your account</div></div>' +
+  '<div style="color:rgba(220,38,38,0.4);font-size:18px">&#8250;</div></div>';
 }
 
 function openBrandingGroup() {
