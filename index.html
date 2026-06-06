@@ -1684,23 +1684,6 @@ function renderHome() {
       '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin-bottom:8px">Recent results</div>' +
       resultCards + moreSection;
 
-  } else if (noResults && previewOn) {
-    result =
-      '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-3);margin-bottom:8px">Recent results</div>' +
-      '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden">' +
-      '<div style="background:var(--primary);padding:14px 16px;position:relative">' +
-      '<div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent-dark),var(--accent),var(--accent-dark))"></div>' +
-      '<div style="display:flex;align-items:center;justify-content:space-between">' +
-      '<div><div style="font-size:15px;font-weight:700;color:white">Example Result Card</div>' +
-      '<div style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:2px">This is how results appear after publishing</div></div></div></div>' +
-      '<div style="padding:6px 16px 4px">' +
-      '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:0.5px solid var(--border)"><div style="width:28px;height:28px;border-radius:50%;background:#B8860B;color:white;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">1st</div><div style="flex:1;font-size:13px;font-weight:600;color:var(--text)">Jamie Murphy</div><div style="font-size:15px;font-weight:800;color:#B8860B">34 pts</div></div>' +
-      '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:0.5px solid var(--border)"><div style="width:28px;height:28px;border-radius:50%;background:#888;color:white;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">2nd</div><div style="flex:1;font-size:13px;color:var(--text)">Ciara Walsh</div><div style="font-size:15px;font-weight:800;color:#888">31 pts</div></div>' +
-      '<div style="display:flex;align-items:center;gap:10px;padding:9px 0"><div style="width:28px;height:28px;border-radius:50%;background:#8B4513;color:white;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">3rd</div><div style="flex:1;font-size:13px;color:var(--text)">Declan Byrne</div><div style="font-size:15px;font-weight:800;color:#8B4513">29 pts</div></div>' +
-      '</div>' +
-      '<div style="padding:10px 16px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">' +
-      '<div style="font-size:11px;color:var(--text-3)">Results appear here after each event</div>' +
-      '<button onclick="showTab(\'settings\')" style="padding:6px 14px;border-radius:8px;border:none;background:var(--primary);color:var(--accent);font-size:12px;font-weight:700;cursor:pointer;font-family:DM Sans,sans-serif">Settings</button></div></div>';
   } else {
     result = '<div class="empty"><div class="empty-icon">&#9971;</div><div class="empty-title">No results yet</div><div class="empty-sub">Results appear here after your first event</div></div>';
   }
@@ -1845,23 +1828,7 @@ var past = db.events.filter(function(e){ return e.event_date < today; }).sort(fu
 var adminBtn = isAdmin ? '<button onclick="openCreateEventModal()" class="btn accent full" style="margin-bottom:14px">+ Create event</button>' : '';
 
 if (!upcoming.length && !past.length) {
-var previewOnSched = !societySettings || societySettings.show_preview !== false;
-if (previewOnSched) {
-var now = new Date();
-var mo2 = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-var previewEvs = [
-{ d: new Date(now.getFullYear(), now.getMonth(), now.getDate()+7), name:'Your Home Course', type:'Sunday - 9 holes' },
-{ d: new Date(now.getFullYear(), now.getMonth(), now.getDate()+14), name:'Your Home Course', type:'Sunday - 9 holes' },
-{ d: new Date(now.getFullYear(), now.getMonth()+1, 12), name:'Away Day Outing', type:'Outing - 18 holes' }
-];
-el.innerHTML = adminBtn +
-'<div style="background:var(--accent-light);border:1px solid var(--accent);border-radius:var(--radius);padding:8px 12px;margin-bottom:10px;font-size:12px;color:var(--accent-dark);text-align:center">Preview - create events to get started</div>' +
-previewEvs.map(function(ev) {
-return '<div class="event-card" style="opacity:0.7"><div style="display:flex;align-items:center;gap:12px;padding:12px 14px"><div class="ev-date"><div class="ev-day">'+ev.d.getDate()+'</div><div class="ev-month">'+mo2[ev.d.getMonth()]+'</div></div><div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600;color:var(--text)">'+ev.name+'</div><div style="font-size:11px;color:var(--text-3);margin-top:2px">'+ev.type+'</div></div></div></div>';
-}).join('');
-} else {
 el.innerHTML = adminBtn + '<div class="empty"><div class="empty-icon">&#128197;</div><div class="empty-title">No events yet</div><div class="empty-sub">Tap the button above to create your first event</div></div>';
-}
 return;
 }
 function evRow(ev, isPast) {
