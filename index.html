@@ -1419,14 +1419,13 @@ function checkSubscriptionStatus() {
   if (trialEnds) {
     var daysLeft = Math.ceil((trialEnds - now) / (1000 * 60 * 60 * 24));
     if (daysLeft <= 0) {
-      // Trial expired — show paywall
       showSubPaywall();
     } else if (daysLeft <= 3) {
-      // Urgent — red banner
       showSubBanner('<svg style="width:14px;height:14px;display:inline-block;vertical-align:middle;flex-shrink:0;margin-right:4px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#ico-clock"/></svg> Trial ends in ' + daysLeft + ' day' + (daysLeft === 1 ? '' : 's') + ' — subscribe now to keep access.', '#ef4444', true);
     } else if (daysLeft <= 7) {
-      // Warning — gold banner
-      showSubBanner('<svg style="width:14px;height:14px;display:inline-block;vertical-align:middle;flex-shrink:0;margin-right:4px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#ico-clock"/></svg> Your free trial ends in ' + daysLeft + ' days. Subscribe to keep access.', '#C9A84C', true);
+      showSubBanner('<svg style="width:14px;height:14px;display:inline-block;vertical-align:middle;flex-shrink:0;margin-right:4px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#ico-clock"/></svg> ' + daysLeft + ' days left in your trial. Subscribe to keep access.', '#C9A84C', true);
+    } else {
+      showSubBanner('<svg style="width:14px;height:14px;display:inline-block;vertical-align:middle;flex-shrink:0;margin-right:4px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#ico-clock"/></svg> Free trial — ' + daysLeft + ' days remaining.', '#1a3320', true);
     }
   }
 }
