@@ -821,9 +821,11 @@ function applyTheme(s) {
   r.setProperty('--primary', t.primary);
   r.setProperty('--accent', t.accent);
 
-  // Colour scheme overrides primary/accent if set
-  if (s.primary_colour) r.setProperty('--primary', s.primary_colour);
-  if (s.secondary_colour) r.setProperty('--accent', s.secondary_colour);
+  // Colour scheme only overrides if mode is explicitly 'scheme'
+  if (s.colour_mode === 'scheme') {
+    if (s.primary_colour) r.setProperty('--primary', s.primary_colour);
+    if (s.secondary_colour) r.setProperty('--accent', s.secondary_colour);
+  }
   r.setProperty('--app-bg', t.appBg);
 
   // Update meta theme colour for browser chrome
