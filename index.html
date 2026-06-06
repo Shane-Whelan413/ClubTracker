@@ -5105,7 +5105,17 @@ user_metadata: { society_id: p.society_id, role: p.role || 'member', full_name: 
 await afterLogin();
 return;
 }
-} catch(e) {}
+} catch(e) {
+// Network error — restore session from localStorage anyway
+// Don't log them out just because of a network issue
+currentUser = {
+id: memberId,
+isMemberSession: true,
+user_metadata: { society_id: memberSociety, role: localStorage.getItem('gs_member_role') || 'member', full_name: localStorage.getItem('gs_member_name') || '' }
+};
+await afterLogin();
+return;
+}
 localStorage.removeItem('gs_member_id');
 localStorage.removeItem('gs_member_society');
 showAuth();
@@ -5117,13 +5127,13 @@ var refresh = localStorage.getItem('gs_refresh');
 
 if (!token && !refresh) { showAuth(); return; }
 
-// 6 second hard timeout
+// 20 second hard timeout
 var bailTimer = setTimeout(function() {
 if (_appReady) return;
 localStorage.removeItem('gs_token');
 localStorage.removeItem('gs_refresh');
 showAuth();
-}, 12000);
+}, 20000);
 
 try {
 var accessToken = token;
