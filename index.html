@@ -339,29 +339,43 @@ input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px;
 
 <!-- Auth -->
 <div id="auth-screen">
-<div class="auth-logo" id="auth-logo">
-<img src="data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/wAARCADEAMgDASIAAhEBAxEB/8QAGwABAQEBAQEBAQAAAAAAAAAAAAECAwQFBgf/xAAuEAACAQMDAwMEAgMBAAAAAAAAAQIDERIhMQRBUWFxgZGhscEiMtHw4fH/xAAYAQEBAQEBAAAAAAAAAAAAAAAAAQIDBP/EABkRAQEBAQEBAAAAAAAAAAAAAAABETFB/9oADAMBAAIRAxEAPwD9UAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB2AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAAAAABIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJAAAASAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==" style="width:100%;height:100%;object-fit:cover" id="auth-logo-img">
+<div class="auth-logo" id="auth-logo" style="background:var(--accent,#C9A84C);border:none">
+<span style="font-family:DM Serif Display,serif;font-size:26px;font-weight:700;color:#0a1628;letter-spacing:-0.02em">GS</span>
 </div>
 <div class="auth-title" id="auth-title">GolfSoc</div>
 <div class="auth-sub" id="auth-sub">Your golf society, connected</div>
 
 <!-- Landing: 3 options -->
 <div id="auth-landing">
-  <button class="auth-btn" style="margin-bottom:10px;background:var(--accent,#C9A84C);color:#0a1628;display:flex;align-items:center;justify-content:center;gap:10px" onclick="switchAuthMode('admin-signup')">
+  <button class="auth-btn" style="margin-bottom:12px;background:var(--accent,#C9A84C);color:#0a1628;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 14px rgba(201,168,76,0.35);transform:translateY(0);transition:transform .15s,box-shadow .15s" onmousedown="this.style.transform='translateY(2px)';this.style.boxShadow='0 1px 6px rgba(201,168,76,0.25)'" onmouseup="this.style.transform='';this.style.boxShadow=''" onclick="switchAuthMode('admin-signup')">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ico-create"/></svg>
     Create a society
   </button>
-  <button class="auth-btn" style="margin-bottom:10px;background:rgba(255,255,255,0.1);border:1.5px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;gap:10px" onclick="switchAuthMode('member');switchMemberView('join')">
+  <button class="auth-btn" style="margin-bottom:12px;background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.25);display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 2px 8px rgba(0,0,0,0.2);transition:background .15s" onmouseover="this.style.background='rgba(255,255,255,0.18)'" onmouseout="this.style.background='rgba(255,255,255,0.12)'" onclick="switchAuthMode('member');switchMemberView('join')">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ico-join"/></svg>
     Join a society
   </button>
-  <button class="auth-btn" style="background:transparent;border:1.5px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.6);display:flex;align-items:center;justify-content:center;gap:10px" onclick="showSignIn()">
+  <button class="auth-btn" style="background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.8);display:flex;align-items:center;justify-content:center;gap:10px;transition:background .15s" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.06)'" onclick="showSignIn()">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ico-signin"/></svg>
     Sign in
   </button>
 </div>
 
-<!-- Member login: mobile + PIN -->
+<!-- Sign in choice -->
+<div id="auth-signin-choice" style="display:none">
+  <button class="auth-btn" style="margin-bottom:12px;background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.25);display:flex;align-items:center;justify-content:center;gap:10px" onclick="switchAuthMode('member');switchMemberView('login')">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ico-members"/></svg>
+    Member sign in
+  </button>
+  <button class="auth-btn" style="margin-bottom:12px;background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.25);display:flex;align-items:center;justify-content:center;gap:10px" onclick="switchAuthMode('admin')">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ico-signin"/></svg>
+    Society admin sign in
+  </button>
+  <button onclick="showLanding()" style="width:100%;margin-top:6px;padding:13px;border-radius:var(--radius);border:1.5px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.7);font-size:14px;font-weight:600;font-family:DM Sans,sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    Back
+  </button>
+</div>
 <div id="auth-member" style="display:none">
 <div id="auth-member-login">
 <span class="auth-label">Mobile number</span>
@@ -371,7 +385,7 @@ input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px;
 <button class="auth-btn" id="member-login-btn" onclick="doMemberLogin()">Sign in</button>
 <div class="auth-err" id="member-login-err"></div>
 <div class="auth-forgot" onclick="switchMemberView('join')" style="margin-top:14px">New member? Join a society &rsaquo;</div>
-<div class="auth-forgot" onclick="showLanding()" style="margin-top:8px">&#8592; Back</div>
+<button onclick="showLanding()" style="width:100%;margin-top:6px;padding:13px;border-radius:var(--radius);border:1.5px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.7);font-size:14px;font-weight:600;font-family:DM Sans,sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>Back</button>
 </div>
 <div id="auth-member-join" style="display:none">
 <span class="auth-label">Your name</span>
@@ -383,7 +397,7 @@ input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px;
 <button class="auth-btn" id="join-btn" onclick="doMemberJoin()">Join society</button>
 <div class="auth-err" id="join-err"></div>
 <div class="auth-forgot" onclick="switchMemberView('login')" style="margin-top:14px">Already a member? Sign in &rsaquo;</div>
-<div class="auth-forgot" onclick="showLanding()" style="margin-top:8px">&#8592; Back</div>
+<button onclick="showLanding()" style="width:100%;margin-top:6px;padding:13px;border-radius:var(--radius);border:1.5px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.7);font-size:14px;font-weight:600;font-family:DM Sans,sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>Back</button>
 </div>
 </div>
 
@@ -396,7 +410,7 @@ input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px;
 <button class="auth-btn" id="login-btn" onclick="doLogin()">Sign in</button>
 <div class="auth-err" id="login-err"></div>
 <div class="auth-forgot" onclick="doForgot()">Forgot password?</div>
-<div class="auth-forgot" onclick="showLanding()" style="margin-top:8px">&#8592; Back</div>
+<button onclick="showLanding()" style="width:100%;margin-top:6px;padding:13px;border-radius:var(--radius);border:1.5px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.7);font-size:14px;font-weight:600;font-family:DM Sans,sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>Back</button>
 </div>
 
 <!-- Admin signup -->
@@ -409,7 +423,7 @@ input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px;
 <input class="auth-input" type="password" id="signup-password" placeholder="Min 8 characters" autocomplete="new-password">
 <button class="auth-btn" id="signup-btn" onclick="doSignup()">Create society</button>
 <div class="auth-err" id="signup-err"></div>
-<div class="auth-forgot" onclick="showLanding()" style="margin-top:8px">&#8592; Back</div>
+<button onclick="showLanding()" style="width:100%;margin-top:6px;padding:13px;border-radius:var(--radius);border:1.5px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.7);font-size:14px;font-weight:600;font-family:DM Sans,sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>Back</button>
 </div>
 </div>
 
@@ -813,13 +827,19 @@ function showLanding() {
   document.getElementById('auth-member').style.display = 'none';
   document.getElementById('auth-admin').style.display = 'none';
   document.getElementById('auth-admin-signup').style.display = 'none';
+  document.getElementById('auth-signin-choice').style.display = 'none';
   document.getElementById('auth-title').textContent = 'GolfSoc';
   document.getElementById('auth-sub').textContent = 'Your golf society, connected';
 }
 
 function showSignIn() {
-  // Show admin sign in by default — members can switch to member login
-  switchAuthMode('admin');
+  document.getElementById('auth-landing').style.display = 'none';
+  document.getElementById('auth-member').style.display = 'none';
+  document.getElementById('auth-admin').style.display = 'none';
+  document.getElementById('auth-admin-signup').style.display = 'none';
+  document.getElementById('auth-signin-choice').style.display = 'block';
+  document.getElementById('auth-title').textContent = 'Sign in';
+  document.getElementById('auth-sub').textContent = 'Choose how you want to sign in';
 }
 
 function switchAuthMode(mode) {
