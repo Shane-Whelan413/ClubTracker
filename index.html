@@ -4448,7 +4448,11 @@ async function startStripeCheckout(plan) {
   try {
     var res = await fetch('https://nljcncrvqjtuwycemutz.supabase.co/functions/v1/stripe-checkout', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_KEY },
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY
+      },
       body: JSON.stringify({
         plan: plan,
         society_id: sid,
