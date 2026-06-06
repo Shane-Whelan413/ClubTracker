@@ -4303,6 +4303,8 @@ document.getElementById('modal-overlay').classList.add('open');
 }
 
 function openExtraPrizes(eid) {
+  window._currentExtraPrizesEid = eid;
+  if (!window._ctpWinners) window._ctpWinners = [''];
 var s = societySettings || {};
 var ev = db.events.filter(function(e){ return e.id === eid; })[0];
 var holes = ev ? (ev.holes || 9) : 9;
@@ -4310,6 +4312,25 @@ var configuredPrizes = s.extra_prizes || [];
 var playerOpts = '<option value="">— None —</option>' + db.players.map(function(p){
   return '<option value="'+p.id+'">'+p.name+'</option>';
 }).join('');
+
+// Only show prizes if extra prizes is enabled
+var standardPrizes = [];
+if (hasExtras) {
+  if (holes === 18) {
+    standardPrizes.push({ id: 'front9', label: 'Best front 9', auto: true });
+    standardPrizes.push({ id: 'back9', label: 'Best back 9', auto: true });
+  }
+  standardPrizes.push({ id: 'closest', label: 'Closest to pin', auto: false });
+  standardPrizes.push({ id: 'longdrive', label: 'Long drive', auto: false });
+  standardPrizes.push({ id: 'bestgross', label: 'Best gross', auto: true });
+  var builtInIds = ['closest','longdrive','bestgross','front9','back9'];
+  configuredPrizes.forEach(function(p){
+    if (builtInIds.indexOf(p.toLowerCase().replace(/ /g,'_')) === -1) {
+      standardPrizes.push({ id: 'custom_'+p, label: p, auto: false });
+    }
+  });
+}
+
 
 // Standard prizes — always shown
 var standardPrizes = [];
@@ -4359,21 +4380,43 @@ if (evRounds.length) {
 }
 
 var prevById = window._extraPrizeWinnersById || {};
-var prizeFields = standardPrizes.map(function(prize) {
+var prizeFields = standardPrizes.length === 0
+  ? '<div style="text-align:center;padding:20px;color:var(--text-3);font-size:13px">No extra prizes enabled.<br><button onclick="closeModal();openExtraPrizesSettings()" style="margin-top:8px;padding:6px 14px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--accent);font-size:12px;font-weight:600;cursor:pointer">Enable in Settings</button></div>'
+  : standardPrizes.map(function(prize) {
   var preselect = prevById[prize.id] || autoWinners[prize.id] || '';
   var isAuto = prize.auto && autoWinners[prize.id];
   var autoTag = isAuto ? '<span style="font-size:11px;font-weight:600;background:rgba(16,185,129,0.12);color:#065f46;padding:2px 8px;border-radius:4px">Auto</span>' : '';
   var opts = playerOpts.replace('value="'+preselect+'"', 'value="'+preselect+'" selected');
-  return '<div style="border:0.5px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:10px">' +
-    '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg);border-bottom:0.5px solid var(--border)">' +
-      '<span style="font-size:14px;font-weight:600;color:var(--text)">' + prize.label + '</span>' +
-      autoTag +
-    '</div>' +
-    '<div style="padding:10px 14px">' +
-      '<select id="ep-'+prize.id+'" style="width:100%;padding:10px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);font-size:14px;font-family:DM Sans,sans-serif;color:var(--text)">' + opts + '</select>' +
-    '</div>' +
+  var fieldHtml = '';
+  if (prize.id === 'closest') {
+    var ctpWinners = (window._ctpWinners && window._ctpWinners.length) ? window._ctpWinners : [preselect];
+    var ctpFields = ctpWinners.map(function(pid, ci) {
+      var cOpts = playerOpts.replace('value="'+pid+'"', 'value="'+pid+'" selected');
+      return '<div style="display:flex;gap:6px;margin-bottom:6px" id="ctp-row-'+ci+'">'+
+        '<select id="ep-closest-'+ci+'" style="flex:1;padding:10px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);font-size:14px;font-family:DM Sans,sans-serif;color:var(--text)">'+cOpts+'</select>'+
+        (ci > 0 ? '<button onclick="removeCtpRow('+ci+')" style="padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text-3);cursor:pointer;font-size:16px">✕</button>' : '')+
+      '</div>';
+    }).join('');
+    fieldHtml = '<div id="ctp-fields">'+ctpFields+'</div>'+
+      '<button onclick="addCtpRow()" style="width:100%;padding:8px;border-radius:6px;border:1px dashed var(--border);background:transparent;color:var(--accent);font-size:13px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif">+ Add another closest to pin</button>';
+  } else if (prize.id === 'longdrive') {
+    var ldDist = window._ldDistance || '';
+    fieldHtml = '<select id="ep-longdrive" style="width:100%;padding:10px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);font-size:14px;font-family:DM Sans,sans-serif;color:var(--text);margin-bottom:8px">'+opts+'</select>'+
+      '<div style="display:flex;align-items:center;gap:8px">'+
+        '<input type="number" id="ep-longdrive-dist" placeholder="Distance (yards)" value="'+ldDist+'" style="flex:1;padding:10px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:14px;font-family:DM Sans,sans-serif">'+
+        '<span style="font-size:13px;color:var(--text-3);white-space:nowrap">yds</span>'+
+      '</div>';
+  } else {
+    fieldHtml = '<select id="ep-'+prize.id+'" style="width:100%;padding:10px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);font-size:14px;font-family:DM Sans,sans-serif;color:var(--text)">'+opts+'</select>';
+  }
+  return '<div style="border:0.5px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:10px">'+
+    '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg);border-bottom:0.5px solid var(--border)">'+
+      '<span style="font-size:14px;font-weight:600;color:var(--text)">'+prize.label+'</span>'+autoTag+
+    '</div>'+
+    '<div style="padding:10px 14px">'+fieldHtml+'</div>'+
   '</div>';
 }).join('');
+
 
 document.getElementById('modal-title').textContent = 'Honours & prizes';
 document.getElementById('modal-body').innerHTML =
@@ -4384,32 +4427,94 @@ document.getElementById('modal-body').innerHTML =
 document.getElementById('modal-overlay').classList.add('open');
 }
 
+function addCtpRow() {
+  if (!window._ctpWinners) window._ctpWinners = [''];
+  window._ctpWinners.push('');
+  // Save current selections before re-render
+  var i = 0;
+  while (document.getElementById('ep-closest-'+i)) {
+    window._ctpWinners[i] = document.getElementById('ep-closest-'+i).value;
+    i++;
+  }
+  // Re-open to refresh
+  var eid = window._currentExtraPrizesEid;
+  if (eid) openExtraPrizes(eid);
+}
+
+function removeCtpRow(idx) {
+  if (!window._ctpWinners) return;
+  // Save current before removing
+  var i = 0;
+  while (document.getElementById('ep-closest-'+i)) {
+    window._ctpWinners[i] = document.getElementById('ep-closest-'+i).value;
+    i++;
+  }
+  window._ctpWinners.splice(idx, 1);
+  var eid = window._currentExtraPrizesEid;
+  if (eid) openExtraPrizes(eid);
+}
+
 async function saveExtraPrizesAndPublish(eid) {
 var s = societySettings || {};
 var ev = db.events.filter(function(e){ return e.id === eid; })[0];
 var holes = ev ? (ev.holes || 9) : 9;
 var configuredPrizes = s.extra_prizes || [];
+var hasExtras = s.extra_prizes_enabled;
 var standardPrizes = [];
-if (holes === 18) {
-  standardPrizes.push({ id: 'front9', label: 'Best front 9' });
-  standardPrizes.push({ id: 'back9', label: 'Best back 9' });
+if (hasExtras) {
+  if (holes === 18) {
+    standardPrizes.push({ id: 'front9', label: 'Best front 9' });
+    standardPrizes.push({ id: 'back9', label: 'Best back 9' });
+  }
+  standardPrizes.push({ id: 'closest', label: 'Closest to pin' });
+  standardPrizes.push({ id: 'longdrive', label: 'Long drive' });
+  standardPrizes.push({ id: 'bestgross', label: 'Best gross' });
+  configuredPrizes.forEach(function(p){ standardPrizes.push({ id: 'custom_'+p, label: p }); });
 }
-standardPrizes.push({ id: 'closest', label: 'Closest to pin' });
-standardPrizes.push({ id: 'longdrive', label: 'Long drive' });
-standardPrizes.push({ id: 'bestgross', label: 'Best gross' });
-configuredPrizes.forEach(function(p){ standardPrizes.push({ id: 'custom_'+p, label: p }); });
 
 var winners = {};
 var winnersById = {};
 standardPrizes.forEach(function(prize) {
-  var sel = document.getElementById('ep-'+prize.id);
-  if (sel && sel.value) {
-    var p = db.players.filter(function(x){ return x.id === sel.value; })[0];
-    if (p) { winners[prize.label] = p.name; winnersById[prize.id] = sel.value; }
+  if (prize.id === 'closest') {
+    // Collect all CTP winners
+    var ctpNames = [], ctpIds = [], ci = 0;
+    while (document.getElementById('ep-closest-'+ci)) {
+      var val = document.getElementById('ep-closest-'+ci).value;
+      if (val) {
+        var p = db.players.find(function(x){ return x.id === val; });
+        if (p) { ctpNames.push(p.name); ctpIds.push(val); }
+      }
+      ci++;
+    }
+    if (ctpNames.length) {
+      winners['Closest to pin'] = ctpNames.join(', ');
+      winnersById['closest'] = ctpIds[0]; // primary
+      winnersById['closest_all'] = ctpIds;
+    }
+  } else if (prize.id === 'longdrive') {
+    var sel = document.getElementById('ep-longdrive');
+    var distEl = document.getElementById('ep-longdrive-dist');
+    if (sel && sel.value) {
+      var p = db.players.find(function(x){ return x.id === sel.value; });
+      var dist = distEl ? distEl.value : '';
+      if (p) {
+        winners['Long drive'] = p.name + (dist ? ' — ' + dist + 'yds' : '');
+        winnersById['longdrive'] = sel.value;
+        window._ldDistance = dist;
+      }
+    }
+  } else {
+    var sel = document.getElementById('ep-'+prize.id);
+    if (sel && sel.value) {
+      var p = db.players.find(function(x){ return x.id === sel.value; });
+      if (p) { winners[prize.label] = p.name; winnersById[prize.id] = sel.value; }
+    }
   }
 });
 window._extraPrizeWinners = winners;
 window._extraPrizeWinnersById = winnersById;
+window._ctpWinners = null; // reset
+window._ldDistance = null;
 await verifyAllAndPublish(eid);
 }
 
