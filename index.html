@@ -169,6 +169,11 @@ padding: calc(env(safe-area-inset-top, 0px) + 48px) 24px calc(env(safe-area-inse
 .auth-input { width: 100%; padding: 13px 14px; border-radius: var(--radius); border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.07); color: white; font-size: 15px; font-family: 'DM Sans', sans-serif; outline: none; margin-bottom: 10px; }
 .auth-input:focus { border-color: #52b788; }
 .auth-input::placeholder { color: rgba(255,255,255,0.2); }
+#setup-wizard .auth-input { background: white; color: #111; border: 1px solid rgba(26,51,32,0.2); }
+#setup-wizard .auth-input:focus { border-color: var(--wiz-primary, #1a3320); }
+#setup-wizard .auth-input::placeholder { color: #aaa; }
+#setup-wizard .auth-label { color: var(--wiz-text2, #444); }
+.theme-label { font-size: 12px; font-weight: 600; color: var(--wiz-primary, #1a3320); margin-top: 6px; text-align: center; }
 .auth-btn { width: 100%; padding: 14px; border-radius: var(--radius); border: none; background: #52b788; color: #1a3320; font-size: 15px; font-weight: 700; font-family: 'DM Sans', sans-serif; cursor: pointer; margin-top: 4px; }
 .auth-btn.loading { opacity: 0.6; pointer-events: none; }
 .auth-err { font-size: 12px; color: #fca5a5; text-align: center; margin-top: 10px; display: none; }
@@ -179,24 +184,24 @@ padding: calc(env(safe-area-inset-top, 0px) + 48px) 24px calc(env(safe-area-inse
 /* ── Wizard ── */
 #setup-wizard {
 position: fixed; inset: 0; z-index: 200;
-background: var(--primary);
+background: #f4f6f4;
 display: none; overflow-y: auto;
 padding: calc(env(safe-area-inset-top, 0px) + 24px) 24px calc(env(safe-area-inset-bottom, 0px) + 24px);
 }
 .wiz-step { display: none; }
 .wiz-step.active { display: block; }
 .wiz-progress { display: flex; gap: 6px; margin-bottom: 28px; }
-.wiz-dot { flex: 1; height: 3px; border-radius: 99px; background: rgba(255,255,255,0.15); transition: background 0.3s; }
-.wiz-dot.done { background: var(--accent); }
-.wiz-title { font-family: 'DM Serif Display', serif; font-size: 24px; color: white; margin-bottom: 6px; }
-.wiz-sub { font-size: 13px; color: rgba(255,255,255,0.45); margin-bottom: 24px; }
-.wiz-btn { width: 100%; padding: 14px; border-radius: var(--radius); border: none; background: var(--accent); color: var(--primary); font-size: 15px; font-weight: 700; font-family: 'DM Sans', sans-serif; cursor: pointer; margin-top: 8px; }
-.wiz-btn-back { width: 100%; padding: 13px; border-radius: var(--radius); border: 1px solid rgba(255,255,255,0.15); background: transparent; color: rgba(255,255,255,0.5); font-size: 14px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; margin-top: 8px; }
-.wiz-option { padding: 14px; border-radius: var(--radius); border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); cursor: pointer; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
-.wiz-option.selected { border-color: var(--accent); }
-.wiz-option-title { font-size: 13px; font-weight: 600; color: white; }
-.wiz-option-sub { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 2px; }
-.wiz-check { color: var(--accent); font-size: 18px; display: none; }
+.wiz-dot { flex: 1; height: 3px; border-radius: 99px; background: rgba(26,51,32,0.15); transition: background 0.3s; }
+.wiz-dot.done { background: var(--wiz-accent, #C9A84C); }
+.wiz-title { font-family: 'DM Serif Display', serif; font-size: 24px; color: var(--wiz-primary, #1a3320); margin-bottom: 6px; }
+.wiz-sub { font-size: 13px; color: var(--wiz-text3, #888888); margin-bottom: 24px; }
+.wiz-btn { width: 100%; padding: 14px; border-radius: var(--radius); border: none; background: var(--wiz-primary, #1a3320); color: white; font-size: 15px; font-weight: 700; font-family: 'DM Sans', sans-serif; cursor: pointer; margin-top: 8px; }
+.wiz-btn-back { width: 100%; padding: 13px; border-radius: var(--radius); border: 1px solid rgba(26,51,32,0.2); background: transparent; color: var(--wiz-text3, #888); font-size: 14px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; margin-top: 8px; }
+.wiz-option { padding: 14px; border-radius: var(--radius); border: 1px solid rgba(26,51,32,0.15); background: white; cursor: pointer; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
+.wiz-option.selected { border-color: var(--wiz-primary, #1a3320); background: rgba(26,51,32,0.04); }
+.wiz-option-title { font-size: 13px; font-weight: 600; color: var(--wiz-primary, #1a3320); }
+.wiz-option-sub { font-size: 11px; color: var(--wiz-text3, #888); margin-top: 2px; }
+.wiz-check { color: var(--wiz-primary, #1a3320); font-size: 18px; display: none; }
 .wiz-option.selected .wiz-check { display: block; }
 .theme-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 8px; }
 .theme-opt { border-radius: var(--radius); overflow: hidden; border: 2px solid transparent; cursor: pointer; }
@@ -473,23 +478,23 @@ input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px;
 <div id="wiz-podium-cuts" style="display:none;background:rgba(255,255,255,0.06);border-radius:12px;padding:14px;margin-top:10px">
   <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.5);margin-bottom:10px">Podium cuts (negative = reduction)</div>
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
-    <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">1st</div><input id="wiz-cut-1" type="number" step="0.1" value="-1.0" inputmode="decimal" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
-    <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">2nd</div><input id="wiz-cut-2" type="number" step="0.1" value="-0.5" inputmode="decimal" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
-    <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">3rd</div><input id="wiz-cut-3" type="number" step="0.1" value="-0.2" inputmode="decimal" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+    <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">1st</div><input id="wiz-cut-1" type="number" step="0.1" value="-1.0" inputmode="decimal" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:white;color:#111;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+    <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">2nd</div><input id="wiz-cut-2" type="number" step="0.1" value="-0.5" inputmode="decimal" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:white;color:#111;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+    <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">3rd</div><input id="wiz-cut-3" type="number" step="0.1" value="-0.2" inputmode="decimal" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:white;color:#111;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
   </div>
-  <div style="margin-top:8px"><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">All others (addition)</div><input id="wiz-cut-other" type="number" step="0.1" value="0.2" inputmode="decimal" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+  <div style="margin-top:8px"><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">All others (addition)</div><input id="wiz-cut-other" type="number" step="0.1" value="0.2" inputmode="decimal" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:white;color:#111;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
 </div>
 
 <!-- Custom: full 5-position scope -->
 <div id="wiz-custom-cuts" style="display:none;background:rgba(255,255,255,0.06);border-radius:12px;padding:14px;margin-top:10px">
   <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.5);margin-bottom:10px">Cuts per position (negative = reduction)</div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-    <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">1st place</div><input id="wiz-cut-1c" type="number" step="0.1" value="-1.0" inputmode="decimal" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
-    <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">2nd place</div><input id="wiz-cut-2c" type="number" step="0.1" value="-0.5" inputmode="decimal" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
-    <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">3rd place</div><input id="wiz-cut-3c" type="number" step="0.1" value="-0.2" inputmode="decimal" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
-    <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">4th place</div><input id="wiz-cut-4c" type="number" step="0.1" value="0" inputmode="decimal" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
-    <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">5th place</div><input id="wiz-cut-5c" type="number" step="0.1" value="0" inputmode="decimal" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
-    <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">Others (addition)</div><input id="wiz-cut-otherc" type="number" step="0.1" value="0.2" inputmode="decimal" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+    <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">1st place</div><input id="wiz-cut-1c" type="number" step="0.1" value="-1.0" inputmode="decimal" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:white;color:#111;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+    <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">2nd place</div><input id="wiz-cut-2c" type="number" step="0.1" value="-0.5" inputmode="decimal" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:white;color:#111;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+    <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">3rd place</div><input id="wiz-cut-3c" type="number" step="0.1" value="-0.2" inputmode="decimal" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:white;color:#111;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+    <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">4th place</div><input id="wiz-cut-4c" type="number" step="0.1" value="0" inputmode="decimal" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:white;color:#111;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+    <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">5th place</div><input id="wiz-cut-5c" type="number" step="0.1" value="0" inputmode="decimal" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:white;color:#111;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+    <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">Others (addition)</div><input id="wiz-cut-otherc" type="number" step="0.1" value="0.2" inputmode="decimal" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:white;color:#111;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
   </div>
 </div>
 <button class="wiz-btn" onclick="wizNext(3)" style="margin-top:16px">Continue</button>
@@ -499,16 +504,16 @@ input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px;
 <div class="wiz-title">League points</div>
 <div class="wiz-sub">Points awarded per position each round. Adjust to match your society's rules.</div>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
-  <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">1st place</div><input id="wiz-pts-1" type="number" value="20" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
-  <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">2nd place</div><input id="wiz-pts-2" type="number" value="17" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
-  <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">3rd place</div><input id="wiz-pts-3" type="number" value="15" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
-  <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">4th place</div><input id="wiz-pts-4" type="number" value="13" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
-  <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">5th place</div><input id="wiz-pts-5" type="number" value="11" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
-  <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">6th place</div><input id="wiz-pts-6" type="number" value="10" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
-  <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">7th place</div><input id="wiz-pts-7" type="number" value="9" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
-  <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">8th place</div><input id="wiz-pts-8" type="number" value="8" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
-  <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">9th place</div><input id="wiz-pts-9" type="number" value="7" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
-  <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">10th place</div><input id="wiz-pts-10" type="number" value="6" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:white;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+  <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">1st place</div><input id="wiz-pts-1" type="number" value="20" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:white;color:#111;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+  <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">2nd place</div><input id="wiz-pts-2" type="number" value="17" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:white;color:#111;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+  <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">3rd place</div><input id="wiz-pts-3" type="number" value="15" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:white;color:#111;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+  <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">4th place</div><input id="wiz-pts-4" type="number" value="13" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:white;color:#111;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+  <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">5th place</div><input id="wiz-pts-5" type="number" value="11" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:white;color:#111;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+  <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">6th place</div><input id="wiz-pts-6" type="number" value="10" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:white;color:#111;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+  <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">7th place</div><input id="wiz-pts-7" type="number" value="9" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:white;color:#111;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+  <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">8th place</div><input id="wiz-pts-8" type="number" value="8" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:white;color:#111;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+  <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">9th place</div><input id="wiz-pts-9" type="number" value="7" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:white;color:#111;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+  <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">10th place</div><input id="wiz-pts-10" type="number" value="6" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:white;color:#111;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
 </div>
 <button class="wiz-btn" onclick="wizNext(4)">Continue</button>
 <button class="wiz-btn-back" onclick="wizStep(3)">Back</button>
@@ -4919,17 +4924,23 @@ renderWizThemes(); wizStep(1);
 }
 
 function renderWizThemes() {
-document.getElementById('wiz-theme-grid').innerHTML = THEMES.map(function(t) {
-var sel = wizData.themeId===t.id ? 'selected' : '';
-var onclick = 'selectWizTheme(\'' + t.id + '\')';
-return '<div class="theme-opt '+sel+'" onclick="'+onclick+'">'
-+ '<div class="theme-preview" style="background:'+t.bg+'">'
-+ '<div style="flex:2;background:'+t.primary+'"></div>'
-+ '<div style="flex:1;background:'+t.accent+'"></div>'
-+ '</div>'
-+ '<div class="theme-label">'+t.name+'</div>'
-+ '<div style="font-size:9px;color:rgba(255,255,255,0.4);margin-top:1px">'+t.desc+'</div>'
-+ '</div>';
+var appThemeList = [
+  { id:'classic', name:'Classic', desc:'Green & white', colors:['#1a3320','#f4f6f4','#ffffff','#C9A84C'] },
+  { id:'white',   name:'White',   desc:'Clean & minimal', colors:['#1a3320','#ffffff','#f8f8f6','#C9A84C'] },
+  { id:'dark',    name:'Dark',    desc:'Dark green', colors:['#1a3320','#1a2420','#2a3d33','#C9A84C'] },
+  { id:'navy',    name:'Navy',    desc:'Navy & light', colors:['#0a1628','#f0f4f8','#ffffff','#C9A84C'] },
+];
+document.getElementById('wiz-theme-grid').innerHTML = appThemeList.map(function(t) {
+  var sel = wizData.themeId === t.id ? 'selected' : '';
+  var onclick = "selectWizTheme('" + t.id + "')";
+  return '<div class="theme-opt '+sel+'" onclick="'+onclick+'" id="wto-'+t.id+'">'
+    + '<div class="theme-preview" style="background:'+t.colors[1]+';border:1px solid rgba(0,0,0,0.08)">'
+    + '<div style="flex:2;background:'+t.colors[0]+'"></div>'
+    + '<div style="flex:1;background:'+t.colors[3]+'"></div>'
+    + '</div>'
+    + '<div class="theme-label">'+t.name+'</div>'
+    + '<div style="font-size:9px;color:var(--wiz-text3,#888);margin-top:1px;text-align:center">'+t.desc+'</div>'
+    + '</div>';
 }).join('');
 }
 function wizStep(n) {
@@ -4964,9 +4975,22 @@ function selectWizTheme(id) {
 wizData.themeId = id;
 var appT = APP_THEMES[id] || APP_THEMES.classic;
 var r = document.documentElement.style;
-r.setProperty('--primary', appT.primary);
-r.setProperty('--accent', appT.accent);
-document.querySelectorAll('#wiz-theme-grid .theme-opt').forEach(function(el){ el.classList.toggle('selected', el.getAttribute('onclick').indexOf("'" + id + "'") > -1); });
+// Apply to wizard CSS variables
+r.setProperty('--wiz-primary', appT.primary);
+r.setProperty('--wiz-accent', appT.accent);
+r.setProperty('--wiz-text2', appT.text2 || '#444');
+r.setProperty('--wiz-text3', appT.text3 || '#888');
+// Apply wizard background
+var wiz = document.getElementById('setup-wizard');
+if (wiz) wiz.style.background = appT.appBg || '#f4f6f4';
+// Update wiz-btn colour
+document.querySelectorAll('.wiz-btn').forEach(function(btn) {
+  btn.style.background = appT.primary;
+  btn.style.color = 'white';
+});
+document.querySelectorAll('#wiz-theme-grid .theme-opt').forEach(function(el) {
+  el.classList.toggle('selected', el.id === 'wto-'+id);
+});
 }
 
 function formatJoinCode(el) {
