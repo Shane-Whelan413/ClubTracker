@@ -507,23 +507,38 @@ input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px;
 </div>
 <div class="wiz-step" id="wiz-4">
 <div class="wiz-title">League points</div>
-<div class="wiz-sub">Points awarded per position each round. Adjust to match your society's rules.</div>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
-  <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">1st place</div><input id="wiz-pts-1" type="number" value="20" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:white;color:#111;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
-  <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">2nd place</div><input id="wiz-pts-2" type="number" value="17" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:white;color:#111;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
-  <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">3rd place</div><input id="wiz-pts-3" type="number" value="15" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:white;color:#111;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
-  <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">4th place</div><input id="wiz-pts-4" type="number" value="13" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:white;color:#111;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
-  <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">5th place</div><input id="wiz-pts-5" type="number" value="11" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:white;color:#111;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
-  <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">6th place</div><input id="wiz-pts-6" type="number" value="10" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:white;color:#111;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
-  <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">7th place</div><input id="wiz-pts-7" type="number" value="9" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:white;color:#111;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
-  <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">8th place</div><input id="wiz-pts-8" type="number" value="8" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:white;color:#111;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
-  <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">9th place</div><input id="wiz-pts-9" type="number" value="7" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:white;color:#111;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
-  <div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">10th place</div><input id="wiz-pts-10" type="number" value="6" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:white;color:#111;font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+<div class="wiz-sub">Points awarded per position each round.</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px">
+  <div onclick="applyWizPtsPreset('standard')" id="wiz-preset-standard" style="border:2px solid var(--wiz-accent,#C9A84C);border-radius:10px;padding:12px 8px;text-align:center;cursor:pointer">
+    <div style="font-size:13px;font-weight:700;color:var(--wiz-title,white)">Standard</div>
+    <div style="font-size:10px;color:var(--wiz-sub,rgba(255,255,255,0.5));margin-top:3px">20, 17, 15...</div>
+  </div>
+  <div onclick="applyWizPtsPreset('simple')" id="wiz-preset-simple" style="border:2px solid var(--wiz-border,rgba(255,255,255,0.15));border-radius:10px;padding:12px 8px;text-align:center;cursor:pointer">
+    <div style="font-size:13px;font-weight:700;color:var(--wiz-title,white)">Simple</div>
+    <div style="font-size:10px;color:var(--wiz-sub,rgba(255,255,255,0.5));margin-top:3px">10, 8, 6...</div>
+  </div>
+  <div onclick="applyWizPtsPreset('custom')" id="wiz-preset-custom" style="border:2px solid var(--wiz-border,rgba(255,255,255,0.15));border-radius:10px;padding:12px 8px;text-align:center;cursor:pointer">
+    <div style="font-size:13px;font-weight:700;color:var(--wiz-title,white)">Custom</div>
+    <div style="font-size:10px;color:var(--wiz-sub,rgba(255,255,255,0.5));margin-top:3px">Set your own</div>
+  </div>
+</div>
+
+<div id="wiz-pts-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+  <div><div style="font-size:11px;color:var(--wiz-sub,rgba(255,255,255,0.4));margin-bottom:4px">1st place</div><input id="wiz-pts-1" type="number" value="20" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid var(--wiz-border,rgba(255,255,255,0.15));background:var(--wiz-input-bg,rgba(255,255,255,0.08));color:var(--wiz-title,white);font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+  <div><div style="font-size:11px;color:var(--wiz-sub,rgba(255,255,255,0.4));margin-bottom:4px">2nd place</div><input id="wiz-pts-2" type="number" value="17" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid var(--wiz-border,rgba(255,255,255,0.15));background:var(--wiz-input-bg,rgba(255,255,255,0.08));color:var(--wiz-title,white);font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+  <div><div style="font-size:11px;color:var(--wiz-sub,rgba(255,255,255,0.4));margin-bottom:4px">3rd place</div><input id="wiz-pts-3" type="number" value="15" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid var(--wiz-border,rgba(255,255,255,0.15));background:var(--wiz-input-bg,rgba(255,255,255,0.08));color:var(--wiz-title,white);font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+  <div><div style="font-size:11px;color:var(--wiz-sub,rgba(255,255,255,0.4));margin-bottom:4px">4th place</div><input id="wiz-pts-4" type="number" value="13" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid var(--wiz-border,rgba(255,255,255,0.15));background:var(--wiz-input-bg,rgba(255,255,255,0.08));color:var(--wiz-title,white);font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+  <div><div style="font-size:11px;color:var(--wiz-sub,rgba(255,255,255,0.4));margin-bottom:4px">5th place</div><input id="wiz-pts-5" type="number" value="11" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid var(--wiz-border,rgba(255,255,255,0.15));background:var(--wiz-input-bg,rgba(255,255,255,0.08));color:var(--wiz-title,white);font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+  <div><div style="font-size:11px;color:var(--wiz-sub,rgba(255,255,255,0.4));margin-bottom:4px">6th place</div><input id="wiz-pts-6" type="number" value="10" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid var(--wiz-border,rgba(255,255,255,0.15));background:var(--wiz-input-bg,rgba(255,255,255,0.08));color:var(--wiz-title,white);font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+  <div><div style="font-size:11px;color:var(--wiz-sub,rgba(255,255,255,0.4));margin-bottom:4px">7th place</div><input id="wiz-pts-7" type="number" value="9" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid var(--wiz-border,rgba(255,255,255,0.15));background:var(--wiz-input-bg,rgba(255,255,255,0.08));color:var(--wiz-title,white);font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+  <div><div style="font-size:11px;color:var(--wiz-sub,rgba(255,255,255,0.4));margin-bottom:4px">8th place</div><input id="wiz-pts-8" type="number" value="8" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid var(--wiz-border,rgba(255,255,255,0.15));background:var(--wiz-input-bg,rgba(255,255,255,0.08));color:var(--wiz-title,white);font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+  <div><div style="font-size:11px;color:var(--wiz-sub,rgba(255,255,255,0.4));margin-bottom:4px">9th place</div><input id="wiz-pts-9" type="number" value="7" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid var(--wiz-border,rgba(255,255,255,0.15));background:var(--wiz-input-bg,rgba(255,255,255,0.08));color:var(--wiz-title,white);font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
+  <div><div style="font-size:11px;color:var(--wiz-sub,rgba(255,255,255,0.4));margin-bottom:4px">10th place</div><input id="wiz-pts-10" type="number" value="6" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid var(--wiz-border,rgba(255,255,255,0.15));background:var(--wiz-input-bg,rgba(255,255,255,0.08));color:var(--wiz-title,white);font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
 </div>
 <button class="wiz-btn" onclick="wizNext(4)">Continue</button>
 <button class="wiz-btn-back" onclick="wizStep(3)">Back</button>
 </div>
-
 <div class="wiz-step" id="wiz-5">
 <div class="wiz-title">Upload your logo</div>
 <div class="wiz-sub">Optional - you can add this later in Settings.</div>
@@ -3187,11 +3202,50 @@ provisional_rounds: parseInt(document.getElementById('hcp-prov')?document.getEle
 try { await apiPatch('society_settings?society_id=eq.' + sid, payload); societySettings = Object.assign({}, societySettings, payload); toast('Saved!', 'success'); closeModal(); renderSettings(); } catch(e) { toast('Error: ' + e.message, 'error'); }
 }
 
+var LEAGUE_PRESETS = {
+  standard: {1:20,2:17,3:15,4:13,5:11,6:10,7:9,8:8,9:7,10:6},
+  simple:   {1:10,2:8,3:6,4:5,5:4,6:3,7:2,8:1,9:1,10:1}
+};
+
+function applyWizPtsPreset(preset) {
+  // Update preset button styles
+  ['standard','simple','custom'].forEach(function(p) {
+    var el = document.getElementById('wiz-preset-'+p);
+    if (!el) return;
+    el.style.borderColor = p === preset ? 'var(--wiz-accent,#C9A84C)' : 'var(--wiz-border,rgba(255,255,255,0.15))';
+  });
+  if (preset === 'custom') return; // just let them edit
+  var vals = LEAGUE_PRESETS[preset];
+  for (var i = 1; i <= 10; i++) {
+    var el = document.getElementById('wiz-pts-'+i);
+    if (el) el.value = vals[i] || 0;
+  }
+}
+
+function applySettingsPtsPreset(preset) {
+  ['standard','simple','custom'].forEach(function(p) {
+    var el = document.getElementById('sp-preset-'+p);
+    if (!el) return;
+    el.style.borderColor = p === preset ? 'var(--accent)' : 'var(--border)';
+  });
+  if (preset === 'custom') return;
+  var vals = LEAGUE_PRESETS[preset];
+  for (var i = 1; i <= 10; i++) {
+    var el = document.getElementById('lp-'+i);
+    if (el) el.value = vals[i] || 0;
+  }
+}
+
 function openLeaguePtsModal() {
 var s = societySettings || {};
 var pts = s.league_pts_table || {1:20,2:17,3:15,4:13,5:11,6:10,7:9,8:8,9:7,10:6};
-var rows = [1,2,3,4,5,6,7,8,9,10].map(function(p){ return '<div class="hcp-rule-row'+(p===10?' style="border:none"':'')+'"><div class="hcp-rule-label">'+p+(p===1?'st':p===2?'nd':p===3?'rd':'th')+' place</div><input class="hcp-rule-input" type="number" id="lp-'+p+'" value="'+(pts[p]||0)+'"></div>'; }).join('');
-openModal('League points', '<div class="field"><label>Mode</label><select id="lp-mode"><option value="bhgs" '+(s.league_pts_mode!=='custom'?'selected':'')+'>BHGS style</option><option value="custom" '+(s.league_pts_mode==='custom'?'selected':'')+'>Custom</option></select></div><div style="background:var(--bg);border-radius:var(--radius);padding:12px 14px;margin-bottom:14px">'+rows+'</div><button class="btn accent full" onclick="saveLeaguePts()">Save</button>');
+var rows = [1,2,3,4,5,6,7,8,9,10].map(function(p){ return '<div class="hcp-rule-row'+(p===10?' style="border:none"':'')+'" ><div class="hcp-rule-label">'+p+(p===1?'st':p===2?'nd':p===3?'rd':'th')+' place</div><input class="hcp-rule-input" type="number" id="lp-'+p+'" value="'+(pts[p]||0)+'"></div>'; }).join('');
+var presetBar = '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">'
+  + '<div id="sp-preset-standard" onclick="applySettingsPtsPreset(\'standard\')" style="border:2px solid var(--border);border-radius:8px;padding:10px 6px;text-align:center;cursor:pointer"><div style="font-size:12px;font-weight:700;color:var(--text)">Standard</div><div style="font-size:10px;color:var(--text-3)">20, 17, 15...</div></div>'
+  + '<div id="sp-preset-simple" onclick="applySettingsPtsPreset(\'simple\')" style="border:2px solid var(--border);border-radius:8px;padding:10px 6px;text-align:center;cursor:pointer"><div style="font-size:12px;font-weight:700;color:var(--text)">Simple</div><div style="font-size:10px;color:var(--text-3)">10, 8, 6...</div></div>'
+  + '<div id="sp-preset-custom" onclick="applySettingsPtsPreset(\'custom\')" style="border:2px solid var(--border);border-radius:8px;padding:10px 6px;text-align:center;cursor:pointer"><div style="font-size:12px;font-weight:700;color:var(--text)">Custom</div><div style="font-size:10px;color:var(--text-3)">Set your own</div></div>'
+  + '</div>';
+openModal('League points', presetBar + '<div style="background:var(--bg);border-radius:var(--radius);padding:12px 14px;margin-bottom:14px">'+rows+'</div><button class="btn accent full" onclick="saveLeaguePts()">Save</button>');
 }
 
 async function saveLeaguePts() {
