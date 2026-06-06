@@ -3788,7 +3788,7 @@ runningPts += Math.max(0, 2 - (s_i - p_i - str_i));
 
 // Points this hole
 var holePoints = score > 0 ? Math.max(0, 2 - (score - par - strokesOnHole)) : null;
-var ptColor = holePoints === null ? 'rgba(255,255,255,0.3)' : holePoints >= 3 ? '#16a34a' : holePoints === 2 ? 'var(--accent)' : holePoints === 1 ? 'rgba(255,255,255,0.7)' : '#dc2626';
+var ptColor = holePoints === null ? 'rgba(255,255,255,0.3)' : holePoints >= 3 ? '#16a34a' : holePoints === 2 ? '#C9A84C' : holePoints === 1 ? '#60a5fa' : '#dc2626';
 var ptLabel = holePoints === null ? '-' : holePoints === 0 ? '0' : '+' + holePoints;
 
 // Progress dots
@@ -3822,8 +3822,9 @@ for (var i = 0; i < holes; i++) {
   if (courseHcp > holes) str += (courseHcp - holes) >= si ? 1 : 0;
   var cellPts = sc > 0 ? Math.max(0, 2 - (sc - p - str)) : null;
   var isAct = i === h;
-  var scoreColor = cellPts === null ? 'var(--text-3)' : cellPts >= 3 ? '#16a34a' : cellPts === 2 ? 'var(--accent-dark)' : cellPts === 1 ? 'var(--text-2)' : '#dc2626';
-  var cell = '<button onclick="renderScoreHole('+i+')" style="flex:1;min-width:0;padding:6px 2px;background:'+(isAct?'var(--primary)':sc>0?'var(--surface)':'var(--bg)')+';border:1.5px solid '+(isAct?'var(--accent)':'var(--border)')+';border-radius:6px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px">' +
+  var scoreColor = cellPts === null ? 'var(--text-3)' : cellPts >= 3 ? '#16a34a' : cellPts === 2 ? '#C9A84C' : cellPts === 1 ? '#60a5fa' : '#dc2626';
+  var cellBg = isAct ? 'var(--primary)' : cellPts === null ? 'var(--bg)' : cellPts >= 3 ? 'rgba(22,163,74,0.15)' : cellPts === 2 ? 'rgba(201,168,76,0.12)' : cellPts === 1 ? 'rgba(96,165,250,0.12)' : sc > 0 ? 'rgba(220,38,38,0.12)' : 'var(--bg)';
+  var cell = '<button onclick="renderScoreHole('+i+')" style="flex:1;min-width:0;padding:6px 2px;background:'+cellBg+';border:1.5px solid '+(isAct?'var(--accent)':'var(--border)')+';border-radius:6px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px">' +
     '<div style="font-size:9px;font-weight:700;color:'+(isAct?'var(--accent)':'var(--text-3)')+'">'+( i+1)+'</div>' +
     '<div style="font-size:8px;color:'+(isAct?'rgba(255,255,255,0.4)':'var(--text-3)')+'">SI'+si+'</div>' +
     '<div style="font-size:15px;font-weight:800;color:'+(isAct&&!sc?'rgba(255,255,255,0.3)':sc?scoreColor:'var(--text-3)')+'">'+(sc||'·')+'</div>' +
