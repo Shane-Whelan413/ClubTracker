@@ -399,9 +399,11 @@ async function loadData() {
 
     // Fetch all societies
     var res = await fetch(SUPABASE_URL + '/rest/v1/societies?select=id,name,contact_email,subscription_status,trial_ends_at,created_at,stripe_customer_id&order=created_at.desc', { headers: h });
-    var societies = await res.json();
+    var raw = await res.text();
+    var societies;
+    try { societies = JSON.parse(raw); } catch(e) { societies = null; }
     if (!Array.isArray(societies)) {
-      document.getElementById('societies-list').innerHTML = '<div class="empty">No societies found — or check Supabase RLS permissions on the societies table.</div>';
+      document.getElementById('societies-list').innerHTML = '<div class="empty">Response (status ' + res.status + '): ' + raw + '</div>';
       return;
     }
 
