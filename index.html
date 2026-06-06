@@ -4392,8 +4392,81 @@ window.location.href = waUrl;
 
 
 function openBillingModal() {
-var s = societySettings || {};
-openModal('Subscription', '<div style="background:var(--bg);border-radius:var(--radius-lg);padding:16px;margin-bottom:16px;text-align:center"><div style="font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Current plan</div><div style="font-size:24px;font-weight:800;color:var(--text)">'+(s.subscription_status==='active'?'Active':'Trial')+'</div></div><div style="background:var(--primary);border-radius:var(--radius-lg);padding:20px;margin-bottom:10px"><div style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">Founding rate</div><div style="font-size:32px;font-weight:800;color:var(--accent)">50/year</div><div style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:4px">Lock in forever. Standard rate is €200/year after year 1</div></div><button class="btn accent full" onclick="toast(\'Redirecting to payment...\')">Subscribe €50/year - Lock in founding rate</button>');
+  var s = societySettings || {};
+  var status = s.subscription_status || 'trial';
+  var isActive = status === 'active';
+  var isFailed = status === 'payment_failed';
+  var isExpired = status === 'expired';
+
+  var statusBadge = isActive
+    ? '<div style="display:inline-block;padding:4px 12px;border-radius:99px;background:rgba(22,163,74,0.15);border:1px solid rgba(22,163,74,0.3);color:#4ade80;font-size:12px;font-weight:600">● Active</div>'
+    : isFailed
+    ? '<div style="display:inline-block;padding:4px 12px;border-radius:99px;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#f87171;font-size:12px;font-weight:600">⚠ Payment failed</div>'
+    : isExpired
+    ? '<div style="display:inline-block;padding:4px 12px;border-radius:99px;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#f87171;font-size:12px;font-weight:600">✕ Expired</div>'
+    : '<div style="display:inline-block;padding:4px 12px;border-radius:99px;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.3);color:#C9A84C;font-size:12px;font-weight:600">⏳ Trial</div>';
+
+  var content = '<div style="text-align:center;margin-bottom:20px">' + statusBadge + '</div>';
+
+  if (isActive) {
+    content += '<div style="background:var(--primary);border-radius:12px;padding:16px;text-align:center;margin-bottom:12px">' +
+      '<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:4px">Current plan</div>' +
+      '<div style="font-size:22px;font-weight:800;color:var(--accent)">GolfSoc Annual</div>' +
+      '<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:4px">Renews automatically each year</div>' +
+      '</div>' +
+      '<button class="btn full" style="margin-top:8px" onclick="closeModal()">Close</button>';
+  } else {
+    content +=
+      '<div style="background:var(--primary);border-radius:12px;padding:20px;margin-bottom:10px">' +
+        '<div style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">Founders rate — limited time</div>' +
+        '<div style="font-size:36px;font-weight:800;color:var(--accent)">€50<span style="font-size:16px;font-weight:400">/year</span></div>' +
+        '<div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:4px">Lock in forever. Standard rate is €200/year</div>' +
+      '</div>' +
+      '<button class="btn accent full" onclick="startStripeCheckout(\'founders\')" style="margin-bottom:8px">⚡ Subscribe €50/year — Lock in founding rate</button>' +
+      '<div style="text-align:center;margin:10px 0;font-size:11px;color:var(--text-3)">or</div>' +
+      '<div style="background:var(--primary);border-radius:12px;padding:16px;margin-bottom:10px">' +
+        '<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:6px">Standard annual</div>' +
+        '<div style="font-size:24px;font-weight:700;color:var(--text)">€200<span style="font-size:13px;font-weight:400">/year</span></div>' +
+      '</div>' +
+      '<button class="btn full" onclick="startStripeCheckout(\'annual\')" style="margin-bottom:8px">Subscribe €200/year</button>' +
+      '<div style="background:var(--primary);border-radius:12px;padding:16px;margin-bottom:10px">' +
+        '<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:6px">Monthly</div>' +
+        '<div style="font-size:24px;font-weight:700;color:var(--text)">€20<span style="font-size:13px;font-weight:400">/month</span></div>' +
+      '</div>' +
+      '<button class="btn full" onclick="startStripeCheckout(\'monthly\')">Subscribe €20/month</button>';
+  }
+
+  openModal('Subscription', content);
+}
+
+async function startStripeCheckout(plan) {
+  var s = societySettings || {};
+  var sid = s.society_id || s.id;
+  var email = currentUser && currentUser.email;
+  if (!sid) { toast('Society not found', 'error'); return; }
+
+  try {
+    var res = await fetch('https://nljcncrvqjtuwycemutz.supabase.co/functions/v1/stripe-checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_KEY },
+      body: JSON.stringify({
+        plan: plan,
+        society_id: sid,
+        society_name: s.society_name || 'Golf Society',
+        email: email,
+        success_url: window.location.href,
+        cancel_url: window.location.href
+      })
+    });
+    var data = await res.json();
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      throw new Error(data.error || 'Failed to create checkout session');
+    }
+  } catch(e) {
+    toast('Error: ' + e.message, 'error');
+  }
 }
 
 // Wizard
