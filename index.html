@@ -184,30 +184,31 @@ padding: calc(env(safe-area-inset-top, 0px) + 48px) 24px calc(env(safe-area-inse
 /* ── Wizard ── */
 #setup-wizard {
 position: fixed; inset: 0; z-index: 200;
-background: #f4f6f4;
+background: var(--wiz-bg, #1a3320);
 display: none; overflow-y: auto;
 padding: calc(env(safe-area-inset-top, 0px) + 24px) 24px calc(env(safe-area-inset-bottom, 0px) + 24px);
 }
 .wiz-step { display: none; }
 .wiz-step.active { display: block; }
 .wiz-progress { display: flex; gap: 6px; margin-bottom: 28px; }
-.wiz-dot { flex: 1; height: 3px; border-radius: 99px; background: rgba(26,51,32,0.15); transition: background 0.3s; }
+.wiz-dot { flex: 1; height: 3px; border-radius: 99px; background: var(--wiz-dot-track, rgba(255,255,255,0.15)); transition: background 0.3s; }
 .wiz-dot.done { background: var(--wiz-accent, #C9A84C); }
-.wiz-title { font-family: 'DM Serif Display', serif; font-size: 24px; color: var(--wiz-primary, #1a3320); margin-bottom: 6px; }
-.wiz-sub { font-size: 13px; color: var(--wiz-text3, #888888); margin-bottom: 24px; }
-.wiz-btn { width: 100%; padding: 14px; border-radius: var(--radius); border: none; background: var(--wiz-primary, #1a3320); color: white; font-size: 15px; font-weight: 700; font-family: 'DM Sans', sans-serif; cursor: pointer; margin-top: 8px; }
-.wiz-btn-back { width: 100%; padding: 13px; border-radius: var(--radius); border: 1px solid rgba(26,51,32,0.2); background: transparent; color: var(--wiz-text3, #888); font-size: 14px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; margin-top: 8px; }
-.wiz-option { padding: 14px; border-radius: var(--radius); border: 1px solid rgba(26,51,32,0.15); background: white; cursor: pointer; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
-.wiz-option.selected { border-color: var(--wiz-primary, #1a3320); background: rgba(26,51,32,0.04); }
-.wiz-option-title { font-size: 13px; font-weight: 600; color: var(--wiz-primary, #1a3320); }
-.wiz-option-sub { font-size: 11px; color: var(--wiz-text3, #888); margin-top: 2px; }
-.wiz-check { color: var(--wiz-primary, #1a3320); font-size: 18px; display: none; }
+.wiz-title { font-family: 'DM Serif Display', serif; font-size: 24px; color: var(--wiz-title, white); margin-bottom: 6px; }
+.wiz-sub { font-size: 13px; color: var(--wiz-sub, rgba(255,255,255,0.45)); margin-bottom: 24px; }
+.wiz-btn { width: 100%; padding: 14px; border-radius: var(--radius); border: none; background: var(--wiz-accent, #C9A84C); color: var(--wiz-btn-text, #0a1628); font-size: 15px; font-weight: 700; font-family: 'DM Sans', sans-serif; cursor: pointer; margin-top: 8px; }
+.wiz-btn-back { width: 100%; padding: 13px; border-radius: var(--radius); border: 1px solid var(--wiz-border, rgba(255,255,255,0.15)); background: transparent; color: var(--wiz-sub, rgba(255,255,255,0.5)); font-size: 14px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; margin-top: 8px; }
+.wiz-option { padding: 14px; border-radius: var(--radius); border: 1px solid var(--wiz-border, rgba(255,255,255,0.1)); background: var(--wiz-option-bg, rgba(255,255,255,0.05)); cursor: pointer; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
+.wiz-option.selected { border-color: var(--wiz-accent, #C9A84C); background: var(--wiz-option-sel, rgba(201,168,76,0.1)); }
+.wiz-option-title { font-size: 13px; font-weight: 600; color: var(--wiz-title, white); }
+.wiz-option-sub { font-size: 11px; color: var(--wiz-sub, rgba(255,255,255,0.4)); margin-top: 2px; }
+.wiz-check { color: var(--wiz-accent, #C9A84C); font-size: 18px; display: none; }
 .wiz-option.selected .wiz-check { display: block; }
-.theme-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 8px; }
-.theme-opt { border-radius: var(--radius); overflow: hidden; border: 2px solid transparent; cursor: pointer; }
-.theme-opt.selected { border-color: var(--accent); }
-.theme-preview { height: 44px; display: flex; }
-.theme-label { font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.6); text-align: center; padding: 5px 0 4px; background: rgba(255,255,255,0.05); }
+#setup-wizard .auth-input { background: var(--wiz-input-bg, rgba(255,255,255,0.08)); color: var(--wiz-title, white); border: 1px solid var(--wiz-border, rgba(255,255,255,0.15)); }
+#setup-wizard .auth-input:focus { border-color: var(--wiz-accent, #C9A84C); }
+#setup-wizard .auth-input::placeholder { color: var(--wiz-sub, rgba(255,255,255,0.25)); }
+#setup-wizard .auth-label { color: var(--wiz-sub, rgba(255,255,255,0.5)); }
+#setup-wizard input[type=number] { background: var(--wiz-input-bg, rgba(255,255,255,0.08)); color: var(--wiz-title, white); border: 1px solid var(--wiz-border, rgba(255,255,255,0.15)); }
+.theme-label { font-size: 12px; font-weight: 600; color: var(--wiz-title, white); margin-top: 6px; text-align: center; }
 
 /* ── Splash ── */
 #topbar, #bottom-nav, #main-content { display: none; }
@@ -4973,21 +4974,48 @@ wizStep(n + 1);
 
 function selectWizTheme(id) {
 wizData.themeId = id;
-var appT = APP_THEMES[id] || APP_THEMES.classic;
 var r = document.documentElement.style;
-// Apply to wizard CSS variables
-r.setProperty('--wiz-primary', appT.primary);
-r.setProperty('--wiz-accent', appT.accent);
-r.setProperty('--wiz-text2', appT.text2 || '#444');
-r.setProperty('--wiz-text3', appT.text3 || '#888');
-// Apply wizard background
 var wiz = document.getElementById('setup-wizard');
-if (wiz) wiz.style.background = appT.appBg || '#f4f6f4';
-// Update wiz-btn colour
-document.querySelectorAll('.wiz-btn').forEach(function(btn) {
-  btn.style.background = appT.primary;
-  btn.style.color = 'white';
-});
+
+// Define wiz variables per theme
+var themes = {
+  classic: {
+    bg:'#1a3320', title:'white', sub:'rgba(255,255,255,0.5)', accent:'#C9A84C',
+    btnText:'#1a3320', border:'rgba(255,255,255,0.15)', dotTrack:'rgba(255,255,255,0.15)',
+    optionBg:'rgba(255,255,255,0.06)', optionSel:'rgba(201,168,76,0.12)',
+    inputBg:'rgba(255,255,255,0.08)'
+  },
+  white: {
+    bg:'#ffffff', title:'#111111', sub:'#888888', accent:'#C9A84C',
+    btnText:'#1a3320', border:'rgba(0,0,0,0.12)', dotTrack:'rgba(0,0,0,0.12)',
+    optionBg:'#f8f8f6', optionSel:'rgba(201,168,76,0.1)',
+    inputBg:'#f0f0ee'
+  },
+  dark: {
+    bg:'#1a2420', title:'#edf2ee', sub:'rgba(237,242,238,0.5)', accent:'#C9A84C',
+    btnText:'#1a2420', border:'rgba(255,255,255,0.12)', dotTrack:'rgba(255,255,255,0.12)',
+    optionBg:'rgba(255,255,255,0.05)', optionSel:'rgba(201,168,76,0.1)',
+    inputBg:'rgba(255,255,255,0.07)'
+  },
+  navy: {
+    bg:'#0a1628', title:'white', sub:'rgba(255,255,255,0.5)', accent:'#C9A84C',
+    btnText:'#0a1628', border:'rgba(255,255,255,0.15)', dotTrack:'rgba(255,255,255,0.15)',
+    optionBg:'rgba(255,255,255,0.06)', optionSel:'rgba(201,168,76,0.12)',
+    inputBg:'rgba(255,255,255,0.08)'
+  }
+};
+var t = themes[id] || themes.navy;
+r.setProperty('--wiz-bg', t.bg);
+r.setProperty('--wiz-title', t.title);
+r.setProperty('--wiz-sub', t.sub);
+r.setProperty('--wiz-accent', t.accent);
+r.setProperty('--wiz-btn-text', t.btnText);
+r.setProperty('--wiz-border', t.border);
+r.setProperty('--wiz-dot-track', t.dotTrack);
+r.setProperty('--wiz-option-bg', t.optionBg);
+r.setProperty('--wiz-option-sel', t.optionSel);
+r.setProperty('--wiz-input-bg', t.inputBg);
+if (wiz) wiz.style.background = t.bg;
 document.querySelectorAll('#wiz-theme-grid .theme-opt').forEach(function(el) {
   el.classList.toggle('selected', el.id === 'wto-'+id);
 });
