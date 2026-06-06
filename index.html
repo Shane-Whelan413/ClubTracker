@@ -1921,7 +1921,7 @@ function evRow(ev, isPast) {
         '</div>';
     }
     if (ev.published) {
-      actionBtn = '<button onclick="openEventResults(\''+ev.id+'\')" style="margin:0 14px 10px;width:calc(100% - 28px);padding:10px;border-radius:var(--radius);border:none;background:var(--primary);color:var(--accent);font-size:13px;font-weight:700;cursor:pointer;font-family:DM Sans,sans-serif">&#9654; View results</button>';
+      actionBtn = '<button onclick="openEventResults(\''+ev.id+'\')" style="margin:0 14px 10px;width:calc(100% - 28px);padding:10px;border-radius:var(--radius);border:none;background:var(--primary);color:var(--accent);font-size:13px;font-weight:700;cursor:pointer;font-family:DM Sans,sans-serif;display:flex;align-items:center;justify-content:center;gap:8px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><use href="#ico-league"/></svg> View results</button>';
     }
     var showFaded = isPast && ev.published;
 return '<div class="event-card" style="'+(showFaded?'opacity:0.6':'')+';margin-bottom:10px;border-radius:var(--radius-lg);box-shadow:0 2px 8px rgba(0,0,0,0.06)">' +
