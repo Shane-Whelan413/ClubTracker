@@ -3768,7 +3768,7 @@ var s = societySettings || {};
 var today = new Date().toISOString().slice(0,10);
 openModal('Create event',
 '<div class="field"><label>Date</label><input type="date" id="ce-date" value="'+today+'" style="width:100%;max-width:100%;box-sizing:border-box"></div>' +
-'<div class="field"><label>Event type</label><select id="ce-type" onchange="updateHoleCount()"><option value="sunday_9">Sunday (9 holes)</option><option value="outing_18">Outing (18 holes)</option></select></div>' +
+'<div class="field"><label>Event type</label><select id="ce-type" onchange="updateHoleCount()"><option value="outing_18">18 holes</option><option value="sunday_9">9 holes</option></select></div>' +
 '<div class="field"><label>Search course</label>' +
 '<input type="text" id="ce-course-search" placeholder="Type course name..." oninput="filterCourses()" autocomplete="off" style="margin-bottom:4px">' +
 '<div id="ce-course-results" style="max-height:180px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);display:none"></div>' +
