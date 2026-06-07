@@ -1977,7 +1977,8 @@ function evRow(ev, isPast) {
         var slope = parseFloat(ev.slope_rating) || 113;
         var hcpId = 'hcp_' + ev.id.slice(0,6);
         var hcpPills = activePlayers.map(function(pl){
-          var courseHcp = Math.round(parseFloat(pl.handicap_index||0) * slope / 113);
+          var _evSlope = (pl && pl.gender === 'female' && ev && ev.women_slope) ? parseFloat(ev.women_slope) : slope;
+var courseHcp = Math.round(parseFloat(pl.handicap_index||0) * _evSlope / 113);
           return '<div style="background:var(--bg);border-radius:6px;padding:5px 10px;font-size:12px;color:var(--text-2)">' +
             pl.name.split(' ')[0]+' <strong style="color:var(--text)">'+courseHcp+'</strong></div>';
         }).join('');
@@ -2022,7 +2023,8 @@ function openHandicapSheet(eid) {
   var players = db.players.filter(function(p){ return p.status !== 'pending'; })
     .sort(function(a,b){ return parseFloat(a.handicap_index||0) - parseFloat(b.handicap_index||0); });
   var rows = players.map(function(p) {
-    var courseHcp = Math.round(parseFloat(p.handicap_index||0) * slope / 113);
+    var _evSlope2 = (p && p.gender === 'female' && ev && ev.women_slope) ? parseFloat(ev.women_slope) : slope;
+var courseHcp = Math.round(parseFloat(p.handicap_index||0) * _evSlope2 / 113);
     return '<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:0.5px solid var(--border)">' +
       '<div style="flex:1"><div style="font-size:14px;font-weight:500;color:var(--text)">' + p.name + '</div>' +
       '<div style="font-size:11px;color:var(--text-3)">Index ' + parseFloat(p.handicap_index||0).toFixed(1) + '</div></div>' +
@@ -3544,6 +3546,14 @@ toast(name + ' added!', 'success'); openMembersModal(); renderAll();
 } catch(e) { toast('Error: ' + e.message, 'error'); }
 }
 
+function setPlayerGender(g) {
+  window._epGender = g;
+  var mb = document.getElementById('ep-gender-male');
+  var fb = document.getElementById('ep-gender-female');
+  if (mb) { mb.style.borderColor = g==='male'?'var(--primary)':'var(--border)'; mb.style.background = g==='male'?'var(--primary)':'var(--surface)'; mb.style.color = g==='male'?'white':'var(--text)'; }
+  if (fb) { fb.style.borderColor = g==='female'?'var(--primary)':'var(--border)'; fb.style.background = g==='female'?'var(--primary)':'var(--surface)'; fb.style.color = g==='female'?'white':'var(--text)'; }
+}
+
 function editPlayer(pid) {
 var p = db.players.filter(function(x){ return x.id === pid; })[0]; if (!p) return;
 var ses = p.can_enter_scores || 'none';
@@ -3553,6 +3563,10 @@ openModal('Edit player',
 '<div class="field"><label>Handicap index</label><input type="number" id="ep-hcp" value="'+parseFloat(p.handicap_index||18).toFixed(1)+'" step="0.1" min="0" max="54"></div>' +
 (p.provisional ? '<div style="background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.25);border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:var(--text-2)"><div style="font-weight:700;color:#C9A84C;margin-bottom:4px">⏳ Provisional member</div>' + (function(){var pR=db.rounds.filter(function(r){return r.player_id===p.id&&r.verified;}).length;var need=parseInt((societySettings||{}).provisional_rounds||3);return pR+' of '+need+' provisional rounds completed';})() + '<div style="margin-top:8px"><button onclick="closeModal();graduateProvisional(\'' + p.id + '\')" style="width:100%;padding:7px;border-radius:6px;border:1px solid #C9A84C;background:rgba(201,168,76,0.1);color:#C9A84C;font-size:11px;font-weight:600;cursor:pointer;font-family:DM Sans,sans-serif">Assign handicap &amp; graduate</button></div></div>' : '') +
 '<div class="field"><label>Role</label><select id="ep-role"><option value="member" '+(p.role==='member'?'selected':'')+'>Member</option><option value="admin" '+(p.role==='admin'?'selected':'')+'>Admin</option></select></div>' +
+'<div class="field"><label>Gender</label><div style="display:flex;gap:8px">' +
+'<button id="ep-gender-male" onclick="setPlayerGender(\'male\')" style="flex:1;padding:9px;border-radius:8px;border:2px solid '+((p.gender||'male')==='male'?'var(--primary)':' var(--border)')+';background:'+((p.gender||'male')==='male'?'var(--primary)':' var(--surface)')+';color:'+((p.gender||'male')==='male'?'white':'var(--text)')+';font-size:13px;font-weight:700;cursor:pointer;font-family:DM Sans,sans-serif">Male</button>' +
+'<button id="ep-gender-female" onclick="setPlayerGender(\'female\')" style="flex:1;padding:9px;border-radius:8px;border:2px solid '+(p.gender==='female'?'var(--primary)':'var(--border)')+';background:'+(p.gender==='female'?'var(--primary)':'var(--surface)')+';color:'+(p.gender==='female'?'white':'var(--text)')+';font-size:13px;font-weight:700;cursor:pointer;font-family:DM Sans,sans-serif">Female</button>' +
+'</div></div>' +
 '<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><label class="toggle-switch"><input type="checkbox" id="ep-prov" '+(p.provisional?'checked':'')+' ><div class="toggle-slider"></div></label><span style="font-size:13px;color:var(--text-2)">Provisional</span></div>' +
 '<div class="field"><label style="margin-bottom:6px;display:block;font-size:13px;font-weight:600;color:var(--text-2)">Score entry access</label>' +
 '<select id="ep-scores" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:DM Sans,sans-serif;color:var(--text);background:var(--surface)">' +
@@ -3572,11 +3586,12 @@ var role = document.getElementById('ep-role').value;
 var provisional = document.getElementById('ep-prov').checked;
 var scoresSel = document.getElementById('ep-scores');
 var canEnterScores = scoresSel ? scoresSel.value : 'none';
+var gender = window._epGender || (db.players.filter(function(p){ return p.id === pid; })[0] || {}).gender || 'male';
 if (!name) { toast('Enter a name', 'error'); return; }
 try {
 var oldPlayer = db.players.filter(function(p){ return p.id === pid; })[0] || {};
 var scoreDate = canEnterScores === 'today' ? new Date().toISOString().slice(0,10) : null;
-await apiPatch('players?id=eq.' + pid, { name: name, email: email||null, handicap_index: hcp, role: role, provisional: provisional, can_enter_scores: canEnterScores, score_entry_date: scoreDate });
+await apiPatch('players?id=eq.' + pid, { name: name, email: email||null, handicap_index: hcp, role: role, provisional: provisional, can_enter_scores: canEnterScores, score_entry_date: scoreDate, gender: gender });
 var idx = db.players.findIndex(function(p){ return p.id === pid; });
 if (idx >= 0) db.players[idx] = Object.assign({}, db.players[idx], { name: name, email: email, handicap_index: hcp, role: role, provisional: provisional, can_enter_scores: canEnterScores, score_entry_date: scoreDate });
 // Notify if score entry access was newly granted
@@ -3663,12 +3678,24 @@ return '<div style="background:var(--surface);border:1px solid var(--border);bor
 openModal('Events', '<button class="btn accent full" onclick="openCreateEventModal()" style="margin-bottom:14px">+ Create event</button>' + (rows || '<div class="empty" style="padding:1rem">No events yet</div>'));
 }
 
+function setEventTees(t) {
+  window._ceTees = t;
+  var mb = document.getElementById('ce-tees-mens');
+  var wb = document.getElementById('ce-tees-womens');
+  if (mb) { mb.style.borderColor = t==='mens'?'var(--primary)':'var(--border)'; mb.style.background = t==='mens'?'var(--primary)':'var(--surface)'; mb.style.color = t==='mens'?'white':'var(--text)'; }
+  if (wb) { wb.style.borderColor = t==='womens'?'var(--primary)':'var(--border)'; wb.style.background = t==='womens'?'var(--primary)':'var(--surface)'; wb.style.color = t==='womens'?'white':'var(--text)'; }
+}
+
 function openCreateEventModal() {
 var s = societySettings || {};
 var today = new Date().toISOString().slice(0,10);
 openModal('Create event',
 '<div class="field"><label>Date</label><input type="date" id="ce-date" value="'+today+'"></div>' +
 '<div class="field"><label>Event type</label><select id="ce-type" onchange="updateHoleCount()"><option value="sunday_9">Sunday (9 holes)</option><option value="outing_18">Outing (18 holes)</option></select></div>' +
+'<div class="field"><label>Tees</label><div style="display:flex;gap:8px">' +
+'<button id="ce-tees-mens" onclick="setEventTees(\'mens\')" style="flex:1;padding:9px;border-radius:8px;border:2px solid var(--primary);background:var(--primary);color:white;font-size:13px;font-weight:700;cursor:pointer;font-family:DM Sans,sans-serif">Men\'s</button>' +
+'<button id="ce-tees-womens" onclick="setEventTees(\'womens\')" style="flex:1;padding:9px;border-radius:8px;border:2px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;font-weight:700;cursor:pointer;font-family:DM Sans,sans-serif">Women\'s / Mixed</button>' +
+'</div></div>' +
 '<div class="field"><label>Search course</label>' +
 '<input type="text" id="ce-course-search" placeholder="Type course name..." oninput="filterCourses()" autocomplete="off" style="margin-bottom:4px">' +
 '<div id="ce-course-results" style="max-height:180px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);display:none"></div>' +
@@ -3745,11 +3772,21 @@ if (prevEvent && prevEvent.hole_sis) {
 var defaultSIs = defaultSIsRaw;
 
 // Store for later
-window._ceData = { date:date, courseName:courseName, type:type, slope:slope, cr:cr, totalPar:totalPar, holes:holes, pars:defaultPars, sis:defaultSIs };
+window._ceData = { date:date, courseName:courseName, type:type, slope:slope, cr:cr, totalPar:totalPar, holes:holes, pars:defaultPars, sis:defaultSIs, tees: window._ceTees || 'mens' };
+
+var womenFields = (window._ceTees === 'womens') ?
+'<div style="background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.2);border-radius:10px;padding:12px 14px;margin-bottom:14px">' +
+'<div style="font-size:11px;font-weight:700;color:#C9A84C;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Women\'s tees</div>' +
+'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">' +
+'<div class="field" style="margin:0"><label>Women\'s slope</label><input type="number" id="ce-w-slope" value="113" step="1"></div>' +
+'<div class="field" style="margin:0"><label>Women\'s rating</label><input type="number" id="ce-w-cr" value="70.0" step="0.1"></div>' +
+'</div>' +
+'<div style="font-size:11px;color:var(--text-3);margin-top:8px">Enter the women\'s SI per hole in the grid below (W-SI column)</div>' +
+'</div>' : '';
 
 var holeRows = '';
 for (var h = 0; h < holes; h++) {
-holeRows += '<div style="display:grid;grid-template-columns:36px 1fr 1fr;align-items:center;gap:8px;padding:8px 0;border-bottom:0.5px solid var(--border)">' +
+holeRows += '<div style="display:grid;grid-template-columns:36px 1fr '+(window._ceTees==='womens'?'1fr 1fr':'1fr')+';align-items:center;gap:8px;padding:8px 0;border-bottom:0.5px solid var(--border)">' +
 '<div style="font-size:12px;font-weight:700;color:var(--text-3);text-align:center">'+(h+1)+'</div>' +
 '<div><label style="font-size:10px;color:var(--text-3);display:block;margin-bottom:2px">Par</label>' +
 '<div style="display:flex;gap:4px">' +
@@ -3762,6 +3799,10 @@ return '<button onclick="setHolePar('+(h)+','+(p)+')" id="hp-'+h+'-'+p+'" style=
 '<button onclick="openSIPicker('+(h)+','+holes+')" id="si-btn-'+h+'" style="width:100%;padding:7px 8px;border-radius:6px;border:2px solid var(--accent);background:var(--accent-light);color:var(--primary);font-size:13px;font-weight:700;cursor:pointer">'+defaultSIs[h]+'</button>' +
 '<input type="hidden" id="si-'+h+'" value="'+defaultSIs[h]+'">' +
 '</div>' +
+(window._ceTees === 'womens' ?
+'<div><label style="font-size:10px;color:#C9A84C;display:block;margin-bottom:2px">W-SI</label>' +
+'<input type="number" id="wsi-'+h+'" value="'+(h+1)+'" min="1" max="'+holes+'" style="width:100%;padding:7px 8px;border-radius:6px;border:1.5px solid rgba(201,168,76,0.4);background:rgba(201,168,76,0.05);color:var(--text);font-size:13px;font-weight:700;text-align:center">' +
+'</div>' : '') +
 '</div>';
 }
 
@@ -3771,6 +3812,7 @@ document.getElementById('modal-body').innerHTML =
 '<div style="font-size:12px;font-weight:600;color:var(--accent-dark);margin-bottom:2px">&#9888; Please verify before use</div>' +
 '<div style="font-size:11px;color:var(--accent-dark)">Golf courses update their layouts and stroke indexes. Please double-check par and SI for each hole before entering scores. These details are saved for future events at '+courseName+'.</div>' +
 '</div>' +
+womenFields +
 '<div style="font-size:12px;font-weight:600;color:var(--text-2);margin-bottom:8px">'+(prevEvent?'&#10003; Loaded from previous event at this course — please verify':'Defaults generated from total par '+totalPar+' — please set correctly')+'</div>' +
 '<div id="ce-hole-grid">'+holeRows+'</div>' +
 '<div style="display:flex;gap:8px;margin-top:14px">' +
@@ -3915,11 +3957,18 @@ if (!cd) { toast('Please set up the event first', 'error'); return; }
 
 // Read final SIs from inputs
 var sis = [];
+var wsis = [];
 for (var h = 0; h < cd.holes; h++) {
 var siEl = document.getElementById('si-'+h);
 sis.push(siEl ? parseInt(siEl.value)||h+1 : h+1);
+if (cd.tees === 'womens') {
+  var wsiEl = document.getElementById('wsi-'+h);
+  wsis.push(wsiEl ? parseInt(wsiEl.value)||h+1 : h+1);
+}
 }
 cd.sis = sis;
+var wSlope = cd.tees === 'womens' ? parseFloat(document.getElementById('ce-w-slope') ? document.getElementById('ce-w-slope').value : 113) : null;
+var wCr = cd.tees === 'womens' ? parseFloat(document.getElementById('ce-w-cr') ? document.getElementById('ce-w-cr').value : 70) : null;
 
 try {
 var res = await apiPost('events', {
@@ -3933,6 +3982,9 @@ course_rating: cd.cr,
 par: cd.totalPar,
 hole_pars: JSON.stringify(cd.pars),
 hole_sis: JSON.stringify(cd.sis),
+women_slope: wSlope,
+women_cr: wCr,
+women_sis: wsis.length ? JSON.stringify(wsis) : null,
 published: false
 });
 db.events.push(res[0]);
@@ -4179,8 +4231,11 @@ var par = se.pars[h];
 var score = se.scores[h];
 var holes = se.holes;
 var slope = parseFloat(se.ev.slope_rating) || 113;
-var courseHcp = Math.round(parseFloat(se.player.handicap_index||0) * slope / 113);
-var sis = se.sis || Array.from({length:holes},function(_,i){return i+1;});
+var _evSlope3 = (se.player && se.player.gender === 'female' && se.ev && se.ev.women_slope) ? parseFloat(se.ev.women_slope) : slope;
+var courseHcp = Math.round(parseFloat(se.player.handicap_index||0) * _evSlope3 / 113);
+var menSis = se.sis || Array.from({length:holes},function(_,i){return i+1;});
+var womenSis = se.ev && se.ev.women_sis ? (typeof se.ev.women_sis==='string'?JSON.parse(se.ev.women_sis):se.ev.women_sis) : menSis;
+var sis = (se.player && se.player.gender === 'female' && se.ev && se.ev.women_sis) ? womenSis : menSis;
 var strokesOnHole = courseHcp >= sis[h] ? 1 : 0;
 if (courseHcp > holes) strokesOnHole += (courseHcp - holes) >= sis[h] ? 1 : 0;
 
@@ -4369,7 +4424,8 @@ var hasScores = scores.some(function(s){ return s > 0; });
 if (!hasScores) { toast('Enter at least one score', 'error'); return; }
 
 var totalPts = 0, totalGross = 0;
-var courseHcp = Math.round(parseFloat(player.handicap_index||0) * (parseFloat(ev.slope_rating)||113) / 113);
+var _evSlope4 = (player && player.gender === 'female' && ev && ev.women_slope) ? parseFloat(ev.women_slope) : (parseFloat(ev.slope_rating)||113);
+var courseHcp = Math.round(parseFloat(player.handicap_index||0) * _evSlope4 / 113);
 var sis = se ? (se.sis || Array.from({length:holes},function(_,i){return i+1;})) : Array.from({length:holes},function(_,i){return i+1;});
 for (var h = 0; h < holes; h++) {
 var sc = scores[h] || 0;
