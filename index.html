@@ -1637,7 +1637,7 @@ function buildResultCard(post) {
       '<span style="font-weight:600;color:var(--text)">'+prizes[pr]+'</span></div>';
   }).join('');
   var postId=post.id||(ev&&ev.id)||'';
-  var evType = ev ? (ev.event_type==='outing_18'?'18 hole outing':'9 hole stableford') : '';
+  var evType = ev ? (ev.event_type==='outing_18'?'18 holes':'9 holes') : '';
   var shareParts=['⛳ '+(ev?ev.course_name:'Golf')+' Results',''];
   top.forEach(function(p,i){ shareParts.push(medals[i]+' '+p.name+' - '+p.pts+' pts'); });
   Object.keys(prizes).forEach(function(pr){ shareParts.push(''); shareParts.push(pr+': '+prizes[pr]); });
@@ -3553,7 +3553,7 @@ try {
 
 function openEventDefaultsModal() {
 var s = societySettings || {};
-openModal('Event defaults', '<div class="field"><label>Home course</label><input type="text" id="ev-course" value="'+(s.home_course||'')+'"></div><div class="field"><label>Slope rating</label><input type="number" id="ev-slope" value="'+(s.home_course_slope||113)+'"></div><div class="field"><label>Course rating</label><input type="number" step="0.1" id="ev-cr" value="'+(s.home_course_cr||69.0)+'"></div><div class="field"><label>Par</label><input type="number" id="ev-par" value="'+(s.home_course_par||70)+'"></div><div class="field"><label>Default holes</label><select id="ev-holes"><option value="9" '+(s.holes_per_round!=18?'selected':'')+'>9 holes</option><option value="18" '+(s.holes_per_round==18?'selected':'')+'>18 holes</option></select></div><button class="btn accent full" onclick="saveEventDefaults()">Save</button>');
+openModal('Event defaults', '<div class="field"><label>Home course</label><input type="text" id="ev-course" value="'+(s.home_course||'')+'"></div><div class="field"><label>Slope rating</label><input type="number" id="ev-slope" value="'+(s.home_course_slope||113)+'"></div><div class="field"><label>Course rating</label><input type="number" step="0.1" id="ev-cr" value="'+(s.home_course_cr||69.0)+'"></div><div class="field"><label>Par</label><input type="number" id="ev-par" value="'+(s.home_course_par||70)+'"></div><div class="field"><label>Default holes</label><select id="ev-holes"><option value="18" '+(s.holes_per_round==18?'selected':'')+'>18 holes</option><option value="9" '+(s.holes_per_round!=18?'selected':'')+'>9 holes</option></select></div><button class="btn accent full" onclick="saveEventDefaults()">Save</button>');
 }
 
 async function saveEventDefaults() {
