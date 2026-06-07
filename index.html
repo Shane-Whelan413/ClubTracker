@@ -253,7 +253,8 @@ transition: opacity 0.4s;
 .empty-sub { font-size: 13px; color: var(--text-3); }
 .field { margin-bottom: 14px; }
 .field label { font-size: 12px; font-weight: 600; color: var(--text-2); display: block; margin-bottom: 6px; }
-.field input, .field select, .field textarea { width: 100%; padding: 11px 12px; border-radius: var(--radius); border: 1px solid var(--border-strong); background: var(--bg); color: var(--text); font-size: 14px; font-family: 'DM Sans', sans-serif; outline: none; }
+.field input, .field select, .field textarea { width: 100%; padding: 11px 12px; border-radius: var(--radius); border: 1px solid var(--border-strong); background: var(--bg); color: var(--text); font-size: 14px; font-family: 'DM Sans', sans-serif; outline: none; box-sizing: border-box; }
+.field input[type="date"] { -webkit-appearance: none; appearance: none; display: block; }
 .field input:focus, .field select:focus { border-color: var(--primary); }
 .skeleton { border-radius: 6px; background: #e8e4de; animation: skPulse 1.4s ease infinite; }
 @keyframes skPulse { 0%,100%{opacity:.6} 50%{opacity:1} }
