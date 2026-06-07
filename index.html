@@ -3844,8 +3844,8 @@ return '<button onclick="setHolePar('+(h)+','+(p)+')" id="hp-'+h+'-'+p+'" style=
 '</div>' +
 (effectiveTees === 'womens' || effectiveTees === 'mixed' ?
 '<div><label style="font-size:10px;color:#C9A84C;display:block;margin-bottom:2px">W-SI</label>' +
-'<button onclick="openSIPicker('+(h)+','+holes+',\'w\')" id="wsi-btn-'+h+'" style="width:100%;padding:7px 8px;border-radius:6px;border:2px solid rgba(201,168,76,0.5);background:rgba(201,168,76,0.08);color:var(--text);font-size:13px;font-weight:700;cursor:pointer">'+(h+1)+'</button>' +
-'<input type="hidden" id="wsi-'+h+'" value="'+(h+1)+'">' +
+'<button onclick="openSIPicker('+(h)+','+holes+',\'w\')" id="wsi-btn-'+h+'" style="width:100%;padding:7px 8px;border-radius:6px;border:2px solid rgba(201,168,76,0.5);background:rgba(201,168,76,0.08);color:var(--text);font-size:13px;font-weight:700;cursor:pointer">'+defaultSIs[h]+'</button>' +
+'<input type="hidden" id="wsi-'+h+'" value="'+defaultSIs[h]+'">' +
 '</div>' : '') +
 '</div>';
 }
