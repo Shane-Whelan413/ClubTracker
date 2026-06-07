@@ -313,7 +313,7 @@ input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px;
 /* ── Modal ── */
 #modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 300; display: none; align-items: center; justify-content: center; padding: 16px; }
 #modal-overlay.open { display: flex; }
-.modal { background: var(--surface); border-radius: 20px; width: 100%; max-width: 520px; max-height: 88vh; display: flex; flex-direction: column; animation: slideUp 0.25s cubic-bezier(0.34,1.1,0.64,1); }
+.modal { background: var(--surface); border-radius: 20px; width: 100%; max-width: 520px; max-height: 94vh; display: flex; flex-direction: column; animation: slideUp 0.25s cubic-bezier(0.34,1.1,0.64,1); }
 @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 .modal-handle { display: none; }
 .modal-header { padding: 14px 20px 12px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); flex-shrink: 0; }
@@ -488,13 +488,33 @@ input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px;
 <button class="wiz-btn" onclick="wizNext(1)" style="margin-top:16px">Continue</button>
 </div>
 <div class="wiz-step" id="wiz-2">
+<div class="wiz-title">Society type</div>
+<div class="wiz-sub">This helps us set up scoring correctly for your members.</div>
+<div style="display:flex;flex-direction:column;gap:10px;margin:20px 0">
+  <button onclick="selectWizSocietyType('mens')" id="wstype-mens" style="width:100%;text-align:left;padding:16px;border-radius:12px;border:2px solid var(--wiz-accent,#C9A84C);background:rgba(201,168,76,0.1);cursor:pointer;font-family:DM Sans,sans-serif">
+    <div style="font-size:15px;font-weight:700;color:var(--wiz-title,white)">Men's society</div>
+    <div style="font-size:12px;color:var(--wiz-sub,rgba(255,255,255,0.5));margin-top:3px">Standard men's stroke index and course rating</div>
+  </button>
+  <button onclick="selectWizSocietyType('womens')" id="wstype-womens" style="width:100%;text-align:left;padding:16px;border-radius:12px;border:2px solid var(--wiz-border,rgba(255,255,255,0.15));background:var(--wiz-option-bg,rgba(255,255,255,0.06));cursor:pointer;font-family:DM Sans,sans-serif">
+    <div style="font-size:15px;font-weight:700;color:var(--wiz-title,white)">Women's society</div>
+    <div style="font-size:12px;color:var(--wiz-sub,rgba(255,255,255,0.5));margin-top:3px">Women's stroke index and course rating used for all events</div>
+  </button>
+  <button onclick="selectWizSocietyType('mixed')" id="wstype-mixed" style="width:100%;text-align:left;padding:16px;border-radius:12px;border:2px solid var(--wiz-border,rgba(255,255,255,0.15));background:var(--wiz-option-bg,rgba(255,255,255,0.06));cursor:pointer;font-family:DM Sans,sans-serif">
+    <div style="font-size:15px;font-weight:700;color:var(--wiz-title,white)">Mixed society</div>
+    <div style="font-size:12px;color:var(--wiz-sub,rgba(255,255,255,0.5));margin-top:3px">Separate men's and women's stroke indexes per event</div>
+  </button>
+</div>
+<button class="wiz-btn" onclick="wizNext(2)">Continue</button>
+<button class="wiz-btn-back" onclick="wizStep(1)">Back</button>
+</div>
+<div class="wiz-step" id="wiz-3">
 <div class="wiz-title">Pick a theme</div>
 <div class="wiz-sub">You can change this anytime in Settings.</div>
 <div class="theme-grid" id="wiz-theme-grid"></div>
 <button class="wiz-btn" onclick="wizNext(2)">Continue</button>
 <button class="wiz-btn-back" onclick="wizStep(1)">Back</button>
 </div>
-<div class="wiz-step" id="wiz-3">
+<div class="wiz-step" id="wiz-4">
 <div class="wiz-title">Handicap rules</div>
 <div class="wiz-sub">How are handicaps adjusted after each round?</div>
 <div class="wiz-option" onclick="selectHcpMode('bhgs')" id="hm-bhgs">
@@ -533,10 +553,10 @@ input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px;
     <div><div style="font-size:11px;color:var(--wiz-sub,rgba(255,255,255,0.4));margin-bottom:4px">Others (addition)</div><input id="wiz-cut-otherc" type="number" step="0.1" value="0.2" inputmode="decimal" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid var(--wiz-border,rgba(255,255,255,0.15));background:var(--wiz-input-bg,rgba(255,255,255,0.08));color:var(--wiz-title,white);font-size:16px;font-family:DM Sans,sans-serif;text-align:center"></div>
   </div>
 </div>
-<button class="wiz-btn" onclick="wizNext(3)" style="margin-top:16px">Continue</button>
-<button class="wiz-btn-back" onclick="wizStep(2)">Back</button>
+<button class="wiz-btn" onclick="wizNext(4)" style="margin-top:16px">Continue</button>
+<button class="wiz-btn-back" onclick="wizStep(3)">Back</button>
 </div>
-<div class="wiz-step" id="wiz-4">
+<div class="wiz-step" id="wiz-5">
 <div class="wiz-title">League points</div>
 <div class="wiz-sub">How points are awarded each round.</div>
 
@@ -597,10 +617,10 @@ input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px;
   <input id="wiz-pts-rest" type="number" value="0" inputmode="numeric" style="width:100%;padding:10px 8px;border-radius:8px;border:1px solid var(--wiz-border,rgba(255,255,255,0.15));background:var(--wiz-input-bg,rgba(255,255,255,0.08));color:var(--wiz-title,white);font-size:16px;font-family:DM Sans,sans-serif;text-align:center">
 </div>
 
-<button class="wiz-btn" onclick="wizNext(4)">Continue</button>
-<button class="wiz-btn-back" onclick="wizStep(3)">Back</button>
+<button class="wiz-btn" onclick="wizNext(5)">Continue</button>
+<button class="wiz-btn-back" onclick="wizStep(4)">Back</button>
 </div>
-<div class="wiz-step" id="wiz-5">
+<div class="wiz-step" id="wiz-6">
 <div class="wiz-title">Upload your logo</div>
 <div class="wiz-sub">Optional - you can add this later in Settings.</div>
 <div style="border:2px dashed rgba(255,255,255,0.2);border-radius:14px;padding:32px;text-align:center;cursor:pointer;margin-bottom:16px" onclick="document.getElementById('wiz-logo-input').click()">
@@ -610,11 +630,11 @@ input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px;
 <div style="font-size:13px;color:rgba(255,255,255,0.4)">Tap to upload club crest</div>
 </div>
 <button class="wiz-btn" onclick="finishWizard()">Finish setup</button>
-<button class="wiz-btn-back" onclick="wizStep(4)">Back</button>
+<button class="wiz-btn-back" onclick="wizStep(5)">Back</button>
 </div>
 
 <!-- Step 5: All set -->
-<div class="wiz-step" id="wiz-6">
+<div class="wiz-step" id="wiz-7">
 <div class="wiz-title">You're all set!</div>
 <div class="wiz-sub">Your society is live. Share your invite code with members.</div>
 <div style="background:var(--wiz-option-bg,rgba(255,255,255,0.08));border:1px solid var(--wiz-border,rgba(255,255,255,0.2));border-radius:14px;padding:20px;text-align:center;margin:16px 0">
@@ -3439,6 +3459,17 @@ function _applyPtsPreset(preset, prefix) {
   }
 }
 
+function selectWizSocietyType(type) {
+  wizData.societyType = type;
+  ['mens','womens','mixed'].forEach(function(t) {
+    var btn = document.getElementById('wstype-'+t);
+    if (!btn) return;
+    var active = t === type;
+    btn.style.borderColor = active ? 'var(--wiz-accent,#C9A84C)' : 'var(--wiz-border,rgba(255,255,255,0.15))';
+    btn.style.background = active ? 'rgba(201,168,76,0.1)' : 'var(--wiz-option-bg,rgba(255,255,255,0.06))';
+  });
+}
+
 function applyWizPtsPreset(preset) { _applyPtsPreset(preset, 'wiz'); }
 function applySettingsPtsPreset(preset) { _applyPtsPreset(preset, 'sp'); }
 
@@ -3829,22 +3860,22 @@ var womenFields = (effectiveTees === 'womens' || effectiveTees === 'mixed') ?
 
 var holeRows = '';
 for (var h = 0; h < holes; h++) {
-holeRows += '<div style="display:grid;grid-template-columns:36px 1fr '+(effectiveTees==='mixed'?'1fr 1fr 1fr':effectiveTees==='womens'?'1fr 1fr':'1fr 1fr')+';align-items:center;gap:8px;padding:8px 0;border-bottom:0.5px solid var(--border)">' +
+holeRows += '<div style="display:grid;grid-template-columns:28px 1fr '+(effectiveTees==='mixed'?'1fr 1fr':effectiveTees==='womens'?'1fr 1fr':'1fr 1fr')+';align-items:center;gap:6px;padding:10px 0;border-bottom:0.5px solid var(--border)">' +
 '<div style="font-size:12px;font-weight:700;color:var(--text-3);text-align:center">'+(h+1)+'</div>' +
 '<div><label style="font-size:10px;color:var(--text-3);display:block;margin-bottom:2px">Par</label>' +
 '<div style="display:flex;gap:4px">' +
 [3,4,5].map(function(p){
-return '<button onclick="setHolePar('+(h)+','+(p)+')" id="hp-'+h+'-'+p+'" style="flex:1;padding:7px 4px;border-radius:6px;border:2px solid '+(defaultPars[h]===p?'var(--accent)':'var(--border)')+';background:'+(defaultPars[h]===p?'var(--accent)':'var(--surface)')+';color:'+(defaultPars[h]===p?'var(--primary)':'var(--text)')+';font-size:13px;font-weight:700;cursor:pointer">'+p+'</button>';
+return '<button onclick="setHolePar('+(h)+','+(p)+')" id="hp-'+h+'-'+p+'" style="flex:1;padding:11px 4px;border-radius:8px;border:2px solid '+(defaultPars[h]===p?'var(--accent)':'var(--border)')+';background:'+(defaultPars[h]===p?'var(--accent)':'var(--surface)')+';color:'+(defaultPars[h]===p?'var(--primary)':'var(--text)')+';font-size:15px;font-weight:700;cursor:pointer;min-height:44px">'+p+'</button>';
 }).join('') +
 '</div>' +
 '</div>' +
 '<div><label style="font-size:10px;color:var(--text-3);display:block;margin-bottom:2px">'+(effectiveTees==='mixed'?'M-SI':effectiveTees==='womens'?'SI':'SI')+'</label>' +
-'<button onclick="openSIPicker('+(h)+','+holes+',\'m\')" id="si-btn-'+h+'" style="width:100%;padding:7px 8px;border-radius:6px;border:2px solid var(--accent);background:var(--accent-light);color:var(--primary);font-size:13px;font-weight:700;cursor:pointer">'+defaultSIs[h]+'</button>' +
+'<button onclick="openSIPicker('+(h)+','+holes+',\'m\')" id="si-btn-'+h+'" style="width:100%;padding:11px 8px;border-radius:8px;border:2px solid var(--accent);background:var(--accent-light);color:var(--primary);font-size:15px;font-weight:700;cursor:pointer;min-height:44px">'+defaultSIs[h]+'</button>' +
 '<input type="hidden" id="si-'+h+'" value="'+defaultSIs[h]+'">' +
 '</div>' +
 (effectiveTees === 'womens' || effectiveTees === 'mixed' ?
 '<div><label style="font-size:10px;color:#C9A84C;display:block;margin-bottom:2px">W-SI</label>' +
-'<button onclick="openSIPicker('+(h)+','+holes+',\'w\')" id="wsi-btn-'+h+'" style="width:100%;padding:7px 8px;border-radius:6px;border:2px solid rgba(201,168,76,0.5);background:rgba(201,168,76,0.08);color:var(--text);font-size:13px;font-weight:700;cursor:pointer">'+defaultSIs[h]+'</button>' +
+'<button onclick="openSIPicker('+(h)+','+holes+',\'w\')" id="wsi-btn-'+h+'" style="width:100%;padding:11px 8px;border-radius:8px;border:2px solid rgba(201,168,76,0.5);background:rgba(201,168,76,0.08);color:var(--text);font-size:15px;font-weight:700;cursor:pointer;min-height:44px">'+defaultSIs[h]+'</button>' +
 '<input type="hidden" id="wsi-'+h+'" value="'+defaultSIs[h]+'">' +
 '</div>' : '') +
 '</div>';
@@ -5356,6 +5387,9 @@ wizData.societyName = document.getElementById('wiz-society-name').value.trim();
 wizData.homeCourse = document.getElementById('wiz-home-course').value.trim();
 if (!wizData.societyName) { toast('Enter your society name', 'error'); return; }
 }
+if (n === 2) {
+wizData.societyType = wizData.societyType || 'mens';
+}
 if (n === 3 && !wizData.hcpMode) { toast('Select a handicap mode', 'error'); return; }
 if (n === 4) {
 var descRow = document.getElementById('wiz-pts-descending-row');
@@ -5526,7 +5560,7 @@ if (wizData.hcpMode === 'custom') {
 var lp = wizData.leaguePts || {1:20,2:17,3:15,4:13,5:11,6:10,7:9,8:8,9:7,10:6};
 var lpMode = wizData.leaguePtsMode || 'custom';
 var lpRest = wizData.leaguePtsRest !== undefined ? wizData.leaguePtsRest : 0;
-await fetch(SUPABASE_URL + '/rest/v1/society_settings', { method: 'POST', headers: h, body: JSON.stringify({ society_id: sid, society_name: wizData.societyName, home_course: wizData.homeCourse||'', primary_colour: theme.primary, secondary_colour: theme.accent, theme_preset: wizData.themeId, handicap_mode: wizData.hcpMode||'bhgs', cut_1st: cut1, cut_2nd: cut2, cut_3rd: cut3, cut_4th: cut4, cut_5th: cut5, add_non_podium: cutOther, max_handicap: 36, provisional_rounds: 3, league_pts_mode: lpMode, league_pts_table: lp, league_pts_rest: lpRest, holes_per_round: 9 }) });
+await fetch(SUPABASE_URL + '/rest/v1/society_settings', { method: 'POST', headers: h, body: JSON.stringify({ society_id: sid, society_name: wizData.societyName, home_course: wizData.homeCourse||'', primary_colour: theme.primary, secondary_colour: theme.accent, theme_preset: wizData.themeId, handicap_mode: wizData.hcpMode||'bhgs', cut_1st: cut1, cut_2nd: cut2, cut_3rd: cut3, cut_4th: cut4, cut_5th: cut5, add_non_podium: cutOther, max_handicap: 36, provisional_rounds: 3, league_pts_mode: lpMode, league_pts_table: lp, league_pts_rest: lpRest, holes_per_round: 9, society_type: wizData.societyType||'mens' }) });
 await fetch(SUPABASE_URL + '/rest/v1/players', { method: 'POST', headers: h, body: JSON.stringify({ society_id: sid, user_id: currentUser.id, name: (currentUser.user_metadata&&currentUser.user_metadata.full_name)||currentUser.email, email: currentUser.email, handicap_index: 18, starting_handicap: 18, role: 'admin' }) });
 await fetch(SUPABASE_URL + '/auth/v1/user', { method: 'PUT', headers: h, body: JSON.stringify({ data: { full_name: (currentUser.user_metadata&&currentUser.user_metadata.full_name)||'', society_id: sid, role: 'admin' } }) });
 currentUser.user_metadata = Object.assign({}, currentUser.user_metadata, { society_id: sid, role: 'admin' });
@@ -5557,7 +5591,7 @@ await loadAll(); renderAll();
 // Show step 6 with invite code
 var codeEl = document.getElementById('wiz-invite-code');
 if (codeEl) codeEl.textContent = inviteCode;
-wizStep(6);
+wizStep(7);
 toast('Society created! Welcome to GolfSoc', 'success');
 } catch(e) { console.error(e); toast('Setup failed: ' + e.message, 'error'); }
 }
