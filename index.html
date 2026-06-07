@@ -319,7 +319,7 @@ input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px;
 .modal-header { padding: 14px 20px 12px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); flex-shrink: 0; }
 .modal-title { font-size: 16px; font-weight: 700; color: var(--text); }
 .modal-close { background: var(--bg); border: none; border-radius: 99px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; color: var(--text-3); }
-.modal-body { padding: 16px 20px; overflow-y: auto; flex: 1; }
+.modal-body { padding: 16px 20px; overflow-y: auto; overflow-x: hidden; flex: 1; }
 
 /* ── Toast ── */
 #toast { position: fixed; bottom: calc(80px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%) translateY(20px); background: #1a1510; color: white; font-size: 13px; font-weight: 500; padding: 10px 18px; border-radius: 99px; opacity: 0; transition: all 0.25s; pointer-events: none; white-space: nowrap; z-index: 400; max-width: 88vw; text-align: center; }
@@ -3766,7 +3766,7 @@ function openCreateEventModal() {
 var s = societySettings || {};
 var today = new Date().toISOString().slice(0,10);
 openModal('Create event',
-'<div class="field"><label>Date</label><input type="date" id="ce-date" value="'+today+'"></div>' +
+'<div class="field"><label>Date</label><input type="date" id="ce-date" value="'+today+'" style="width:100%;max-width:100%;box-sizing:border-box"></div>' +
 '<div class="field"><label>Event type</label><select id="ce-type" onchange="updateHoleCount()"><option value="sunday_9">Sunday (9 holes)</option><option value="outing_18">Outing (18 holes)</option></select></div>' +
 '<div class="field"><label>Search course</label>' +
 '<input type="text" id="ce-course-search" placeholder="Type course name..." oninput="filterCourses()" autocomplete="off" style="margin-bottom:4px">' +
