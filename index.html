@@ -2548,6 +2548,7 @@ el.innerHTML =
   card('billing', 'Plan &amp; billing', subLabel+' plan', 'openBillingModal') +
   sectionTitle('Branding') +
   card('branding', 'Appearance', 'Logo, colours &amp; theme', 'openBrandingGroup') +
+  card('members', 'Society type', ({mens:'Men\'s society',womens:'Women\'s society',mixed:'Mixed society'})[s.society_type||'mens']||'Men\'s society', 'openSocietyTypeModal') +
   sectionTitle('Members') +
   card('members', 'Manage members', activeMemberCount+' active members', 'openMembersModal', pendingCount > 0 ? pendingCount+' pending' : '') +
   card('invite', 'Invite members', 'Share join link &amp; code', 'openInviteModal') +
@@ -2574,6 +2575,50 @@ el.innerHTML =
   '<div style="flex:1"><div style="font-size:14px;font-weight:600;color:#dc2626">Sign out</div>' +
   '<div style="font-size:12px;color:rgba(220,38,38,0.6);margin-top:1px">Sign out of your account</div></div>' +
   '<div style="color:rgba(220,38,38,0.4);font-size:18px">&#8250;</div></div>';
+}
+
+function openSocietyTypeModal() {
+var s = societySettings || {};
+var cur = s.society_type || 'mens';
+var opts = [
+  { id:'mens',   label:'Men\'s',   desc:'Single SI column. Men\'s slope & CR used for all events.' },
+  { id:'womens', label:'Women\'s', desc:'Single SI column. Women\'s slope & CR entered per event. All members default to female.' },
+  { id:'mixed',  label:'Mixed',    desc:'Two SI columns per event (M-SI and W-SI). Slope & CR entered per gender.' }
+];
+var cards = opts.map(function(o) {
+  var active = cur === o.id;
+  return '<button onclick="setSocietyType(\''+o.id+'\')" id="stype-'+o.id+'" style="width:100%;text-align:left;padding:14px 16px;border-radius:var(--radius);border:2px solid '+(active?'var(--primary)':'var(--border)')+';background:'+(active?'var(--primary)':'var(--surface)')+';cursor:pointer;font-family:DM Sans,sans-serif;margin-bottom:8px">'
+    + '<div style="font-size:14px;font-weight:700;color:'+(active?'var(--accent)':'var(--text)')+'">'+o.label+'</div>'
+    + '<div style="font-size:12px;color:'+(active?'rgba(255,255,255,0.5)':'var(--text-3)')+';margin-top:3px;line-height:1.4">'+o.desc+'</div>'
+    + '</button>';
+}).join('');
+openModal('Society type', cards + '<button class="btn accent full" onclick="saveSocietyType()">Save</button>');
+}
+
+function setSocietyType(type) {
+window._pendingSocietyType = type;
+['mens','womens','mixed'].forEach(function(t) {
+  var btn = document.getElementById('stype-'+t);
+  if (!btn) return;
+  var active = t === type;
+  btn.style.borderColor = active ? 'var(--primary)' : 'var(--border)';
+  btn.style.background = active ? 'var(--primary)' : 'var(--surface)';
+  var label = btn.querySelector('div:first-child');
+  var desc = btn.querySelector('div:last-child');
+  if (label) label.style.color = active ? 'var(--accent)' : 'var(--text)';
+  if (desc) desc.style.color = active ? 'rgba(255,255,255,0.5)' : 'var(--text-3)';
+});
+}
+
+async function saveSocietyType() {
+var sid = currentUser && currentUser.user_metadata ? currentUser.user_metadata.society_id : null;
+var type = window._pendingSocietyType || (societySettings && societySettings.society_type) || 'mens';
+try {
+  await apiPatch('society_settings?society_id=eq.' + sid, { society_type: type });
+  societySettings = Object.assign({}, societySettings, { society_type: type });
+  toast('Saved!', 'success');
+  closeModal(); renderSettings();
+} catch(e) { toast('Error: ' + e.message, 'error'); }
 }
 
 function openBrandingGroup() {
@@ -3692,10 +3737,6 @@ var today = new Date().toISOString().slice(0,10);
 openModal('Create event',
 '<div class="field"><label>Date</label><input type="date" id="ce-date" value="'+today+'"></div>' +
 '<div class="field"><label>Event type</label><select id="ce-type" onchange="updateHoleCount()"><option value="sunday_9">Sunday (9 holes)</option><option value="outing_18">Outing (18 holes)</option></select></div>' +
-'<div class="field"><label>Tees</label><div style="display:flex;gap:8px">' +
-'<button id="ce-tees-mens" onclick="setEventTees(\'mens\')" style="flex:1;padding:9px;border-radius:8px;border:2px solid var(--primary);background:var(--primary);color:white;font-size:13px;font-weight:700;cursor:pointer;font-family:DM Sans,sans-serif">Men\'s</button>' +
-'<button id="ce-tees-womens" onclick="setEventTees(\'womens\')" style="flex:1;padding:9px;border-radius:8px;border:2px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;font-weight:700;cursor:pointer;font-family:DM Sans,sans-serif">Women\'s / Mixed</button>' +
-'</div></div>' +
 '<div class="field"><label>Search course</label>' +
 '<input type="text" id="ce-course-search" placeholder="Type course name..." oninput="filterCourses()" autocomplete="off" style="margin-bottom:4px">' +
 '<div id="ce-course-results" style="max-height:180px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);display:none"></div>' +
@@ -3772,9 +3813,11 @@ if (prevEvent && prevEvent.hole_sis) {
 var defaultSIs = defaultSIsRaw;
 
 // Store for later
-window._ceData = { date:date, courseName:courseName, type:type, slope:slope, cr:cr, totalPar:totalPar, holes:holes, pars:defaultPars, sis:defaultSIs, tees: window._ceTees || 'mens' };
+window._ceData = { date:date, courseName:courseName, type:type, slope:slope, cr:cr, totalPar:totalPar, holes:holes, pars:defaultPars, sis:defaultSIs, tees: (societySettings && societySettings.society_type) || 'mens' };
+var effectiveTees = window._ceData.tees;
+window._ceTees = effectiveTees;
 
-var womenFields = (window._ceTees === 'womens') ?
+var womenFields = (effectiveTees === 'womens' || effectiveTees === 'mixed') ?
 '<div style="background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.2);border-radius:10px;padding:12px 14px;margin-bottom:14px">' +
 '<div style="font-size:11px;font-weight:700;color:#C9A84C;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Women\'s tees</div>' +
 '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">' +
@@ -3786,7 +3829,7 @@ var womenFields = (window._ceTees === 'womens') ?
 
 var holeRows = '';
 for (var h = 0; h < holes; h++) {
-holeRows += '<div style="display:grid;grid-template-columns:36px 1fr '+(window._ceTees==='womens'?'1fr 1fr':'1fr')+';align-items:center;gap:8px;padding:8px 0;border-bottom:0.5px solid var(--border)">' +
+holeRows += '<div style="display:grid;grid-template-columns:36px 1fr '+(effectiveTees==='mixed'?'1fr 1fr 1fr':effectiveTees==='womens'?'1fr 1fr':'1fr 1fr')+';align-items:center;gap:8px;padding:8px 0;border-bottom:0.5px solid var(--border)">' +
 '<div style="font-size:12px;font-weight:700;color:var(--text-3);text-align:center">'+(h+1)+'</div>' +
 '<div><label style="font-size:10px;color:var(--text-3);display:block;margin-bottom:2px">Par</label>' +
 '<div style="display:flex;gap:4px">' +
@@ -3795,11 +3838,11 @@ return '<button onclick="setHolePar('+(h)+','+(p)+')" id="hp-'+h+'-'+p+'" style=
 }).join('') +
 '</div>' +
 '</div>' +
-'<div><label style="font-size:10px;color:var(--text-3);display:block;margin-bottom:2px">'+(window._ceTees==='womens'?'M-SI':'SI')+'</label>' +
+'<div><label style="font-size:10px;color:var(--text-3);display:block;margin-bottom:2px">'+(effectiveTees==='mixed'?'M-SI':effectiveTees==='womens'?'SI':'SI')+'</label>' +
 '<button onclick="openSIPicker('+(h)+','+holes+',\'m\')" id="si-btn-'+h+'" style="width:100%;padding:7px 8px;border-radius:6px;border:2px solid var(--accent);background:var(--accent-light);color:var(--primary);font-size:13px;font-weight:700;cursor:pointer">'+defaultSIs[h]+'</button>' +
 '<input type="hidden" id="si-'+h+'" value="'+defaultSIs[h]+'">' +
 '</div>' +
-(window._ceTees === 'womens' ?
+(effectiveTees === 'womens' || effectiveTees === 'mixed' ?
 '<div><label style="font-size:10px;color:#C9A84C;display:block;margin-bottom:2px">W-SI</label>' +
 '<button onclick="openSIPicker('+(h)+','+holes+',\'w\')" id="wsi-btn-'+h+'" style="width:100%;padding:7px 8px;border-radius:6px;border:2px solid rgba(201,168,76,0.5);background:rgba(201,168,76,0.08);color:var(--text);font-size:13px;font-weight:700;cursor:pointer">'+(h+1)+'</button>' +
 '<input type="hidden" id="wsi-'+h+'" value="'+(h+1)+'">' +
@@ -3991,8 +4034,8 @@ if (cd.tees === 'womens') {
 }
 }
 cd.sis = sis;
-var wSlope = cd.tees === 'womens' ? parseFloat(document.getElementById('ce-w-slope') ? document.getElementById('ce-w-slope').value : 113) : null;
-var wCr = cd.tees === 'womens' ? parseFloat(document.getElementById('ce-w-cr') ? document.getElementById('ce-w-cr').value : 70) : null;
+var wSlope = (cd.tees === 'womens' || cd.tees === 'mixed') ? parseFloat(document.getElementById('ce-w-slope') ? document.getElementById('ce-w-slope').value : 113) : null;
+var wCr = (cd.tees === 'womens' || cd.tees === 'mixed') ? parseFloat(document.getElementById('ce-w-cr') ? document.getElementById('ce-w-cr').value : 70) : null;
 
 try {
 var res = await apiPost('events', {
