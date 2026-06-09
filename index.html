@@ -1386,6 +1386,8 @@ var sRes = await fetch(SUPABASE_URL + '/rest/v1/society_settings?society_id=eq.'
 var soRes = await fetch(SUPABASE_URL + '/rest/v1/societies?id=eq.' + sid + '&select=*', { headers: h });
 var settings = sRes.ok ? await sRes.json() : [];
 var society = soRes.ok ? await soRes.json() : [];
+console.log('society_settings from DB:', JSON.stringify(settings[0]));
+console.log('logo_url value:', settings[0] ? settings[0].logo_url : 'NO SETTINGS ROW');
 societySettings = Object.assign({}, society[0] || {}, settings[0] || {});
 applyTheme(societySettings);
 updateBranding(societySettings);
