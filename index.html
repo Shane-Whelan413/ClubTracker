@@ -624,11 +624,11 @@ input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px;
 <div class="wiz-step" id="wiz-6">
 <div class="wiz-title">Upload your logo</div>
 <div class="wiz-sub">Optional - you can add this later in Settings.</div>
-<div style="border:2px dashed rgba(255,255,255,0.2);border-radius:14px;padding:32px;text-align:center;cursor:pointer;margin-bottom:16px" onclick="document.getElementById('wiz-logo-input').click()">
+<div style="border:2px dashed var(--wiz-border,rgba(255,255,255,0.2));border-radius:14px;padding:32px;text-align:center;cursor:pointer;margin-bottom:16px;background:var(--wiz-option-bg,rgba(255,255,255,0.06))" onclick="document.getElementById('wiz-logo-input').click()">
 <input type="file" id="wiz-logo-input" accept="image/*" onchange="previewWizLogo(event)" style="display:none">
 <div id="wiz-logo-preview" style="display:none;width:80px;height:80px;border-radius:16px;overflow:hidden;margin:0 auto 12px"></div>
-<div style="font-size:32px;margin-bottom:8px" id="wiz-logo-icon">&#9971;</div>
-<div style="font-size:13px;color:rgba(255,255,255,0.4)">Tap to upload club crest</div>
+<div style="font-size:32px;margin-bottom:8px;color:var(--wiz-sub,rgba(255,255,255,0.4))" id="wiz-logo-icon">&#9971;</div>
+<div style="font-size:13px;color:var(--wiz-sub,rgba(255,255,255,0.4))">Tap to upload club crest</div>
 </div>
 <button class="wiz-btn" onclick="finishWizard()">Finish setup</button>
 <button class="wiz-btn-back" onclick="wizStep(6)">Back</button>
@@ -5447,10 +5447,10 @@ var themes = {
     inputBg:'rgba(255,255,255,0.08)'
   },
   white: {
-    bg:'#ffffff', title:'#111111', sub:'#888888', accent:'#C9A84C',
-    btnText:'#1a3320', border:'rgba(0,0,0,0.12)', dotTrack:'rgba(0,0,0,0.12)',
-    optionBg:'#f8f8f6', optionSel:'rgba(201,168,76,0.1)',
-    inputBg:'#f0f0ee'
+    bg:'#f4f6f4', title:'#1a3320', sub:'#4a5e4a', accent:'#C9A84C',
+    btnText:'#ffffff', border:'rgba(0,0,0,0.15)', dotTrack:'rgba(0,0,0,0.12)',
+    optionBg:'#ffffff', optionSel:'rgba(201,168,76,0.12)',
+    inputBg:'#ffffff'
   },
   dark: {
     bg:'#1a2420', title:'#edf2ee', sub:'rgba(237,242,238,0.5)', accent:'#C9A84C',
