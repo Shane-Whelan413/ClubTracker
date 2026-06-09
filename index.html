@@ -3185,15 +3185,6 @@ function applyThemePreset(id) {
 }
 
 
-function applyThemePreset(id) {
-var t = THEMES.filter(function(x){ return x.id === id; })[0];
-if (!t) return;
-document.getElementById('pc').value = t.primary; document.getElementById('ph').value = t.primary; document.getElementById('pp').style.background = t.primary;
-document.getElementById('ac').value = t.accent; document.getElementById('ah').value = t.accent; document.getElementById('ap').style.background = t.accent;
-document.documentElement.style.setProperty('--primary', t.primary);
-document.documentElement.style.setProperty('--accent', t.accent);
-document.querySelectorAll('.theme-opt').forEach(function(el){ el.classList.toggle('selected', el.id === 'to-'+id); });
-}
 
 
 function openLogoModal() {
@@ -5534,92 +5525,88 @@ r.readAsDataURL(file);
 }
 
 async function finishWizard() {
-toast('Setting up your society...');
+toast('Creating your society...');
 try {
-var appTheme = APP_THEMES[wizData.themeId] || APP_THEMES.classic;
-var theme = { primary: appTheme.primary, accent: appTheme.accent };
-// Generate invite code: initials + sequential number e.g. BHGS-1, BHGS-2
-var initials = (wizData.societyName||'GOLF').split(' ')
-  .filter(function(w){ return w.length > 1; })
-  .map(function(w){ return w[0]; })
-  .join('').toUpperCase().slice(0,6);
-if (!initials) initials = (wizData.societyName||'GOLF').replace(/[^A-Z0-9]/gi,'').toUpperCase().slice(0,4);
-// Find next available number suffix
-var inviteCode = initials + '-1';
-try {
-var codeCheck = await fetch(SUPABASE_URL + '/rest/v1/societies?invite_code=like.' + initials + '-*&select=invite_code', {
-headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Prefer': '' }
-});
-var existingCodes = codeCheck.ok ? await codeCheck.json() : [];
-var nums = existingCodes.map(function(s){
-  var m = s.invite_code.replace(initials+'-','');
-  return parseInt(m)||0;
-}).filter(function(n){ return n > 0; });
-var nextNum = nums.length ? Math.max.apply(null,nums)+1 : 1;
-inviteCode = initials + '-' + nextNum;
-} catch(e) {}
-var h = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + currentUser.access_token, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
-var sRes = await fetch(SUPABASE_URL + '/rest/v1/societies', { method: 'POST', headers: h, body: JSON.stringify({ name: wizData.societyName, invite_code: inviteCode, contact_email: currentUser.email, subscription_status: 'trial', trial_ends_at: new Date(Date.now()+30*86400000).toISOString() }) });
-if (!sRes.ok) throw new Error('Society: ' + await sRes.text());
-var sid = (await sRes.json())[0].id;
-// Handicap cuts
-var cut1, cut2, cut3, cut4, cut5, cutOther;
-if (wizData.hcpMode === 'custom') {
-  cut1 = parseFloat(document.getElementById('wiz-cut-1c').value) || -1;
-  cut2 = parseFloat(document.getElementById('wiz-cut-2c').value) || -0.5;
-  cut3 = parseFloat(document.getElementById('wiz-cut-3c').value) || -0.2;
-  cut4 = parseFloat(document.getElementById('wiz-cut-4c').value) || 0;
-  cut5 = parseFloat(document.getElementById('wiz-cut-5c').value) || 0;
-  cutOther = parseFloat(document.getElementById('wiz-cut-otherc').value) || 0.2;
-} else if (wizData.hcpMode === 'bhgs') {
-  cut1 = parseFloat(document.getElementById('wiz-cut-1').value) || -1;
-  cut2 = parseFloat(document.getElementById('wiz-cut-2').value) || -0.5;
-  cut3 = parseFloat(document.getElementById('wiz-cut-3').value) || -0.2;
-  cut4 = 0; cut5 = 0;
-  cutOther = parseFloat(document.getElementById('wiz-cut-other').value) || 0.2;
-} else {
-  cut1=-1; cut2=-0.5; cut3=-0.2; cut4=0; cut5=0; cutOther=0.2;
-}
-// League points
-var lp = wizData.leaguePts || {1:20,2:17,3:15,4:13,5:11,6:10,7:9,8:8,9:7,10:6};
-var lpMode = wizData.leaguePtsMode || 'custom';
-var lpRest = wizData.leaguePtsRest !== undefined ? wizData.leaguePtsRest : 0;
-await fetch(SUPABASE_URL + '/rest/v1/society_settings', { method: 'POST', headers: h, body: JSON.stringify({ society_id: sid, society_name: wizData.societyName, home_course: wizData.homeCourse||'', primary_colour: theme.primary, secondary_colour: theme.accent, theme_preset: wizData.themeId, handicap_mode: wizData.hcpMode||'bhgs', cut_1st: cut1, cut_2nd: cut2, cut_3rd: cut3, cut_4th: cut4, cut_5th: cut5, add_non_podium: cutOther, max_handicap: 36, provisional_rounds: 3, league_pts_mode: lpMode, league_pts_table: lp, league_pts_rest: lpRest, holes_per_round: 9, society_type: wizData.societyType||'mens' }) });
-await fetch(SUPABASE_URL + '/rest/v1/players', { method: 'POST', headers: h, body: JSON.stringify({ society_id: sid, user_id: currentUser.id, name: (currentUser.user_metadata&&currentUser.user_metadata.full_name)||currentUser.email, email: currentUser.email, handicap_index: 18, starting_handicap: 18, role: 'admin' }) });
-await fetch(SUPABASE_URL + '/auth/v1/user', { method: 'PUT', headers: h, body: JSON.stringify({ data: { full_name: (currentUser.user_metadata&&currentUser.user_metadata.full_name)||'', society_id: sid, role: 'admin' } }) });
-currentUser.user_metadata = Object.assign({}, currentUser.user_metadata, { society_id: sid, role: 'admin' });
-societySettings = { society_id: sid, society_name: wizData.societyName, home_course: wizData.homeCourse, primary_colour: theme.primary, secondary_colour: theme.accent, invite_code: inviteCode, subscription_status: 'trial' };
-// Upload logo if provided
-if (wizData.logoFile && sid) {
-try {
-var ext = wizData.logoFile.name.split('.').pop();
-var logoPath = sid + '/logo.' + ext;
-var logoRes = await fetch(SUPABASE_URL + '/storage/v1/object/society-logos/' + logoPath, {
-method: 'POST',
-headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + currentUser.access_token, 'Content-Type': wizData.logoFile.type, 'x-upsert': 'true' },
-body: wizData.logoFile
-});
-if (logoRes.ok) {
-var logoUrl = SUPABASE_URL + '/storage/v1/object/public/society-logos/' + logoPath + '?t=' + Date.now();
-await fetch(SUPABASE_URL + '/rest/v1/society_settings?society_id=eq.' + sid, { method: 'PATCH', headers: h, body: JSON.stringify({ logo_url: logoUrl }) });
-societySettings.logo_url = logoUrl;
-}
-} catch(logoErr) { console.warn('Logo upload failed:', logoErr); }
-}
-// Store invite code for step 6
-window._wizInviteCode = inviteCode;
-// Apply theme and branding
-applyTheme(societySettings); updateBranding(societySettings);
-// Load data in background
-await loadAll(); renderAll();
-// Show step 6 with invite code
-var codeEl = document.getElementById('wiz-invite-code');
-if (codeEl) codeEl.textContent = inviteCode;
-wizStep(7);
-toast('Society created! Welcome to GolfSoc', 'success');
-} catch(e) { console.error(e); toast('Setup failed: ' + e.message, 'error'); }
-}
+  var appTheme = APP_THEMES[wizData.themeId] || APP_THEMES.classic;
+  var theme = { primary: appTheme.primary, accent: appTheme.accent };
 
+  // Generate invite code
+  var initials = (wizData.societyName||'GOLF').split(' ').filter(function(w){return w.length>1;}).map(function(w){return w[0];}).join('').toUpperCase().slice(0,6);
+  if (!initials) initials = (wizData.societyName||'GOLF').replace(/[^A-Z0-9]/gi,'').toUpperCase().slice(0,4);
+  var inviteCode = initials + '-1';
+  try {
+    var codeCheck = await fetch(SUPABASE_URL + '/rest/v1/societies?invite_code=like.' + initials + '-*&select=invite_code', { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } });
+    var existingCodes = codeCheck.ok ? await codeCheck.json() : [];
+    var nums = existingCodes.map(function(s){ var m = parseInt(s.invite_code.replace(initials+'-','')); return isNaN(m)?0:m; }).filter(function(n){return n>0;});
+    inviteCode = initials + '-' + (nums.length ? Math.max.apply(null,nums)+1 : 1);
+  } catch(e) { console.warn('Invite code check failed:', e); }
+
+  var h = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + currentUser.access_token, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
+
+  // 1. Create society
+  toast('Step 1/4: Creating society...');
+  var sRes = await fetch(SUPABASE_URL + '/rest/v1/societies', { method: 'POST', headers: h, body: JSON.stringify({ name: wizData.societyName, invite_code: inviteCode, contact_email: currentUser.email, subscription_status: 'trial', trial_ends_at: new Date(Date.now()+30*86400000).toISOString() }) });
+  if (!sRes.ok) throw new Error('Society creation failed: ' + await sRes.text());
+  var sid = (await sRes.json())[0].id;
+
+  // 2. Create society settings
+  toast('Step 2/4: Saving settings...');
+  var cut1=-1, cut2=-0.5, cut3=-0.2, cut4=0, cut5=0, cutOther=0.2;
+  if (wizData.hcpMode === 'custom') {
+    cut1 = parseFloat((document.getElementById('wiz-cut-1c')||{}).value)||cut1;
+    cut2 = parseFloat((document.getElementById('wiz-cut-2c')||{}).value)||cut2;
+    cut3 = parseFloat((document.getElementById('wiz-cut-3c')||{}).value)||cut3;
+    cut4 = parseFloat((document.getElementById('wiz-cut-4c')||{}).value)||cut4;
+    cut5 = parseFloat((document.getElementById('wiz-cut-5c')||{}).value)||cut5;
+    cutOther = parseFloat((document.getElementById('wiz-cut-otherc')||{}).value)||cutOther;
+  } else if (wizData.hcpMode === 'bhgs') {
+    cut1 = parseFloat((document.getElementById('wiz-cut-1')||{}).value)||cut1;
+    cut2 = parseFloat((document.getElementById('wiz-cut-2')||{}).value)||cut2;
+    cut3 = parseFloat((document.getElementById('wiz-cut-3')||{}).value)||cut3;
+    cutOther = parseFloat((document.getElementById('wiz-cut-other')||{}).value)||cutOther;
+  }
+  var lp = wizData.leaguePts || {1:20,2:17,3:15,4:13,5:11,6:10,7:9,8:8,9:7,10:6};
+  var stRes = await fetch(SUPABASE_URL + '/rest/v1/society_settings', { method: 'POST', headers: h, body: JSON.stringify({ society_id: sid, society_name: wizData.societyName, home_course: wizData.homeCourse||'', primary_colour: theme.primary, secondary_colour: theme.accent, theme_preset: wizData.themeId, handicap_mode: wizData.hcpMode||'bhgs', cut_1st: cut1, cut_2nd: cut2, cut_3rd: cut3, cut_4th: cut4, cut_5th: cut5, add_non_podium: cutOther, max_handicap: 36, provisional_rounds: 3, league_pts_mode: wizData.leaguePtsMode||'custom', league_pts_table: lp, league_pts_rest: wizData.leaguePtsRest||0, holes_per_round: 9, society_type: wizData.societyType||'mens' }) });
+  if (!stRes.ok) throw new Error('Settings creation failed: ' + await stRes.text());
+
+  // 3. Create admin player
+  toast('Step 3/4: Setting up your account...');
+  await fetch(SUPABASE_URL + '/rest/v1/players', { method: 'POST', headers: h, body: JSON.stringify({ society_id: sid, user_id: currentUser.id, name: (currentUser.user_metadata&&currentUser.user_metadata.full_name)||currentUser.email, email: currentUser.email, handicap_index: 18, starting_handicap: 18, role: 'admin' }) });
+  var authRes = await fetch(SUPABASE_URL + '/auth/v1/user', { method: 'PUT', headers: h, body: JSON.stringify({ data: { full_name: (currentUser.user_metadata&&currentUser.user_metadata.full_name)||'', society_id: sid, role: 'admin' } }) });
+  if (!authRes.ok) throw new Error('Account update failed: ' + await authRes.text());
+  currentUser.user_metadata = Object.assign({}, currentUser.user_metadata, { society_id: sid, role: 'admin' });
+  societySettings = { society_id: sid, society_name: wizData.societyName, home_course: wizData.homeCourse, primary_colour: theme.primary, secondary_colour: theme.accent, invite_code: inviteCode, subscription_status: 'trial' };
+
+  // 4. Upload logo (optional — don't fail if this errors)
+  if (wizData.logoFile && sid) {
+    toast('Step 4/4: Uploading logo...');
+    try {
+      var ext = wizData.logoFile.name.split('.').pop();
+      var logoPath = sid + '/logo.' + ext;
+      var logoRes = await fetch(SUPABASE_URL + '/storage/v1/object/society-logos/' + logoPath, { method: 'POST', headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + currentUser.access_token, 'Content-Type': wizData.logoFile.type, 'x-upsert': 'true' }, body: wizData.logoFile });
+      if (logoRes.ok) {
+        var logoUrl = SUPABASE_URL + '/storage/v1/object/public/society-logos/' + logoPath;
+        await fetch(SUPABASE_URL + '/rest/v1/society_settings?society_id=eq.' + sid, { method: 'PATCH', headers: Object.assign({}, h, {'Prefer':'return=minimal'}), body: JSON.stringify({ logo_url: logoUrl }) });
+        societySettings.logo_url = logoUrl;
+      } else {
+        console.warn('Logo upload failed:', await logoRes.text());
+      }
+    } catch(logoErr) { console.warn('Logo upload error:', logoErr); }
+  }
+
+  // Done
+  window._wizInviteCode = inviteCode;
+  applyTheme(societySettings); updateBranding(societySettings);
+  await loadAll(); renderAll();
+  var codeEl = document.getElementById('wiz-invite-code');
+  if (codeEl) codeEl.textContent = inviteCode;
+  wizStep(7);
+  toast('Society created! Welcome to GolfSoc', 'success');
+} catch(e) {
+  console.error('finishWizard error:', e);
+  toast('Setup failed: ' + e.message, 'error');
+}
+}
 function completeWizard() {
 document.getElementById('setup-wizard').style.display = 'none';
 showApp();
