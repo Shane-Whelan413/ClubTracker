@@ -5524,6 +5524,10 @@ document.getElementById('wiz-logo-icon').style.display = 'none';
 r.readAsDataURL(file);
 }
 
+// Toast
+var _toastTimer;
+var _appReady = false;
+
 async function finishWizard() {
 toast('Creating your society...');
 try {
@@ -5719,7 +5723,6 @@ async function doPasswordReset() {
     showSignIn();
   } catch(e) { document.getElementById('reset-err').textContent = e.message; document.getElementById('reset-err').classList.add('show'); }
 }
-var _appReady = false;
 function toast(msg, type) {
 var el = document.getElementById('toast');
 el.textContent = msg;
