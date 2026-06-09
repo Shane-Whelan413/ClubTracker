@@ -1225,6 +1225,15 @@ if (loginPass) loginPass.value = '';
 
 async function afterLogin() {
 try { await loadSocietySettings(); } catch(e) { console.error('settings:', e); }
+
+// If no society linked to this account yet — show wizard
+var sid = currentUser && currentUser.user_metadata ? currentUser.user_metadata.society_id : null;
+if (!sid) {
+  document.getElementById('auth-screen').style.display = 'none';
+  showWizard();
+  return;
+}
+
 try { await loadAll(); } catch(e) { console.error('loadAll:', e); }
 // If returning from Stripe checkout, refresh subscription status
 if (window.location.search.includes('session_id=')) {
@@ -1460,6 +1469,8 @@ async function refreshSubscriptionStatus() {
 }
 
 function checkSubscriptionStatus() {
+  // Don't run if wizard is showing
+  if (document.getElementById('setup-wizard') && document.getElementById('setup-wizard').style.display !== 'none') return;
   var s = societySettings || {};
   var status = s.subscription_status || 'trial';
   var trialEnds = s.trial_ends_at ? new Date(s.trial_ends_at) : null;
