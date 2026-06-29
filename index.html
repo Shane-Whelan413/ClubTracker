@@ -1193,7 +1193,7 @@ async function doForgot() {
 var email = document.getElementById('login-email').value.trim();
 if (!email) { document.getElementById('login-err').textContent = 'Enter your email first'; document.getElementById('login-err').classList.add('show'); return; }
 try {
-await authFetch('recover', { email: email, gotrue_meta_security: {}, redirect_to: 'https://app.golfsoc.ie' });
+await authFetch('recover', { email: email, gotrue_meta_security: {}, redirect_to: 'https://golfsoc.ie' });
 document.getElementById('login-err').textContent = 'Check your email for a reset link';
 document.getElementById('login-err').style.color = '#6ee7b7';
 document.getElementById('login-err').classList.add('show');
